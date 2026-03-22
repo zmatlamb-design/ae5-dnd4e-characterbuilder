@@ -9283,9 +9283,10 @@ function renderFeatSlots() {
     return `<div class="feat-slot-row" id="feat-slot-${i}">
       <input type="text" list="featDataList" value="${slot.name||''}"
         placeholder="Sélectionner un don..."
-        oninput="onFeatSlotChange(${i}, this.value)"
+        oninput="onFeatSlotInput(${i}, this.value)"
+        onchange="onFeatSlotCommit(${i}, this.value)"
         class="feat-slot-input" autocomplete="off">
-      ${fd ? `<span class="feat-slot-info" title="${fd.desc}">${fd.prereq ? '<span style=\'color:#f0a040;\'>⚠</span>' : '✓'} ${fd.cat}</span>` : ''}
+      <span class="feat-slot-info" id="feat-info-${i}">${fd ? `${fd.prereq ? '<span style=\'color:#f0a040;\'>⚠</span>' : '✓'} ${fd.cat}` : ''}</span>
     </div>`;
   }).join('');
 
@@ -9303,12 +9304,38 @@ function renderFeatSlots() {
   if (badge) badge.textContent = `${__featSlots.filter(s=>s.name).length} / ${count}`;
 }
 
-function onFeatSlotChange(i, value) {
-  if (__featSlots[i]) {
-    __featSlots[i].name = value;
-    renderFeatSlots();
-    applyAllBonuses();
-    autoSave();
+// Frappe clavier : met à jour la valeur + badge + info, SANS re-render complet
+function onFeatSlotInput(i, value) {
+  if (!__featSlots[i]) return;
+  __featSlots[i].name = value;
+  // Mettre à jour le badge count
+  const badge = document.getElementById('featCountBadge');
+  if (badge) badge.textContent = `${__featSlots.filter(s=>s.name).length} / ${getFeatSlotCount()}`;
+  // Mettre à jour l'info inline sans recréer l'input
+  const infoEl = document.getElementById(`feat-info-${i}`);
+  if (infoEl) {
+    const fd = FEAT_LIST.find(f => f.name === value);
+    infoEl.innerHTML = fd
+      ? `${fd.prereq ? '<span style="color:#f0a040;">⚠</span>' : '✓'} ${fd.cat}`
+      : '';
+    // Si on a sélectionné un don reconnu depuis la datalist, on commit tout de suite
+    if (fd) onFeatSlotCommit(i, value);
+  }
+}
+
+// Blur ou Enter : commit complet (re-render + bonus + save)
+function onFeatSlotCommit(i, value) {
+  if (!__featSlots[i]) return;
+  __featSlots[i].name = value;
+  applyAllBonuses();
+  autoSave();
+  // Re-render uniquement si la valeur a changé (pour afficher/masquer le ⚠)
+  const infoEl = document.getElementById(`feat-info-${i}`);
+  if (infoEl) {
+    const fd = FEAT_LIST.find(f => f.name === value);
+    infoEl.innerHTML = fd
+      ? `${fd.prereq ? '<span style="color:#f0a040;">⚠</span>' : '✓'} ${fd.cat}`
+      : '';
   }
 }
 
