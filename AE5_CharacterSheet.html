@@ -1515,6 +1515,7 @@
     <button class="btn btn-outline" onclick="loadSheet()">📂 Charger</button>
     <div class="toolbar-sep"></div>
     <button class="btn btn-red" onclick="nouveauPersonnage()" title="Effacer toutes les données et repartir de zéro">🆕 Nouveau</button>
+    <button class="btn btn-outline" onclick="openCreationWizard()" title="Créer un personnage guidé étape par étape" style="border-color:#6a9fd8;color:#6a9fd8;">✨ Créer</button>
     <button class="btn btn-outline" onclick="window.print()" title="Imprimer la fiche complète">🖨️ Imprimer</button>
     <span class="toolbar-info">Auto-sauvegarde · ARCHYON-5</span>
       <a class="btn btn-outline" href="https://iws.mx/dnd/?list" target="_blank" title="D&D 4e Compendium en ligne" style="text-decoration:none;font-size:10px;padding:4px 8px;">📖 Compendium</a>
@@ -1548,7 +1549,7 @@
     <div class="id-field">
       <label>Race</label>
       <div class="combo-wrap">
-        <input type="text" id="race" class="combo" list="dl-race" placeholder="Humain, Deva..." oninput="autoSave()" autocomplete="off" title="Choisir dans la liste ou saisir une race homebrew">
+        <input type="text" id="race" class="combo" list="dl-race" placeholder="Humain, Deva..." oninput="autoSave()" onchange="onRaceChange(this.value)" autocomplete="off" title="Choisir dans la liste ou saisir une race homebrew">
       </div>
       <div class="combo-hint">↕ Canon AE5 · Homebrew libre</div>
     </div>
@@ -1850,10 +1851,10 @@
       <div class="panel-title">⚔️ Armes & Armure</div>
       <div class="equip-section-title">Armure équipée</div>
       <div class="equip-grid" style="grid-template-columns:2fr 1fr 1fr 1fr;gap:6px;margin-bottom:12px;">
-        <div><input class="equip-bonus" style="width:100%;" type="text" placeholder="Nom de l'armure" oninput="autoSave()"></div>
-        <div><input class="equip-bonus" type="text" placeholder="Bonus CA" oninput="autoSave()"></div>
-        <div><input class="equip-bonus" type="text" placeholder="Malus Check" oninput="autoSave()"></div>
-        <div><input class="equip-bonus" type="text" placeholder="Vitesse Min." oninput="autoSave()"></div>
+        <div><input id="armorName" class="equip-bonus" style="width:100%;" type="text" list="armorNameList" placeholder="Nom de l'armure" oninput="autoSave()" onchange="onArmorChange(this.value)" autocomplete="off"></div>
+        <div><input id="armorCA" class="equip-bonus" type="text" placeholder="Bonus CA" oninput="onArmorCAInput();autoSave()"></div>
+        <div><input id="armorCheck" class="equip-bonus" type="text" placeholder="Malus Check" oninput="autoSave()"></div>
+        <div><input id="armorSpeed" class="equip-bonus" type="text" placeholder="Vitesse Min." oninput="autoSave()"></div>
       </div>
       <div class="equip-section-title">Armes</div>
       <div id="weaponsList">
@@ -2201,6 +2202,103 @@ const POWER_DEFAULTS = {
   ],
   utility: [],
 };
+
+// ═══════════════════════════════════════════════════
+//  RACE_DATA — Bonus raciaux AE5/D&D 4e
+// ═══════════════════════════════════════════════════
+const RACE_DATA = {
+  'Humain':           { stats:{any1:2,any2:2}, speed:6, vision:'Norm', bonusDefense:'Vol+1,Vig+1,Réf+1', skills:['any'], features:['Bonus de Feat au niv.1','Un pouvoir de Race humaine'], promptEn:'human' },
+  'Elfe':             { stats:{dex:2,sag:2}, speed:7, vision:'Basse-lumière', bonusDefense:'Réf+1,Vol+1', skills:['perception','nature'], features:['Évasion Elfique (tir ne provoque pas PdO)','Sens Magiques (+5 Perception)'], promptEn:'elf' },
+  'Demi-Elfe':        { stats:{con:2,cha:2}, speed:6, vision:'Basse-lumière', bonusDefense:'Vol+1', skills:['perspicacite'], features:['Diplomatie de Groupe (allié gagne +1 vs premier ennemi attaqué)','Pouvoir de classe supplémentaire (at-will d\'une autre classe)'], promptEn:'half-elf' },
+  'Nain':             { stats:{con:2,sag:2}, speed:5, vision:'Basse-lumière', bonusDefense:'Vig+2', skills:['metier'], features:['Endurance Naine (Surge gratuit 1×/rencontre)','Stabilité (+2 vs bousculade & déplacement forcé)'], promptEn:'dwarf' },
+  'Halfelin':         { stats:{dex:2,cha:2}, speed:6, vision:'Norm', bonusDefense:'Réf+1,Vol+1', skills:['acrobaties','furtivite'], features:['Audace Halfeline (+2 jets de sauvegarde contre effet Effrayé)','Seconde Chance (relancer jet d\'attaque ennemi 1×/rencontre)'], promptEn:'halfling' },
+  'Gnome':            { stats:{int:2,cha:2}, speed:5, vision:'Vision dans le noir', bonusDefense:'Réf+1,Vol+1', skills:['arcanes','furtivite'], features:['Disparition Illusoire (invisibilité jusqu\'à fin du tour 1×/rencontre)','Magie Naturelle (Illusion au toucher)'], promptEn:'gnome' },
+  'Tieflin':          { stats:{int:2,cha:2}, speed:6, vision:'Vision dans le noir', bonusDefense:'Réf+1,Vol+1', skills:['dissimuler','intimidation'], features:['Résistance Infernale (feu 5+½niv)','Châtiment Infernal (quand tu es touché, +1d6 feu à ta prochaine attaque)'], promptEn:'tiefling' },
+  'Dragonné':         { stats:{for:2,cha:2}, speed:6, vision:'Basse-lumière', bonusDefense:'Vig+2', skills:['histoire','intimidation'], features:['Souffle du Dragon (Attaque explosion 3 dégâts 1×/rencontre)','Héritage Draconique (+1 jet d\'attaque à Vigueur quand blessé)'], promptEn:'dragonborn' },
+  'Demi-Orc':         { stats:{for:2,dex:2}, speed:6, vision:'Basse-lumière', bonusDefense:'Réf+1', skills:['intimidation','athletisme'], features:['Vitesse Bestiale (+2 vitesse 1×/rencontre comme action libre)','Assault Éclair (+1d10 dégâts à l\'attaque si tu t\'es déplacé avant)'], promptEn:'half-orc' },
+  'Goliath':          { stats:{for:2,con:2}, speed:6, vision:'Norm', bonusDefense:'Vig+1', skills:['athletisme','nature'], features:['Résilience de Pierre (résistance temporaire = ½ niveau 1×/rencontre)','Stature Imposante (portée mêlée +1)'], promptEn:'goliath' },
+  'Githzeraï':        { stats:{sag:2,dex:2}, speed:6, vision:'Norm', bonusDefense:'Réf+1,Vol+2', skills:['acrobaties'], features:['Défenses Mentales (+2 jets de sauvegarde contre effets d\'étourdissement)','Flash de Télépathie (déplacement 3 hors-tour 1×/rencontre)'], promptEn:'githzerai' },
+  'Kalashtar':        { stats:{sag:2,cha:2}, speed:6, vision:'Norm', bonusDefense:'Vol+2', skills:['perspicacite','religion'], features:['Barrière Mentale (+2 contre effets psioniques et charmants)','Double Âme (+1 jet de sauvegarde de fin de tour)'], promptEn:'kalashtar' },
+  'Revenant':         { stats:{dex:2,con:2}, speed:6, vision:'Vision dans le noir', bonusDefense:'Vol+1,Vig+1', skills:['intimidation'], features:['Forme Fantomale (sans corps physique, invisible dans l\'obscurité)','Résurrection Funeste (reviens à 1 PV si mort 1×/rencontre)'], promptEn:'revenant undead' },
+  'Changeling':       { stats:{dex:2,cha:2}, speed:6, vision:'Norm', bonusDefense:'Réf+1,Vol+1', skills:['dissimuler','perspicacite'], features:['Imitation (changer d\'apparence humanoïde à volonté)','Infiltration Mentale (+5 Persuasion/Imposture vs cibles dupliquées)'], promptEn:'changeling shapeshifter' },
+  'Shifter (Bestial)':{ stats:{for:2,con:2}, speed:7, vision:'Basse-lumière', bonusDefense:'Vig+1', skills:['nature','athletisme'], features:['Forme Bestiale (vitesse+2 & Vig+2 jusqu\'à fin rencontre 1×/rencontre)'], promptEn:'shifter bestial lycanthrope' },
+  'Minotaure':        { stats:{for:2,con:2}, speed:6, vision:'Norm', bonusDefense:'Vig+2', skills:['athletisme','nature'], features:['Charge du Minotaure (+1d6 à la première charge)','Mémoire des Labyrinthes (jamais perdu)'], promptEn:'minotaur' },
+  'Deva (Bassin de Vie)': { stats:{sag:2,int:2}, speed:6, vision:'Norm', bonusDefense:'Vol+2', skills:['religion','histoire'], features:['Mémoire des Vies Passées (+1d6 à n\'importe quel jet 1×/rencontre)','Radiance Immortelle (résistance radiant 5+½niv)'], promptEn:'deva angel divine being' },
+  'Résonnant':        { stats:{con:2,int:2}, speed:6, vision:'Basse-lumière', bonusDefense:'Vig+1', skills:['arcanes','metier'], features:['Infatigable (pas de besoin de manger/dormir)','Correction Résonante (réduction dégâts 1 permanent)'], promptEn:'warforged construct resonant mechanical' },
+  'Warforged (Mécanique)': { stats:{con:2,for:2}, speed:5, vision:'Basse-lumière', bonusDefense:'Vig+2', skills:['metier'], features:['Armure Intégrée (+1 CA permanent)','Réparation Mécanique (se soigner avec la compétence Metier au lieu de Médecine)'], promptEn:'warforged mechanical construct' },
+};
+
+// ─── Appliquer les bonus raciaux ─────────────────────
+function onRaceChange(val) {
+  const rd = RACE_DATA[val];
+  if (!rd) { autoSave(); return; }
+
+  // Vitesse
+  const speedEl = document.getElementById('vitesse');
+  if (speedEl) { speedEl.value = rd.speed; }
+
+  // Vision
+  const visionEl = document.getElementById('vision');
+  if (visionEl && (!visionEl.value || visionEl.value === 'Norm')) visionEl.value = rd.vision;
+
+  // Afficher les bonus raciaux (toaster)
+  showRaceToast(val, rd);
+  updateAutoStats();
+  autoSave();
+}
+
+function showRaceToast(raceName, rd) {
+  const existing = document.getElementById('race-toast');
+  if (existing) existing.remove();
+
+  const statStr = Object.entries(rd.stats).map(([k,v]) => k === 'any1' || k === 'any2' ? `+${v} (au choix)` : `+${v} ${k.toUpperCase()}`).join(', ');
+  const toast = document.createElement('div');
+  toast.id = 'race-toast';
+  toast.style.cssText = `position:fixed;bottom:70px;right:16px;max-width:300px;background:#1a1a2e;border:1px solid var(--gold);border-radius:8px;padding:12px 14px;z-index:9999;font-size:11px;color:var(--text);box-shadow:0 4px 20px rgba(0,0,0,0.5);`;
+  toast.innerHTML = `
+    <div style="font-weight:700;color:var(--gold);margin-bottom:6px;">🧬 ${raceName}</div>
+    <div style="margin-bottom:4px;"><span style="color:var(--text3);">Stats :</span> ${statStr}</div>
+    <div style="margin-bottom:4px;"><span style="color:var(--text3);">Vitesse :</span> ${rd.speed} · <span style="color:var(--text3);">Vision :</span> ${rd.vision}</div>
+    <div style="margin-bottom:4px;"><span style="color:var(--text3);">Défenses :</span> ${rd.bonusDefense || '—'}</div>
+    <div style="color:var(--text3);margin-bottom:2px;">Capacités raciales :</div>
+    ${rd.features.map(f=>`<div style="color:var(--gold2);margin-left:6px;">• ${f}</div>`).join('')}
+    <div style="font-size:9px;color:var(--text3);margin-top:8px;">Applique les bonus de stats manuellement dans Caractéristiques</div>
+    <button onclick="this.parentNode.remove()" style="position:absolute;top:6px;right:8px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;">×</button>
+  `;
+  document.body.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.style.opacity='0'; toast.style.transition='opacity 0.5s'; setTimeout(()=>toast.remove(), 500); }, 9000);
+}
+
+// ─── Auto-calc CA depuis armure ──────────────────────
+function onArmorChange(val) {
+  // Parse "Nom de l'armure (CA +X, Type)" pattern
+  const m = val.match(/CA\s*\+?(\d+)/i);
+  if (m) {
+    const caEl = document.getElementById('armorCA');
+    if (caEl) { caEl.value = '+' + m[1]; }
+    updateCAFromArmor();
+  }
+  autoSave();
+}
+
+function onArmorCAInput() { updateCAFromArmor(); }
+
+function updateCAFromArmor() {
+  const className = document.getElementById('classe')?.value?.trim();
+  const niveau = parseInt(document.getElementById('niveau')?.value) || 1;
+  const cd = CLASS_DATA[className];
+  if (!cd) return;
+  const blason = Math.floor(niveau / 2);
+  const dexMod = getMod(getStat('dex'));
+  const intMod = getMod(getStat('int'));
+  const caBase = 10 + blason + Math.max(dexMod, intMod);
+  const armorBonusStr = document.getElementById('armorCA')?.value || '';
+  const armorBonus = parseInt(armorBonusStr.replace(/[^0-9\-]/g,'')) || 0;
+  const caTotal = caBase + armorBonus;
+  setAutoField('def-ca', caTotal);
+  const caHint = document.getElementById('caAutoHint');
+  if (caHint) caHint.textContent = `⚙ ${caBase} base + ${armorBonus} armure = ${caTotal}`;
+}
 
 // ─────────────────── CLASS DATA ───────────────────
 // ═══════════════════════════════════════════════════
@@ -3154,8 +3252,8 @@ function updateAutoStats() {
   setAutoField('def-vol', vol);
 
   // CA : base calculée + note "ajouter bonus d'armure"
-  const caHint = document.getElementById('caAutoHint');
-  if (caHint) caHint.textContent = `⚙ Base ${caBase} + armure`;
+  // CA : updated via updateCAFromArmor (also called here)
+  updateCAFromArmor();
 
   // ── Initiative (DEX mod + blason) ──
   setAutoField('initiative', dexMod + blason);
@@ -3576,41 +3674,61 @@ function closePicker(type) {
 }
 
 function buildPickerContent(type) {
-  const className = document.getElementById('classe')?.value?.trim();
+  const className = document.getElementById(‘classe’)?.value?.trim();
   const cd = className ? CLASS_DATA[className] : null;
-  const classPowers = cd?.powers?.[type] || [];
-  const typeLabels = { atwill:'À volonté', encounter:'Par rencontre', daily:'Quotidien', utility:'Utilitaire' };
+  const allPowers = cd?.powers?.[type] || [];
+  const niveau = parseInt(document.getElementById(‘niveau’)?.value) || 1;
+  const typeLabels = { atwill:’À volonté’, encounter:’Par rencontre’, daily:’Quotidien’, utility:’Utilitaire’ };
 
-  let classTab = '';
-  if (classPowers.length > 0) {
-    const rows = classPowers.map((p,i) => {
-      const enSub = p.nameEn ? `<div class="picker-power-sub">${p.nameEn}</div>` : '';
-      const atkSub = p.atk && p.atk !== '—' ? `<div class="picker-power-sub">${p.atk} · ${p.dmg||'—'}</div>` : '';
-      return `<div class="picker-power-option" onclick="addPickerPower('${type}',${i})">
-        <div class="picker-power-lvl">N.${p.level||1}</div>
+  // Level gates per power type (D&D 4e rules)
+  const levelGate = { atwill: 99, encounter: niveau, daily: niveau, utility: niveau };
+
+  // Filter by level
+  const filteredPowers = allPowers.filter(p => (p.level||1) <= levelGate[type]);
+  const lockedPowers   = allPowers.filter(p => (p.level||1) > levelGate[type]);
+
+  let classTab = ‘’;
+  if (allPowers.length > 0) {
+    const rows = filteredPowers.map((p,i) => {
+      const realIdx = allPowers.indexOf(p);
+      const enSub = p.nameEn ? `<div class="picker-power-sub">${p.nameEn}</div>` : ‘’;
+      const atkSub = p.atk && p.atk !== ‘—‘ ? `<div class="picker-power-sub">${p.atk} · ${p.dmg||’—‘}</div>` : ‘’;
+      return `<div class="picker-power-option" onclick="addPickerPower(‘${type}’,${realIdx})">
+        <div class="picker-power-lvl" style="color:var(--gold2);">N.${p.level||1}</div>
         <div class="picker-power-info">
           <div class="picker-power-name">${p.name}</div>
           ${enSub}${atkSub}
         </div>
       </div>`;
-    }).join('');
-    classTab = `<div id="pickerClassList-${type}" class="picker-class-list">${rows}</div>`;
+    }).join(‘’);
+    const lockedRows = lockedPowers.map(p => `
+      <div class="picker-power-option" style="opacity:0.35;cursor:not-allowed;" title="Disponible au niveau ${p.level}">
+        <div class="picker-power-lvl" style="color:#e05;">N.${p.level||1}</div>
+        <div class="picker-power-info">
+          <div class="picker-power-name" style="color:#888;">🔒 ${p.name}</div>
+          <div class="picker-power-sub">Débloque au niveau ${p.level}</div>
+        </div>
+      </div>`).join(‘’);
+    const lockNote = lockedPowers.length > 0 ? `<div style="font-size:9px;color:#666;margin:4px 0 2px;padding:4px 6px;border-top:1px solid #2a2a3e;">${lockedPowers.length} pouvoir(s) verouillé(s) — niveau insuffisant</div>` : ‘’;
+    classTab = `<div id="pickerClassList-${type}" class="picker-class-list">${rows}${lockNote}${lockedRows}</div>`;
   } else {
-    classTab = `<div class="picker-no-class">${cd ? 'Aucun pouvoir de ce type dans CLASS_DATA.' : 'Sélectionne d’abord une classe dans le profil.'}</div>`;
+    classTab = `<div class="picker-no-class">${cd ? ‘Aucun pouvoir de ce type dans CLASS_DATA.’ : ‘Sélectionne d\’abord une classe dans le profil.’}</div>`;
   }
+
+  const levelBadge = type !== ‘atwill’ ? `<span style="font-size:9px;color:#888;margin-left:6px;">· Niv. max affiché : ${niveau}</span>` : ‘’;
 
   return `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-      <span style="font-size:10px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Ajouter un pouvoir ${typeLabels[type]||type}</span>
-      <button class="picker-close" onclick="closePicker('${type}')">✕</button>
+      <span style="font-size:10px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Ajouter un pouvoir ${typeLabels[type]||type}${levelBadge}</span>
+      <button class="picker-close" onclick="closePicker(‘${type}’)">✕</button>
     </div>
     <div class="picker-tabs">
-      <button class="picker-tab active" id="ptab-class-${type}" onclick="switchPickerTab('${type}','class')">📖 Classe${className?' — '+className:''}</button>
-      <button class="picker-tab" id="ptab-blank-${type}" onclick="switchPickerTab('${type}','blank')">✏️ Vierge</button>
+      <button class="picker-tab active" id="ptab-class-${type}" onclick="switchPickerTab(‘${type}’,’class’)">📖 Classe${className?’ — ‘+className:’’}</button>
+      <button class="picker-tab" id="ptab-blank-${type}" onclick="switchPickerTab(‘${type}’,’blank’)">✏️ Vierge</button>
     </div>
     <div id="pickerBody-class-${type}">${classTab}</div>
     <div id="pickerBody-blank-${type}" style="display:none;">
-      <button class="picker-blank-btn" onclick="addBlankPower('${type}');closePicker('${type}')">+ Créer une carte vierge</button>
+      <button class="picker-blank-btn" onclick="addBlankPower(‘${type}’);closePicker(‘${type}’)">+ Créer une carte vierge</button>
     </div>`;
 }
 
@@ -3816,7 +3934,8 @@ function gatherData() {
    'initiative','vitesse','vision','perceptionPassive','perspicacitePassive',
    'cur-or','cur-moellat','cur-bondesang','cur-lingot','cur-shard',
    'background','personality','gameNotes','classFeatures','raciaux','inventory',
-   'socialPrestige','socialInfamy','socialCover','socialNotes'].forEach(id => {
+   'socialPrestige','socialInfamy','socialCover','socialNotes',
+   'armorName','armorCA','armorCheck','armorSpeed'].forEach(id => {
     const el = document.getElementById(id);
     if (el) data.fields[id] = el.value;
   });
@@ -4504,6 +4623,334 @@ if ('serviceWorker' in navigator && location.protocol !== 'blob:' && !location.h
       .catch(() => {}); // silencieux si sw.js absent (preview local)
   });
 }
+</script>
+
+<!-- ═══════════════ WIZARD DE CRÉATION ═══════════════ -->
+<div id="wizardOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:10000;overflow-y:auto;">
+<div id="wizardModal" style="max-width:680px;margin:30px auto 60px;background:#12121e;border:1px solid #c9a260;border-radius:12px;padding:0;font-family:inherit;box-shadow:0 8px 40px rgba(0,0,0,0.7);">
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#1a1a2e,#0d0d1a);padding:16px 20px;border-radius:12px 12px 0 0;border-bottom:1px solid #c9a260;display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="font-size:16px;font-weight:700;color:#c9a260;letter-spacing:1px;">✨ Création de Personnage</div>
+      <div id="wizStepLabel" style="font-size:10px;color:#888;margin-top:2px;">Étape 1 / 5</div>
+    </div>
+    <button onclick="closeWizard()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">×</button>
+  </div>
+
+  <!-- Progress bar -->
+  <div style="height:3px;background:#1e1e30;">
+    <div id="wizProgressBar" style="height:100%;background:linear-gradient(90deg,#c9a260,#f0c040);width:20%;transition:width 0.3s;"></div>
+  </div>
+
+  <!-- Steps -->
+  <div id="wizBody" style="padding:20px 24px 24px;"></div>
+
+  <!-- Footer nav -->
+  <div style="padding:12px 24px 16px;display:flex;justify-content:space-between;border-top:1px solid #1e1e30;">
+    <button id="wizBtnBack" onclick="wizNav(-1)" style="background:none;border:1px solid #444;color:#888;border-radius:6px;padding:8px 18px;cursor:pointer;font-size:12px;">◀ Retour</button>
+    <button id="wizBtnNext" onclick="wizNav(1)" style="background:#c9a260;border:none;color:#12121e;border-radius:6px;padding:8px 22px;cursor:pointer;font-size:12px;font-weight:700;">Suivant ▶</button>
+  </div>
+
+</div>
+</div>
+
+<!-- ═══════════════ PORTRAIT IA MODAL ═══════════════ -->
+<div id="portraitOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:10001;display:none;align-items:center;justify-content:center;flex-direction:column;">
+<div style="background:#12121e;border:1px solid #c9a260;border-radius:12px;padding:20px;max-width:500px;width:90%;text-align:center;">
+  <div style="font-weight:700;color:#c9a260;margin-bottom:12px;font-size:14px;">🎨 Portrait du Personnage</div>
+  <div id="portraitImgWrap" style="min-height:300px;background:#0a0a14;border-radius:8px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+    <div id="portraitStatus" style="color:#888;font-size:12px;">Génération en cours...</div>
+  </div>
+  <div style="margin-bottom:10px;">
+    <textarea id="portraitPromptExtra" rows="2" placeholder="Détails supplémentaires (ex: cheveux rouges, cicatrice, capuche noire...)" style="width:100%;background:#0a0a14;border:1px solid #333;border-radius:6px;color:#ccc;font-size:11px;padding:6px;font-family:inherit;resize:none;box-sizing:border-box;"></textarea>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+    <button onclick="generatePortrait()" style="background:#c9a260;border:none;color:#12121e;border-radius:6px;padding:8px 16px;cursor:pointer;font-size:12px;font-weight:700;">🔄 Regénérer</button>
+    <button onclick="downloadPortrait()" style="background:none;border:1px solid #c9a260;color:#c9a260;border-radius:6px;padding:8px 16px;cursor:pointer;font-size:12px;">⬇ Télécharger</button>
+    <button onclick="closePortrait()" style="background:none;border:1px solid #444;color:#888;border-radius:6px;padding:8px 16px;cursor:pointer;font-size:12px;">Fermer</button>
+  </div>
+  <div style="font-size:9px;color:#555;margin-top:8px;">Généré par Pollinations.ai · Gratuit · Sans compte</div>
+</div>
+</div>
+
+<script>
+// ═══════════════ WIZARD LOGIC ═══════════════
+let wizStep = 0;
+const WIZ_STEPS = 5;
+const wizState = { race:'', classe:'', stats:{for:10,con:10,dex:10,int:10,sag:10,cha:10}, statMethod:'standard', skills:[], powers:[] };
+const STANDARD_ARRAYS = [[16,14,13,12,11,10],[15,14,13,12,11,10],[16,14,13,12,10,8]];
+const STAT_KEYS = ['for','con','dex','int','sag','cha'];
+const STAT_LABELS = {for:'FOR',con:'CON',dex:'DEX',int:'INT',sag:'SAG',cha:'CHA'};
+
+function openCreationWizard() {
+  wizStep = 0;
+  document.getElementById('wizardOverlay').style.display = 'block';
+  renderWizStep();
+}
+function closeWizard() { document.getElementById('wizardOverlay').style.display = 'none'; }
+
+function wizNav(dir) {
+  if (dir === 1 && !wizValidate()) return;
+  wizStep = Math.max(0, Math.min(WIZ_STEPS-1, wizStep + dir));
+  renderWizStep();
+}
+
+function wizValidate() {
+  if (wizStep === 0 && !wizState.race) { alert('Choisis une race.'); return false; }
+  if (wizStep === 1 && !wizState.classe) { alert('Choisis une classe.'); return false; }
+  return true;
+}
+
+function renderWizStep() {
+  const labels = ['Race','Classe','Statistiques','Pouvoirs de départ','Résumé & Appliquer'];
+  document.getElementById('wizStepLabel').textContent = `Étape ${wizStep+1} / ${WIZ_STEPS} · ${labels[wizStep]}`;
+  document.getElementById('wizProgressBar').style.width = `${((wizStep+1)/WIZ_STEPS)*100}%`;
+  document.getElementById('wizBtnBack').style.opacity = wizStep===0 ? '0.3' : '1';
+  document.getElementById('wizBtnBack').disabled = wizStep===0;
+  document.getElementById('wizBtnNext').textContent = wizStep===WIZ_STEPS-1 ? '✅ Appliquer' : 'Suivant ▶';
+  if (wizStep===WIZ_STEPS-1) document.getElementById('wizBtnNext').onclick = applyWizard;
+  else document.getElementById('wizBtnNext').onclick = ()=>wizNav(1);
+
+  const body = document.getElementById('wizBody');
+  body.innerHTML = '';
+  if (wizStep===0) renderWizRace(body);
+  else if (wizStep===1) renderWizClass(body);
+  else if (wizStep===2) renderWizStats(body);
+  else if (wizStep===3) renderWizPowers(body);
+  else renderWizSummary(body);
+}
+
+function renderWizRace(el) {
+  el.innerHTML = `<div style="color:#c9a260;font-weight:700;margin-bottom:12px;font-size:13px;">🧬 Choix de la Race</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;max-height:380px;overflow-y:auto;padding-right:4px;">
+  ${Object.entries(RACE_DATA).map(([r,rd])=>`
+    <div onclick="wizState.race='${r}';renderWizStep();" style="cursor:pointer;border:1px solid ${wizState.race===r?'#c9a260':'#2a2a3e'};background:${wizState.race===r?'rgba(201,162,39,0.1)':'#0d0d1a'};border-radius:8px;padding:10px 12px;transition:all 0.2s;">
+      <div style="font-weight:700;font-size:12px;color:${wizState.race===r?'#c9a260':'#e0e0e0'};">${r}</div>
+      <div style="font-size:9px;color:#888;margin-top:3px;">${Object.entries(rd.stats).map(([k,v])=>k.startsWith('any')?`+${v} libre`:`+${v} ${k.toUpperCase()}`).join(' · ')} · V${rd.speed} · ${rd.vision}</div>
+      <div style="font-size:9px;color:#666;margin-top:2px;">${rd.features[0]||''}</div>
+    </div>`).join('')}
+  </div>
+  ${wizState.race&&RACE_DATA[wizState.race]?`<div style="margin-top:12px;padding:10px 12px;background:#0a0a14;border-radius:8px;border:1px solid #c9a260;font-size:11px;">
+    <b style="color:#c9a260;">${wizState.race}</b> — ${RACE_DATA[wizState.race].features.join(' · ')}
+  </div>`:''}`;
+}
+
+function renderWizClass(el) {
+  const classes = Object.keys(CLASS_DATA);
+  el.innerHTML = `<div style="color:#c9a260;font-weight:700;margin-bottom:12px;font-size:13px;">⚔️ Choix de la Classe</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;max-height:380px;overflow-y:auto;padding-right:4px;">
+  ${classes.map(c=>{const cd=CLASS_DATA[c];return`
+    <div onclick="wizState.classe='${c.replace(/'/g,"\\'")}';renderWizStep();" style="cursor:pointer;border:1px solid ${wizState.classe===c?'#6a9fd8':'#2a2a3e'};background:${wizState.classe===c?'rgba(106,159,216,0.1)':'#0d0d1a'};border-radius:8px;padding:10px 12px;transition:all 0.2s;">
+      <div style="font-weight:700;font-size:12px;color:${wizState.classe===c?'#6a9fd8':'#e0e0e0'};">${c}</div>
+      <div style="font-size:9px;color:#888;margin-top:3px;">PV:${cd.hp1}+CON · Surges:${cd.surges} · ${cd.source}</div>
+      <div style="font-size:9px;color:#666;margin-top:2px;">Stats clés: ${(cd.mainStats||[]).join(', ')||'—'}</div>
+    </div>`;}).join('')}
+  </div>`;
+}
+
+function renderWizStats(el) {
+  // AI suggestion based on class
+  const cd = CLASS_DATA[wizState.classe];
+  const mainStats = cd?.mainStats || [];
+  const priority = [...mainStats, ...STAT_KEYS.filter(k=>!mainStats.map(s=>s.toLowerCase()).includes(k))].slice(0,6).map(s=>s.toLowerCase());
+
+  el.innerHTML = `<div style="color:#c9a260;font-weight:700;margin-bottom:8px;font-size:13px;">📊 Distribution des Statistiques</div>
+  <div style="font-size:10px;color:#888;margin-bottom:10px;">Tableau standard recommandé pour <b style="color:#6a9fd8;">${wizState.classe}</b> :</div>
+  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+    ${STANDARD_ARRAYS.map((arr,i)=>`<button onclick="applyStatArray(${i})" style="background:${i===0?'rgba(201,162,39,0.1)':'none'};border:1px solid ${i===0?'#c9a260':'#333'};color:${i===0?'#c9a260':'#888'};border-radius:6px;padding:6px 12px;cursor:pointer;font-size:10px;">${arr.join('/')}</button>`).join('')}
+    <button onclick="wizState.statMethod='buy';renderWizStep()" style="background:none;border:1px solid #333;color:#888;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:10px;">⚖️ Achat de points</button>
+  </div>
+  <div id="wizStatGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+  ${STAT_KEYS.map((k,i)=>{
+    const isPrio = mainStats.map(s=>s.toLowerCase()).includes(k);
+    return `<div style="background:#0d0d1a;border:1px solid ${isPrio?'#c9a260':'#2a2a3e'};border-radius:8px;padding:10px;text-align:center;">
+      <div style="font-size:10px;color:${isPrio?'#c9a260':'#888'};font-weight:700;margin-bottom:4px;">${STAT_LABELS[k]}${isPrio?' ★':''}</div>
+      <input type="number" id="wiz-stat-${k}" value="${wizState.stats[k]||10}" min="3" max="20" oninput="wizState.stats['${k}']=parseInt(this.value)||10;updateWizStatMods();" style="width:50px;text-align:center;background:#12121e;border:1px solid #333;border-radius:4px;color:#f0c040;font-size:16px;font-weight:700;padding:4px;">
+      <div id="wiz-mod-${k}" style="font-size:10px;color:#888;margin-top:3px;">${modStr(wizState.stats[k])}</div>
+    </div>`;
+  }).join('')}
+  </div>
+  <div id="wizStatPoints" style="margin-top:10px;font-size:10px;color:#888;text-align:center;"></div>`;
+  updateWizStatMods();
+}
+
+function modStr(s){const m=Math.floor((s-10)/2);return(m>=0?'+':'')+m;}
+function applyStatArray(i){
+  const arr=STANDARD_ARRAYS[i];
+  const cd=CLASS_DATA[wizState.classe];
+  const mainStats=(cd?.mainStats||[]).map(s=>s.toLowerCase());
+  const priority=[...mainStats,...STAT_KEYS.filter(k=>!mainStats.includes(k))];
+  priority.forEach((k,j)=>{wizState.stats[k]=arr[j]||10;});
+  renderWizStep();
+}
+function updateWizStatMods(){
+  STAT_KEYS.forEach(k=>{
+    const v=parseInt(document.getElementById('wiz-stat-'+k)?.value)||10;
+    wizState.stats[k]=v;
+    const el=document.getElementById('wiz-mod-'+k);
+    if(el)el.textContent=modStr(v);
+  });
+}
+
+function renderWizPowers(el) {
+  const cd = CLASS_DATA[wizState.classe];
+  if (!cd?.powers) { el.innerHTML='<div style="color:#888;">Aucun pouvoir disponible.</div>'; return; }
+  const types = [{k:'atwill',label:'À Volonté',col:'#4ec94e'},{k:'encounter',label:'Par Rencontre',col:'#e05050'},{k:'daily',label:'Quotidien',col:'#b070f0'},{k:'utility',label:'Utilitaire',col:'#50a8e0'}];
+  el.innerHTML = `<div style="color:#c9a260;font-weight:700;margin-bottom:10px;font-size:13px;">⚡ Pouvoirs de départ (Niveau 1)</div>
+  <div style="font-size:10px;color:#888;margin-bottom:12px;">Ces pouvoirs seront chargés automatiquement. Tu pourras les modifier après.</div>
+  ${types.map(t=>{
+    const pwList=(cd.powers[t.k]||[]).filter(p=>p.level<=1||t.k==='atwill');
+    if(!pwList.length) return '';
+    return `<div style="margin-bottom:10px;">
+      <div style="font-size:10px;font-weight:700;color:${t.col};margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">${t.label}</div>
+      ${pwList.map((p,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#0d0d1a;border-radius:6px;margin-bottom:4px;border:1px solid #2a2a3e;font-size:11px;">
+        <span style="color:#c0c0c0;flex:1;">${p.name}</span>
+        <span style="font-size:9px;color:#888;">${p.atk||''} ${p.dmg||''}</span>
+      </div>`).join('')}
+    </div>`;
+  }).join('')}`;
+}
+
+function renderWizSummary(el) {
+  const rd = RACE_DATA[wizState.race]||{};
+  const cd = CLASS_DATA[wizState.classe]||{};
+  const conScore = wizState.stats.con||10;
+  const conMod = Math.floor((conScore-10)/2);
+  const hpMax = (cd.hp1||10) + conScore + ((cd.hpLvl||5)-1)*0;
+  const statStr = STAT_KEYS.map(k=>`${STAT_LABELS[k]}: <b style="color:#f0c040;">${wizState.stats[k]}</b> (${modStr(wizState.stats[k])})`).join(' · ');
+
+  el.innerHTML = `<div style="color:#c9a260;font-weight:700;margin-bottom:14px;font-size:13px;">📋 Résumé du Personnage</div>
+  <div style="display:grid;gap:10px;">
+    <div style="background:#0d0d1a;border:1px solid #2a2a3e;border-radius:8px;padding:12px;">
+      <div style="font-size:10px;color:#888;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Identité</div>
+      <div style="font-size:12px;">Race : <b style="color:#c9a260;">${wizState.race||'—'}</b> · Classe : <b style="color:#6a9fd8;">${wizState.classe||'—'}</b></div>
+      <div style="font-size:11px;color:#888;margin-top:3px;">Vitesse: ${rd.speed||6} · Vision: ${rd.vision||'Norm'}</div>
+    </div>
+    <div style="background:#0d0d1a;border:1px solid #2a2a3e;border-radius:8px;padding:12px;">
+      <div style="font-size:10px;color:#888;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Statistiques</div>
+      <div style="font-size:11px;line-height:1.8;">${statStr}</div>
+    </div>
+    <div style="background:#0d0d1a;border:1px solid #2a2a3e;border-radius:8px;padding:12px;">
+      <div style="font-size:10px;color:#888;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Calculé automatiquement</div>
+      <div style="font-size:11px;color:#e0e0e0;">PV max (niv.1) : <b style="color:#f0c040;">${hpMax}</b> · Surges : <b style="color:#f0c040;">${(cd.surges||6)+conMod}</b></div>
+    </div>
+    ${rd.features?`<div style="background:rgba(201,162,39,0.05);border:1px solid rgba(201,162,39,0.3);border-radius:8px;padding:12px;">
+      <div style="font-size:10px;color:#888;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Capacités raciales</div>
+      ${rd.features.map(f=>`<div style="font-size:11px;color:#c9a260;">• ${f}</div>`).join('')}
+    </div>`:''}
+  </div>
+  <div style="margin-top:14px;padding:10px 12px;background:rgba(106,159,216,0.05);border:1px solid rgba(106,159,216,0.3);border-radius:8px;font-size:10px;color:#6a9fd8;">
+    ℹ️ Clique "Appliquer" pour remplir la fiche. Tu pourras ajuster tout après.
+  </div>`;
+}
+
+function applyWizard() {
+  // Apply race
+  const raceEl = document.getElementById('race');
+  if (raceEl) { raceEl.value = wizState.race; onRaceChange(wizState.race); }
+
+  // Apply class
+  const classeEl = document.getElementById('classe');
+  if (classeEl) { classeEl.value = wizState.classe; onClassChange(wizState.classe); }
+
+  // Apply stats
+  STAT_KEYS.forEach(k => {
+    const el = document.getElementById('stat-'+k);
+    if (el) { el.value = wizState.stats[k]; updateStatMod(k); }
+  });
+
+  // Apply vitesse
+  const speedEl = document.getElementById('vitesse');
+  const rd = RACE_DATA[wizState.race];
+  if (speedEl && rd) speedEl.value = rd.speed;
+
+  // Apply vision
+  const visionEl = document.getElementById('vision');
+  if (visionEl && rd) visionEl.value = rd.vision;
+
+  // Recalculate everything
+  updateNiveau();
+  closeWizard();
+
+  // Show portrait offer
+  setTimeout(()=>{
+    if (confirm('🎨 Veux-tu générer un portrait IA pour ce personnage ?')) openPortrait();
+  }, 400);
+}
+
+// ═══════════════ PORTRAIT IA ═══════════════
+function buildPortraitPrompt() {
+  const race = document.getElementById('race')?.value || wizState.race || 'human adventurer';
+  const classe = document.getElementById('classe')?.value || wizState.classe || 'warrior';
+  const nom = document.getElementById('nom')?.value || '';
+  const rd = RACE_DATA[race] || {};
+  const raceEn = rd.promptEn || race.toLowerCase().replace(/\(.*\)/,'').trim();
+
+  // Map class to English concept for better results
+  const classMap = {
+    'Paladin':'paladin holy warrior','Clerc (Prêtre)':'cleric priest divine','Avenger (Vengeur)':'avenger assassin divine',
+    'Guerrier (Fighter)':'fighter warrior','Rôdeur (Ranger)':'ranger archer scout','Voleur (Rogue)':'rogue thief shadow',
+    'Magicien (Wizard)':'wizard mage arcane','Sorcier (Warlock)':'warlock dark pact','Barde':'bard performer',
+    'Druide':'druid nature shapeshifter','Warden':'warden nature guardian','Armaturge':'artificer mechanical resonant armor',
+    'Barbare':'barbarian rage','Moine (Monk)':'monk psionic martial artist','Psion':'psion psionic mind',
+  };
+  const classeEn = classMap[classe] || classe.toLowerCase().replace(/\(.*\)/,'').trim();
+
+  const extra = document.getElementById('portraitPromptExtra')?.value || '';
+  return encodeURIComponent(`fantasy portrait, ${raceEn} ${classeEn}, D&D 4th edition art style, dramatic lighting, detailed armor and weapons, dark fantasy, character art${extra ? ', '+extra : ''}${nom ? ', character named '+nom : ''}, cinematic, high quality, front-facing portrait`);
+}
+
+function openPortrait() {
+  const overlay = document.getElementById('portraitOverlay');
+  overlay.style.display = 'flex';
+  generatePortrait();
+}
+
+function closePortrait() {
+  document.getElementById('portraitOverlay').style.display = 'none';
+}
+
+function generatePortrait() {
+  const wrap = document.getElementById('portraitImgWrap');
+  const status = document.getElementById('portraitStatus');
+  wrap.innerHTML = '<div id="portraitStatus" style="color:#888;font-size:12px;">Génération en cours... (10-20 sec)</div>';
+
+  const prompt = buildPortraitPrompt();
+  const seed = Math.floor(Math.random()*99999);
+  const url = `https://image.pollinations.ai/prompt/${prompt}?width=512&height=512&seed=${seed}&nologo=true&model=flux`;
+
+  const img = new Image();
+  img.style.cssText = 'width:100%;height:auto;border-radius:6px;display:block;';
+  img.onload = () => { wrap.innerHTML = ''; wrap.appendChild(img); };
+  img.onerror = () => { wrap.innerHTML = '<div style="color:#e05;font-size:11px;">Erreur — vérifie ta connexion et réessaie.</div>'; };
+  img.src = url;
+  window.__lastPortraitUrl = url;
+}
+
+function downloadPortrait() {
+  if (!window.__lastPortraitUrl) return;
+  const a = document.createElement('a');
+  a.href = window.__lastPortraitUrl;
+  const nom = document.getElementById('nom')?.value || 'personnage';
+  a.download = `portrait_${nom.replace(/\s+/g,'_')}.png`;
+  a.target = '_blank';
+  a.click();
+}
+
+// Add portrait button to toolbar dynamically
+document.addEventListener('DOMContentLoaded', ()=>{
+  const info = document.querySelector('.toolbar-info');
+  if (info) {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-outline';
+    btn.style.cssText = 'border-color:#b070f0;color:#b070f0;font-size:10px;padding:4px 8px;';
+    btn.title = 'Générer un portrait IA pour ce personnage';
+    btn.textContent = '🎨 Portrait IA';
+    btn.onclick = openPortrait;
+    info.parentNode.insertBefore(btn, info);
+  }
+});
 </script>
 
 </body>
