@@ -5083,6 +5083,17 @@ var __wizData = { name:'', race:'', classe:'', statMethod:'standard', stats:{for
 var __wizSteps = ['identity','race','stats','class'];
 var __pointBuyPts = 27;
 
+function wizRoll4d6() {
+  var keys = ['for','con','dex','int','sag','cha'];
+  keys.forEach(function(k) {
+    var dice = [0,0,0,0].map(function(){ return Math.floor(Math.random()*6)+1; });
+    dice.sort(function(a,b){return b-a;});
+    var total = dice[0]+dice[1]+dice[2];
+    __wizData.stats[k] = total;
+  });
+  renderWizStep();
+}
+
 function wizUpdateStat(el) {
   var k = el.getAttribute('data-statkey');
   if (k) __wizData.stats[k] = parseInt(el.value) || 10;
@@ -5152,13 +5163,17 @@ function renderWizStep() {
     var STAT_KEYS = ['for','con','dex','int','sag','cha'];
     var STAT_LABELS = {for:'FOR',con:'CON',dex:'DEX',int:'INT',sag:'SAG',cha:'CHA'};
     var STANDARD_ARRAY = [16,14,13,12,11,10];
-    var isArr = __wizData.statMethod === 'array';
-    var isPb = __wizData.statMethod === 'pointbuy';
-    var isMan = __wizData.statMethod === 'manual';
+    var HEROIC_ARRAY = [18,17,16,15,14,13];
+    var isArr  = __wizData.statMethod === 'array';
+    var isPb   = __wizData.statMethod === 'pointbuy';
+    var isMan  = __wizData.statMethod === 'manual';
+    var isRoll = __wizData.statMethod === 'roll4d6';
+    var isHero = __wizData.statMethod === 'heroic';
     var statInputs = STAT_KEYS.map(function(k,i){
       var v = __wizData.stats[k]||10;
-      if (isArr) {
-        var arrOpts = STANDARD_ARRAY.map(function(n){return '<option value="'+n+'"'+(v==n?' selected':'')+'>'+n+'</option>';}).join('');
+      var curArr = isHero ? HEROIC_ARRAY : STANDARD_ARRAY;
+      if (isArr || isHero) {
+        var arrOpts = curArr.map(function(n){return '<option value="'+n+'"'+(v==n?' selected':'')+'>'+n+'</option>';}).join('');
         return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
           +'<span style="color:var(--text2);font-size:12px;width:32px;">'+STAT_LABELS[k]+'</span>'
           +'<select id="ws_'+k+'" data-statkey="'+k+'" onchange="wizUpdateStat(this)" style="flex:1;background:#1a1a2e;border:1px solid #555;color:var(--text);padding:5px;border-radius:4px;font-size:12px;">'
@@ -5168,13 +5183,14 @@ function renderWizStep() {
         +'<span style="color:var(--text2);font-size:12px;width:32px;">'+STAT_LABELS[k]+'</span>'
         +'<input id="ws_'+k+'" type="number" value="'+v+'" min="3" max="18" data-statkey="'+k+'" onchange="wizUpdateStat(this)" style="width:60px;background:#1a1a2e;border:1px solid #555;color:var(--text);padding:5px 8px;border-radius:4px;font-size:12px;"></div>';
     }).join('');
-    var methodBtns = ['standard','array','pointbuy','manual'].map(function(m){
-      var labels = {standard:'Standard (valeurs libres)',array:'Array (16,14,13,12,11,10)',pointbuy:'Achat 27pts',manual:'Manuel'};
+    var methodBtns = ['standard','array','heroic','roll4d6','manual'].map(function(m){
+      var labels = {standard:'Standard (libres)',array:'Array PHB (16,14,13,12,11,10)',pointbuy:'Achat 27pts',manual:'Manuel',roll4d6:'4d6 garde 3 🎲',heroic:'Héroïque (18-13) ⚡'};
       return '<button data-method="'+m+'" onclick="wizSetMethod(this)" style="background:'+(__wizData.statMethod===m?'var(--gold)':'#1a1a2e')+';color:'+(__wizData.statMethod===m?'#000':'var(--text2)')+';border:1px solid '+(__wizData.statMethod===m?'var(--gold)':'#444')+';padding:5px 10px;border-radius:4px;cursor:pointer;font-size:11px;">'+labels[m]+'</button>';
     }).join('');
     html = '<div style="font-weight:700;color:var(--gold);font-size:14px;margin-bottom:10px;">📊 Distribution des Caractéristiques</div>'
       + '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;">' + methodBtns + '</div>'
       + statInputs
+      + (isRoll ? '<button onclick="wizRoll4d6()" style="width:100%;background:#2a1a3e;border:1px solid var(--gold);color:var(--gold);padding:8px;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;margin-bottom:8px;">🎲 Lancer les dés !</button>' : '')
       + '<div style="font-size:10px;color:var(--text3);margin-top:8px;">Les bonus raciaux seront appliqués automatiquement à l’étape suivante.</div>';
   }
   else if (s === 'class') {
