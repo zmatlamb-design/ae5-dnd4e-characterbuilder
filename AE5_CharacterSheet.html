@@ -9112,7 +9112,7 @@ function applyPNJToSheet() {
 //  bonus: [{type, val, cond}]
 //   type: 'ca'|'vig'|'ref'|'vol'|'init'|'atk'|'dmg'|'hp'|'surge'|'speed'|'skill:NOM'|'save'
 // ═══════════════════════════════════════════════════
-const FEAT_DATA = [
+const FEAT_LIST = [
   // ── COMBAT ──────────────────────────────────────
   { name:'Armure Légère', cat:'Armure', prereq:'', src:'PHB', bonus:[], desc:'Maîtrise des armures légères.' },
   { name:'Armure de Mailles', cat:'Armure', prereq:'Armure Légère', src:'PHB', bonus:[], desc:'Maîtrise des armures de mailles.' },
@@ -9279,7 +9279,7 @@ function renderFeatSlots() {
   while (__featSlots.length < count) __featSlots.push({ id: Date.now() + Math.random(), name: '', custom: '' });
 
   container.innerHTML = __featSlots.slice(0, count).map((slot, i) => {
-    const fd = FEAT_DATA.find(f => f.name === slot.name);
+    const fd = FEAT_LIST.find(f => f.name === slot.name);
     return `<div class="feat-slot-row" id="feat-slot-${i}">
       <input type="text" list="featDataList" value="${slot.name||''}"
         placeholder="Sélectionner un don..."
@@ -9296,7 +9296,7 @@ function renderFeatSlots() {
     dl.id = 'featDataList';
     document.body.appendChild(dl);
   }
-  dl.innerHTML = FEAT_DATA.map(f => `<option value="${f.name}" label="${f.cat} — ${f.desc.substring(0,40)}"></option>`).join('');
+  dl.innerHTML = FEAT_LIST.map(f => `<option value="${f.name}" label="${f.cat} — ${f.desc.substring(0,40)}"></option>`).join('');
 
   // Update feat count badge
   const badge = document.getElementById('featCountBadge');
@@ -9383,7 +9383,7 @@ function applyAllBonuses() {
   const featBonuses = { ca:0, vig:0, ref:0, vol:0, init:0, atk:0, dmg:0, hp:0, surge:0, speed:0, save:0 };
 
   (__featSlots||[]).forEach(slot => {
-    const fd = FEAT_DATA.find(f => f.name === slot.name);
+    const fd = FEAT_LIST.find(f => f.name === slot.name);
     if (!fd) return;
     (fd.bonus||[]).forEach(b => {
       if (b.type in featBonuses) featBonuses[b.type] += b.val;
