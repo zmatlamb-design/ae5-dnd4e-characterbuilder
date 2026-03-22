@@ -2242,26 +2242,159 @@ const POWER_DEFAULTS = {
 //  RACE_DATA — Bonus raciaux AE5/D&D 4e
 // ═══════════════════════════════════════════════════
 const RACE_DATA = {
-  "Humain":              { stats:{any1:2,any2:2}, speed:6, vision:"Norm", bonusDef:"Vol+1,Vig+1,Réf+1", features:["Bonus de Feat au niv.1","Un pouvoir de Race humaine"], promptEn:"human" },
-  "Elfe":                { stats:{dex:2,sag:2}, speed:7, vision:"Basse-lumière", bonusDef:"Réf+1,Vol+1", features:["Évasion Elfique (tir ne provoque pas PdO)","Sens Magiques (+5 Perception)"], promptEn:"elf" },
-  "Demi-Elfe":           { stats:{con:2,cha:2}, speed:6, vision:"Basse-lumière", bonusDef:"Vol+1", features:["Diplomatie de Groupe (allié +1 vs premier ennemi attaqué)","At-will supplémentaire d’une autre classe"], promptEn:"half-elf" },
-  "Nain":                { stats:{con:2,sag:2}, speed:5, vision:"Basse-lumière", bonusDef:"Vig+2", features:["Endurance Naine (Surge gratuit 1×/rencontre)","Stabilité (+2 vs bousculade)"], promptEn:"dwarf" },
-  "Halfelin":            { stats:{dex:2,cha:2}, speed:6, vision:"Norm", bonusDef:"Réf+1,Vol+1", features:["Audace Halfeline (+2 saves vs Effrayé)","Seconde Chance (relancer jet ennemi 1×/rencontre)"], promptEn:"halfling" },
-  "Gnome":               { stats:{int:2,cha:2}, speed:5, vision:"Vision dans le noir", bonusDef:"Réf+1,Vol+1", features:["Disparition Illusoire (invisible 1×/rencontre)","Magie Naturelle (Illusion au toucher)"], promptEn:"gnome" },
-  "Tieflin":             { stats:{int:2,cha:2}, speed:6, vision:"Vision dans le noir", bonusDef:"Réf+1,Vol+1", features:["Résistance Infernale (feu 5+½niv)","Châtiment Infernal (+1d6 feu à prochaine attaque)"], promptEn:"tiefling" },
-  "Dragonné":            { stats:{for:2,cha:2}, speed:6, vision:"Basse-lumière", bonusDef:"Vig+2", features:["Souffle du Dragon (explosion 3, 1×/rencontre)","Héritage Draconique (+1 atk Vigueur quand blessé)"], promptEn:"dragonborn" },
-  "Demi-Orc":            { stats:{for:2,dex:2}, speed:6, vision:"Basse-lumière", bonusDef:"Réf+1", features:["Vitesse Bestiale (+2 vitesse 1×/rencontre)","Assault Éclair (+1d10 si déplacement avant attaque)"], promptEn:"half-orc" },
-  "Goliath":             { stats:{for:2,con:2}, speed:6, vision:"Norm", bonusDef:"Vig+1", features:["Résilience de Pierre (résistance temp 1×/rencontre)","Stature Imposante (portée mêlée +1)"], promptEn:"goliath" },
-  "Githzeraï":           { stats:{sag:2,dex:2}, speed:6, vision:"Norm", bonusDef:"Réf+1,Vol+2", features:["Défenses Mentales (+2 saves étourdissement)","Flash de Télépathie (téléportation 3 hors-tour)"], promptEn:"githzerai" },
-  "Kalashtar":           { stats:{sag:2,cha:2}, speed:6, vision:"Norm", bonusDef:"Vol+2", features:["Barrière Mentale (+2 vs psionique/charme)","Double Âme (+1 save fin de tour)"], promptEn:"kalashtar" },
-  "Revenant":            { stats:{dex:2,con:2}, speed:6, vision:"Vision dans le noir", bonusDef:"Vol+1,Vig+1", features:["Forme Fantomale (invisible dans obscurité)","Résurrection Funeste (reviens à 1 PV 1×/rencontre)"], promptEn:"revenant undead" },
-  "Changeling":          { stats:{dex:2,cha:2}, speed:6, vision:"Norm", bonusDef:"Réf+1,Vol+1", features:["Imitation (changer apparence à volonté)","Infiltration Mentale (+5 Persuasion vs cibles dupliquées)"], promptEn:"changeling shapeshifter" },
-  "Shifter (Bestial)":   { stats:{for:2,con:2}, speed:7, vision:"Basse-lumière", bonusDef:"Vig+1", features:["Forme Bestiale (vitesse+2 & Vig+2 1×/rencontre)"], promptEn:"shifter bestial lycanthrope" },
-  "Minotaure":           { stats:{for:2,con:2}, speed:6, vision:"Norm", bonusDef:"Vig+2", features:["Charge du Minotaure (+1d6 à la première charge)","Mémoire des Labyrinthes"], promptEn:"minotaur" },
-  "Deva (Bassin de Vie)":{ stats:{sag:2,int:2}, speed:6, vision:"Norm", bonusDef:"Vol+2", features:["Mémoire des Vies Passées (+1d6 à n’importe quel jet 1×/rencontre)","Radiance Immortelle (résistance radiant 5+½niv)"], promptEn:"deva angel divine" },
-  "Résonnant":           { stats:{con:2,int:2}, speed:6, vision:"Basse-lumière", bonusDef:"Vig+1", features:["Infatigable (pas besoin manger/dormir)","Correction Résonante (réduction dégâts 1)"], promptEn:"warforged construct resonant mechanical" },
-  "Warforged (Mécanique)":{ stats:{con:2,for:2}, speed:5, vision:"Basse-lumière", bonusDef:"Vig+2", features:["Armure Intégrée (+1 CA permanent)","Réparation Mécanique (Metier au lieu de Médecine)"], promptEn:"warforged mechanical construct" },
+  "Humain": {
+    stats:{any1:2,any2:2}, speed:6, vision:"Norm", bonusDef:"Vol+1,Vig+1,R\u00e9f+1",
+    features:["Bonus de Feat au niv.1","At-will suppl\u00e9mentaire au niv.1","Effort H\u00e9ro\u00efque (pouvoir racial)"],
+    racialPowers:[
+      { name:"Effort H\u00e9ro\u00efque", nameEn:"Heroic Effort (PHB1 p.43)", type:"Par rencontre \u00b7 Racial \u00b7 Humain", level:0, tags:["\u00e9action","personnel"], atk:"\u2014", dmg:"\u2014",
+        effect:"D\u00e9clencheur : tu rates un jet d\u2019attaque ou un jet de sauvegarde. +4 au jet rat\u00e9. (Transforme souvent un \u00e9chec en succ\u00e8s.)" }
+    ], promptEn:"human" },
+
+  "Elfe": {
+    stats:{dex:2,sag:2}, speed:7, vision:"Basse-lumi\u00e8re", bonusDef:"R\u00e9f+1,Vol+1",
+    features:["\u00c9vasion Elfique (tir ne provoque pas PdO)","Sens Magiques (+5 Perception)","Pr\u00e9cision Elfique (pouvoir racial)"],
+    racialPowers:[
+      { name:"Pr\u00e9cision Elfique", nameEn:"Elven Accuracy (PHB1 p.41)", type:"Par rencontre \u00b7 Racial \u00b7 Elfe", level:0, tags:["libre","personnel"], atk:"\u2014", dmg:"\u2014",
+        effect:"Relance un jet d\u2019attaque que tu viens d\u2019effectuer. Garde le second r\u00e9sultat m\u00eame s\u2019il est inf\u00e9rieur." }
+    ], promptEn:"elf" },
+
+  "Demi-Elfe": {
+    stats:{con:2,cha:2}, speed:6, vision:"Basse-lumi\u00e8re", bonusDef:"Vol+1",
+    features:["Diplomatie de Groupe (alliés +1 atk vs 1\u00e8re cible attaqu\u00e9e)","At-will suppl\u00e9mentaire d\u2019une autre classe","Pr\u00e9sence F\u00e9y\u00e9rique (pouvoir racial)"],
+    racialPowers:[
+      { name:"Pr\u00e9sence F\u00e9y\u00e9rique", nameEn:"Knack for Success (PHB1 p.43)", type:"Par rencontre \u00b7 Racial \u00b7 Demi-Elfe", level:0, tags:["mineure","alli\u00e9 dans 5"], atk:"\u2014", dmg:"\u2014",
+        effect:"Un alli\u00e9 dans 5 cases choisit l\u2019un de ces effets : +2 aux jets d\u2019attaque jusqu\u2019\u00e0 la fin de son tour \u2014 OU \u2014 se d\u00e9place de 2 cases sans PdO (action libre)." }
+    ], promptEn:"half-elf" },
+
+  "Nain": {
+    stats:{con:2,sag:2}, speed:5, vision:"Basse-lumi\u00e8re", bonusDef:"Vig+2",
+    features:["Endurance Naine (Surge gratuit 1\u00d7/rencontre)","Stabilit\u00e9 (+2 vs bousculade)"],
+    racialPowers:[
+      { name:"Endurance Naine", nameEn:"Dwarven Resilience (PHB1 p.37)", type:"Par rencontre \u00b7 Racial \u00b7 Nain", level:0, tags:["mineure","personnel"], atk:"\u2014", dmg:"\u2014",
+        effect:"D\u00e9pense un Surge de soin et r\u00e9cup\u00e8re des PV \u00e9gaux \u00e0 ta Valeur de Surge. (Action mineure \u2014 plus souple que Second Souffle.)" }
+    ], promptEn:"dwarf" },
+
+  "Halfelin": {
+    stats:{dex:2,cha:2}, speed:6, vision:"Norm", bonusDef:"R\u00e9f+1,Vol+1",
+    features:["Audace Halfeline (+2 saves vs Effray\u00e9)","Seconde Chance (pouvoir racial)"],
+    racialPowers:[
+      { name:"Seconde Chance", nameEn:"Second Chance (PHB1 p.44)", type:"Par rencontre \u00b7 Racial \u00b7 Halfelin", level:0, tags:["\u00e9action imm\u00e9diate","personnel"], atk:"\u2014", dmg:"\u2014",
+        effect:"D\u00e9clencheur : un ennemi te touche. Force cet ennemi \u00e0 relancer son jet d\u2019attaque. Il doit garder le second r\u00e9sultat m\u00eame s\u2019il est inf\u00e9rieur." }
+    ], promptEn:"halfling" },
+
+  "Gnome": {
+    stats:{int:2,cha:2}, speed:5, vision:"Vision dans le noir", bonusDef:"R\u00e9f+1,Vol+1",
+    features:["Disparition Illusoire (invisible 1\u00d7/rencontre)","Magie Naturelle (Illusion au toucher)"],
+    racialPowers:[
+      { name:"Disparition Illusoire", nameEn:"Fade Away (PHB2 p.10)", type:"Par rencontre \u00b7 Racial \u00b7 Gnome", level:0, tags:["imm\u00e9diate","personnel"], atk:"\u2014", dmg:"\u2014",
+        effect:"D\u00e9clencheur : tu subis des d\u00e9g\u00e2ts. Deviens Invisible jusqu\u2019\u00e0 la fin de ton prochain tour. L\u2019invisibilit\u00e9 s\u2019annule si tu attaques ou forces une cr\u00e9ature." }
+    ], promptEn:"gnome" },
+
+  "Tieflin": {
+    stats:{int:2,cha:2}, speed:6, vision:"Vision dans le noir", bonusDef:"R\u00e9f+1,Vol+1",
+    features:["R\u00e9sistance Infernale (feu 5+\u00bdniv)","Ch\u00e2timent Infernal (pouvoir racial)"],
+    racialPowers:[
+      { name:"Ch\u00e2timent Infernal", nameEn:"Infernal Wrath (PHB1 p.48)", type:"Par rencontre \u00b7 Racial \u00b7 Tieflin", level:0, tags:["mineure","personnel"], atk:"\u2014", dmg:"\u2014",
+        effect:"D\u00e9clencheur : une cr\u00e9ature t\u2019a touch\u00e9 ce tour. Ajoute +1d6+mod CHA en d\u00e9g\u00e2ts de feu \u00e0 ta prochaine attaque contre cette cr\u00e9ature avant la fin de ton prochain tour." }
+    ], promptEn:"tiefling" },
+
+  "Dragon\u00e9": {
+    stats:{for:2,cha:2}, speed:6, vision:"Basse-lumi\u00e8re", bonusDef:"Vig+2",
+    features:["Souffle du Dragon (explosion 3, 1\u00d7/rencontre)","H\u00e9ritage Draconique (+1 atk Vigueur quand bless\u00e9)"],
+    racialPowers:[
+      { name:"Souffle du Dragon", nameEn:"Dragon Breath (PHB1 p.35)", type:"Par rencontre \u00b7 Racial \u00b7 Dragon\u00e9", level:0, tags:["standard","explosion rapproch\u00e9e 3"], atk:"+\u00bdNIV+FOR ou CON vs R\u00e9flexes", dmg:"1d6+CON ou FOR",
+        effect:"Type de d\u00e9g\u00e2ts selon ton h\u00e9ritage draconique (acide/froid/feu/foudre/poison/etc.). Toutes les cr\u00e9atures dans l\u2019explosion sont cibl\u00e9es." }
+    ], promptEn:"dragonborn" },
+
+  "Demi-Orc": {
+    stats:{for:2,dex:2}, speed:6, vision:"Basse-lumi\u00e8re", bonusDef:"R\u00e9f+1",
+    features:["Vitesse Bestiale (+2 vitesse 1\u00d7/rencontre)","Assault \u00c9clair (+1d10 si d\u00e9placement avant attaque)"],
+    racialPowers:[
+      { name:"Vitesse Bestiale", nameEn:"Swift Charge (PHB2 p.14)", type:"Par rencontre \u00b7 Racial \u00b7 Demi-Orc", level:0, tags:["libre","personnel"], atk:"\u2014", dmg:"\u2014",
+        effect:"D\u00e9clencheur : tu effectues une charge. +2 \u00e0 ta vitesse jusqu\u2019\u00e0 la fin du mouvement de charge. Tu gagnes Combat Advantage contre la cible de la charge jusqu\u2019\u00e0 la fin de ton prochain tour." }
+    ], promptEn:"half-orc" },
+
+  "Goliath": {
+    stats:{for:2,con:2}, speed:6, vision:"Norm", bonusDef:"Vig+1",
+    features:["R\u00e9silience de Pierre (r\u00e9sistance temp 1\u00d7/rencontre)","Stature Imposante (port\u00e9e m\u00eale\u00e9 +1)"],
+    racialPowers:[
+      { name:"R\u00e9silience de Pierre", nameEn:"Stone\u2019s Endurance (PHB2 p.14)", type:"Par rencontre \u00b7 Racial \u00b7 Goliath", level:0, tags:["mineure","personnel"], atk:"\u2014", dmg:"\u2014",
+        effect:"R\u00e9sistance 5 \u00e0 tous les d\u00e9g\u00e2ts jusqu\u2019\u00e0 la fin de ton prochain tour. (Si tu es de Niveau 11+, r\u00e9sistance 10. Si Niveau 21+, r\u00e9sistance 15.)" }
+    ], promptEn:"goliath" },
+
+  "Githez\u00e9ra\u00ef": {
+    stats:{sag:2,dex:2}, speed:6, vision:"Norm", bonusDef:"R\u00e9f+1,Vol+2",
+    features:["D\u00e9fenses Mentales (+2 saves \u00e9tourdissement)","Flash de T\u00e9l\u00e9pathie (t\u00e9l\u00e9portation 3 hors-tour)"],
+    racialPowers:[
+      { name:"Esprit de Fer", nameEn:"Iron Mind (PHB2 p.10)", type:"Par rencontre \u00b7 Racial \u00b7 Githez\u00e9ra\u00ef", level:0, tags:["imm\u00e9diate","personnel"], atk:"\u2014", dmg:"\u2014",
+        effect:"D\u00e9clencheur : tu serais \u00c9tourdi, Sonni ou Domin\u00e9. Effectue un jet de sauvegarde contre cet effet imm\u00e9diatement (avant qu\u2019il prenne effet). En cas de succ\u00e8s, l\u2019effet est annul\u00e9." }
+    ], promptEn:"githzerai" },
+
+  "Kalashtar": {
+    stats:{sag:2,cha:2}, speed:6, vision:"Norm", bonusDef:"Vol+2",
+    features:["Barri\u00e8re Mentale (+2 vs psionique/charme)","Double \u00c2me (+1 save fin de tour)"],
+    racialPowers:[
+      { name:"Clart\u00e9 Mentale", nameEn:"Bastion of Mental Clarity (EPG p.15)", type:"Par rencontre \u00b7 Racial \u00b7 Kalashtar", level:0, tags:["imm\u00e9diate","personnel"], atk:"\u2014", dmg:"\u2014",
+        effect:"D\u00e9clencheur : tu subirais un effet psionique, de charme ou de domination. +5 \u00e0 toutes tes d\u00e9fenses jusqu\u2019\u00e0 la fin de ton prochain tour." }
+    ], promptEn:"kalashtar" },
+
+  "Revenant": {
+    stats:{dex:2,con:2}, speed:6, vision:"Vision dans le noir", bonusDef:"Vol+1,Vig+1",
+    features:["Forme Fantomale (invisible dans obscurit\u00e9)","R\u00e9surrection Funeste (pouvoir racial)"],
+    racialPowers:[
+      { name:"R\u00e9surrection Funeste", nameEn:"Dark Reaping (Dragon 376 p.28)", type:"Par rencontre \u00b7 Racial \u00b7 Revenant", level:0, tags:["libre","personnel"], atk:"\u2014", dmg:"\u2014",
+        effect:"D\u00e9clencheur : tu tombes \u00e0 0 PV ou moins. R\u00e9cup\u00e8re des PV \u00e9gaux \u00e0 ta Valeur de Surge sans d\u00e9penser de Surge. Tu restes debout avec ces PV." }
+    ], promptEn:"revenant undead" },
+
+  "Changeling": {
+    stats:{dex:2,cha:2}, speed:6, vision:"Norm", bonusDef:"R\u00e9f+1,Vol+1",
+    features:["Imitation (changer apparence \u00e0 volont\u00e9)","Infiltration Mentale (+5 Persuasion vs cibles dupliqu\u00e9es)"],
+    racialPowers:[
+      { name:"Ruse du Changeling", nameEn:"Changeling Trick (EPG p.12)", type:"Par rencontre \u00b7 Racial \u00b7 Changeling", level:0, tags:["mineure","alli\u00e9 ou ennemi dans 2"], atk:"\u2014", dmg:"\u2014",
+        effect:"Cible un alli\u00e9 adjacent ou un ennemi dans 2 cases. Si alli\u00e9 : \u00e9changes vos apparences (illusion) et l\u2019ennemi le plus proche perd Combat Advantage contre lui jusqu\u2019\u00e0 fin du tour. Si ennemi : Distracted jusqu\u2019\u00e0 fin de ton prochain tour (\u22122 jets d\u2019attaque)." }
+    ], promptEn:"changeling shapeshifter" },
+
+  "Shifter (Bestial)": {
+    stats:{for:2,con:2}, speed:7, vision:"Basse-lumi\u00e8re", bonusDef:"Vig+1",
+    features:["Forme Bestiale (vitesse+2 & Vig+2 1\u00d7/rencontre)"],
+    racialPowers:[
+      { name:"Forme Bestiale", nameEn:"Longtooth Shifting (PHB2 p.16)", type:"Par rencontre \u00b7 Racial \u00b7 Shifter", level:0, tags:["mineure","personnel"], atk:"\u2014", dmg:"\u2014",
+        effect:"Jusqu\u2019\u00e0 la fin de la rencontre : +2 \u00e0 la vitesse, +2 \u00e0 Vigueur, et quand tu r\u00e9duis un ennemi \u00e0 0 PV tu r\u00e9g\u00e9n\u00e8res 2 PV par niveau au d\u00e9but de chaque tour. (Disponible seulement quand tu es Bless\u00e9 ou moins.)" }
+    ], promptEn:"shifter bestial lycanthrope" },
+
+  "Minotaure": {
+    stats:{for:2,con:2}, speed:6, vision:"Norm", bonusDef:"Vig+2",
+    features:["Charge du Minotaure (+1d6 \u00e0 la premi\u00e8re charge)","M\u00e9moire des Labyrinthes"],
+    racialPowers:[
+      { name:"Charge du Minotaure", nameEn:"Goring Charge (PHB2 p.12)", type:"Par rencontre \u00b7 Racial \u00b7 Minotaure", level:0, tags:["standard","m\u00eale\u00e9"], atk:"+\u00bdNIV+FOR vs CA", dmg:"1d6+FOR",
+        effect:"Effectue une charge. \u00c0 la place de l\u2019Attaque de Base, tu effectues cette attaque. Si elle touche : la cible est repouss\u00e9e de 1 case et tombe \u00e0 terre. La cible est \u00e9galement Marqu\u00e9e jusqu\u2019\u00e0 la fin de ton prochain tour." }
+    ], promptEn:"minotaur" },
+
+  "Deva (Bassin de Vie)": {
+    stats:{sag:2,int:2}, speed:6, vision:"Norm", bonusDef:"Vol+2",
+    features:["M\u00e9moire des Vies Pass\u00e9es (+1d6 \u00e0 n\u2019importe quel jet 1\u00d7/rencontre)","Radiance Immortelle (r\u00e9sistance radiant 5+\u00bdniv)"],
+    racialPowers:[
+      { name:"M\u00e9moire des Vies Pass\u00e9es", nameEn:"Memory of a Thousand Lifetimes (PHB2 p.9)", type:"Par rencontre \u00b7 Racial \u00b7 Deva", level:0, tags:["libre","personnel"], atk:"\u2014", dmg:"\u2014",
+        effect:"D\u00e9clencheur : tu effectues un jet d20 (attaque, comp\u00e9tence, sauvegarde). Ajoute 1d6 au r\u00e9sultat. S\u2019applique apr\u00e8s avoir vu le d\u00e9 mais avant de savoir si tu r\u00e9ussis." }
+    ], promptEn:"deva angel divine" },
+
+  "R\u00e9sonnant": {
+    stats:{con:2,int:2}, speed:6, vision:"Basse-lumi\u00e8re", bonusDef:"Vig+1",
+    features:["Infatigable (pas besoin manger/dormir)","Correction R\u00e9sonante (r\u00e9duction d\u00e9g\u00e2ts 1)"],
+    racialPowers:[
+      { name:"R\u00e9solution R\u00e9sonante", nameEn:"Warforged Resolve (PHB2 p.19)", type:"Par rencontre \u00b7 Racial \u00b7 R\u00e9sonnant", level:0, tags:["mineure","personnel"], atk:"\u2014", dmg:"\u2014",
+        effect:"R\u00e9cup\u00e8re PV = \u00bdniv + mod CON. R\u00e9sistance 2 \u00e0 tous les d\u00e9g\u00e2ts jusqu\u2019\u00e0 la fin de ton prochain tour. Pendant cet effet, tu n\u2019es pas Mis hors de combat par les d\u00e9g\u00e2ts continus." }
+    ], promptEn:"warforged construct resonant mechanical" },
+
+  "Warforged (M\u00e9canique)": {
+    stats:{con:2,for:2}, speed:5, vision:"Basse-lumi\u00e8re", bonusDef:"Vig+2",
+    features:["Armure Int\u00e9gr\u00e9e (+1 CA permanent)","R\u00e9paration M\u00e9canique (Metier au lieu de M\u00e9decine)"],
+    racialPowers:[
+      { name:"R\u00e9solution M\u00e9canique", nameEn:"Warforged Resolve (PHB2 p.19)", type:"Par rencontre \u00b7 Racial \u00b7 Warforged", level:0, tags:["mineure","personnel"], atk:"\u2014", dmg:"\u2014",
+        effect:"R\u00e9cup\u00e8re PV = \u00bdniv + mod CON. R\u00e9sistance 2 \u00e0 tous les d\u00e9g\u00e2ts jusqu\u2019\u00e0 la fin de ton prochain tour. Pendant cet effet, tu n\u2019es pas Mis hors de combat par les d\u00e9g\u00e2ts continus." }
+    ], promptEn:"warforged mechanical construct" },
 };
+
 
 function recallRaceToast() {
   const val = document.getElementById("race")?.value?.trim();
@@ -3710,7 +3843,9 @@ function closePicker(type) {
 
 function buildPickerContent(type) {
   var className = document.getElementById("classe") ? document.getElementById("classe").value.trim() : "";
+  var raceName  = document.getElementById("race")   ? document.getElementById("race").value.trim()   : "";
   var cd = className ? CLASS_DATA[className] : null;
+  var rd = raceName  ? RACE_DATA[raceName]   : null;
   var allPowers = cd && cd.powers && cd.powers[type] ? cd.powers[type] : [];
   var niveau = parseInt(document.getElementById("niveau") ? document.getElementById("niveau").value : "1") || 1;
   var typeLabels = { atwill:"À volonté", encounter:"Par rencontre", daily:"Quotidien", utility:"Utilitaire" };
@@ -3718,9 +3853,10 @@ function buildPickerContent(type) {
   var filteredPowers = allPowers.filter(function(p){ return (p.level||1) <= levelGate[type]; });
   var lockedPowers   = allPowers.filter(function(p){ return (p.level||1) > levelGate[type]; });
 
+  // Class tab
   var classTab = "";
   if (allPowers.length > 0) {
-    var rows = filteredPowers.map(function(p, i) {
+    var rows = filteredPowers.map(function(p) {
       var realIdx = allPowers.indexOf(p);
       var enSub = p.nameEn ? "<div class='picker-power-sub'>"+p.nameEn+"</div>" : "";
       var atkSub = p.atk && p.atk !== "—" ? "<div class='picker-power-sub'>"+p.atk+" · "+(p.dmg||"—")+"</div>" : "";
@@ -3732,18 +3868,52 @@ function buildPickerContent(type) {
     var lockNote = lockedPowers.length > 0 ? "<div style='font-size:9px;color:#666;margin:4px 0 2px;padding:4px 6px;border-top:1px solid #2a2a3e;'>"+lockedPowers.length+" pouvoir(s) verrouillé(s)</div>" : "";
     classTab = "<div id='pickerClassList-"+type+"' class='picker-class-list'>"+rows+lockNote+lockedRows+"</div>";
   } else {
-    classTab = "<div class='picker-no-class'>"+(cd ? "Aucun pouvoir de ce type." : "Sélectionne d’abord une classe.")+"</div>";
+    classTab = "<div class='picker-no-class'>"+(cd ? "Aucun pouvoir de ce type." : "Sélectionne d'abord une classe.")+"</div>";
   }
+
+  // Racial tab (shown in encounter picker + utility picker)
+  var racialTabBtn = "";
+  var racialTabBody = "";
+  var racialPowers = (rd && rd.racialPowers) ? rd.racialPowers : [];
+  if (racialPowers.length > 0) {
+    var racialRows = racialPowers.map(function(p, i) {
+      var enSub = p.nameEn ? "<div class='picker-power-sub' style='color:#5a9f7a;'>"+p.nameEn+"</div>" : "";
+      var atkSub = p.atk && p.atk !== "—" ? "<div class='picker-power-sub'>"+p.atk+" · "+(p.dmg||"—")+"</div>" : "";
+      return "<div class='picker-power-option' onclick='addRacialPower(\""+type+"\","+i+")' style='border-left:3px solid #5a9f7a;'>"
+        +"<div class='picker-power-lvl' style='color:#5a9f7a;'>🧬</div>"
+        +"<div class='picker-power-info'><div class='picker-power-name' style='color:#70e0a0;'>"+p.name+"</div>"+enSub+atkSub+"</div></div>";
+    }).join("");
+    racialTabBtn  = "<button class='picker-tab' id='ptab-racial-"+type+"' onclick=\"switchPickerTab('"+type+"','racial')\">🧬 "+raceName+"</button>";
+    racialTabBody = "<div id='pickerBody-racial-"+type+"' style='display:none;'>"
+      +"<div style='font-size:9px;color:#5a9f7a;padding:4px 6px;margin-bottom:4px;background:#0a1a12;border-radius:4px;'>Pouvoirs raciaux de "+raceName+" — s'ajoutent dans la colonne "+typeLabels[type]+"</div>"
+      +racialRows+"</div>";
+  }
+
   var levelBadge = type !== "atwill" ? "<span style='font-size:9px;color:#888;margin-left:6px;'>· Niv. max : "+niveau+"</span>" : "";
   return "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;'>"
     +"<span style='font-size:10px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:1px;'>Ajouter "+typeLabels[type]+" "+levelBadge+"</span>"
     +"<button class='picker-close' onclick=\"closePicker('"+type+"')\">✕</button></div>"
     +"<div class='picker-tabs'>"
     +"<button class='picker-tab active' id='ptab-class-"+type+"' onclick=\"switchPickerTab('"+type+"','class')\">📖 Classe"+(className?" — "+className:"")+"</button>"
+    +racialTabBtn
     +"<button class='picker-tab' id='ptab-blank-"+type+"' onclick=\"switchPickerTab('"+type+"','blank')\">✏️ Vierge</button></div>"
     +"<div id='pickerBody-class-"+type+"'>"+classTab+"</div>"
+    +racialTabBody
     +"<div id='pickerBody-blank-"+type+"' style='display:none;'>"
     +"<button class='picker-blank-btn' onclick=\"addBlankPower('"+type+"');closePicker('"+type+"')\">+ Créer une carte vierge</button></div>";
+}
+
+function addRacialPower(type, idx) {
+  var raceName = document.getElementById("race")?.value?.trim();
+  var rd = raceName ? RACE_DATA[raceName] : null;
+  var p = rd?.racialPowers?.[idx];
+  if (!p) return;
+  var container = document.getElementById("powers-" + type);
+  if (!container) return;
+  var id = type + "_racial_" + Date.now();
+  container.appendChild(createPowerCard(id, "encounter", p));
+  closePicker(type);
+  autoSave();
 }
 
 function switchPickerTab(type, tab) {
