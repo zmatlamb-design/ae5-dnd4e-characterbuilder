@@ -8191,17 +8191,23 @@ function buildPortraitPrompt() {
 
   // Map class to English concept for better results
   const classMap = {
-    'Paladin':'paladin holy warrior','Clerc (Prêtre)':'cleric priest divine','Avenger (Vengeur)':'avenger assassin divine',
-    'Guerrier (Fighter)':'fighter warrior','Rôdeur (Ranger)':'ranger archer scout','Voleur (Rogue)':'rogue thief shadow',
-    'Magicien (Wizard)':'wizard mage arcane','Sorcier (Warlock)':'warlock dark pact','Barde':'bard performer',
-    'Druide':'druid nature shapeshifter','Warden':'warden nature guardian','Armaturge':'artificer mechanical resonant armor',
-    'Barbare':'barbarian rage','Moine (Monk)':'monk psionic martial artist','Psion':'psion psionic mind',
+    'Paladin':'paladin holy warrior','Clerc (Prêtre)':'cleric priest divine','Avenger (Vengeur)':'avenger divine assassin',
+    'Invocateur (Invoker)':'invoker divine arcanist','Rune-Prêtre (Runepriest)':'rune priest runic armor',
+    'Guerrier (Fighter)':'fighter warrior plate armor','Rôdeur (Ranger)':'ranger archer scout','Voleur (Rogue)':'rogue thief shadow',
+    'Warlord':'warlord commander warrior','Barbare (Barbarian)':'barbarian berserker rage',
+    'Magicien (Wizard)':'wizard mage arcane robes','Sorcier (Warlock)':'warlock dark pact eldritch',
+    'Ensorceleur (Sorcerer)':'sorcerer wild magic arcane','Barde':'bard performer arcane',
+    'Druide':'druid nature shapeshifter','Warden (Gardien)':'warden nature guardian','Chaman (Shaman)':'shaman spirit totem primal',
+    'Chercheur (Seeker)':'seeker archer primal nature','Armaturge':'artificer construct resonant armor',
+    'Chantelame (Bladesinger)':'bladesinger elf arcane sword','Seigneur des Lames (Swordmage)':'swordmage arcane blade defender',
+    'Ardent (Ardent)':'ardent psionic empath','Battlemind':'battlemind psionic warrior','Moine (Monk)':'monk psionic martial artist',
+    'Psion':'psion psionic mage crystals','Guerrier Inébranlable [PHB1]':'fighter stalwart defender warrior',
   };
   const classeEn = classMap[classe] || classe.toLowerCase().replace(/\(.*\)/,'').trim();
 
   const extra = document.getElementById('portraitPromptExtra')?.value || '';
   const genre = document.getElementById('genre')?.value || '';
-  const genreEn = genre === 'F' ? 'female woman' : genre === 'A' ? 'androgynous nonbinary' : 'male man';
+  const genreEn = genre === 'F' ? 'female' : genre === 'A' ? 'androgynous nonbinary' : 'male';
   const culture = document.getElementById('culture')?.value?.trim() || '';
   const bd = (typeof BASTION_DATA !== 'undefined') ? BASTION_DATA[culture] : null;
   const bastionStyle = bd ? bd.promptEn : '';
