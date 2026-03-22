@@ -4658,23 +4658,27 @@ if ('serviceWorker' in navigator && location.protocol !== 'blob:' && !location.h
   <!-- PERCHANCE TAB -->
   <div id="portraitTabPerc" style="display:none;padding:12px;">
     <div style="background:#0a0a14;border:1px solid #2a2a3e;border-radius:8px;padding:10px;margin-bottom:10px;text-align:left;">
-      <div style="font-size:10px;color:#888;margin-bottom:5px;">📋 Prompt généré — colle-le dans Perchance ci-dessous :</div>
+      <div style="font-size:10px;color:#888;margin-bottom:5px;">📋 Prompt généré — copie-le et colle-le dans Perchance :</div>
       <div style="display:flex;gap:6px;align-items:flex-start;">
         <textarea id="percPromptDisplay" readonly rows="3" style="flex:1;background:#050510;border:1px solid #333;border-radius:5px;color:#aaa;font-size:10px;padding:5px;font-family:monospace;resize:none;"></textarea>
         <button onclick="copyPercPrompt()" id="percCopyBtn" style="padding:5px 10px;border:1px solid #c9a260;border-radius:5px;background:none;color:#c9a260;font-size:10px;cursor:pointer;white-space:nowrap;">📋 Copier</button>
       </div>
     </div>
-    <div style="font-size:10px;color:#5a9f7a;margin-bottom:8px;padding:6px 10px;background:#0a1a12;border-radius:6px;border:1px solid #1a3020;">
-      💡 Colle le prompt dans le champ texte Perchance, puis génère ton image directement dans le générateur ci-dessous.
+    <div style="padding:14px 0;display:flex;flex-direction:column;gap:8px;align-items:center;">
+      <button onclick="openPerchanceTab()" style="width:100%;max-width:320px;padding:10px 0;background:#7b5ea7;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.3px;">
+        🎲 Ouvrir Perchance.org dans un onglet
+      </button>
+      <div style="font-size:10px;color:#555;text-align:center;">Perchance.org bloque l'intégration directe (X-Frame-Options).<br>Le prompt est copié — colle-le dans le générateur Perchance.</div>
     </div>
-    <div style="border-radius:8px;overflow:hidden;border:1px solid #222;background:#000;">
-      <iframe id="perchanceIframe"
-        src="about:blank"
-        style="width:100%;height:480px;border:none;display:block;"
-        allow="clipboard-read; clipboard-write">
-      </iframe>
+    <div style="margin-top:8px;padding:10px;background:#0a1020;border:1px solid #1a2040;border-radius:8px;">
+      <div style="font-size:10px;color:#6a9fd8;font-weight:700;margin-bottom:6px;">⚡ Stable Horde — Gratuit, communautaire, sans compte</div>
+      <div style="font-size:10px;color:#666;margin-bottom:10px;">GPU communautaire · Plus lent mais aucun rate limit · Résultats variables</div>
+      <div id="hordeImgWrap" style="min-height:80px;background:#050510;border-radius:6px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
+        <span style="font-size:10px;color:#444;">Clique Générer pour lancer</span>
+      </div>
+      <button onclick="generateHorde()" style="width:100%;padding:8px 0;background:#1a3050;border:1px solid #6a9fd8;border-radius:6px;color:#6a9fd8;font-size:11px;font-weight:700;cursor:pointer;">⚡ Générer via Stable Horde</button>
     </div>
-    <div style="font-size:9px;color:#444;margin-top:6px;">Perchance.org · Gratuit · Aucun compte · Images haute qualité</div>
+    <div style="font-size:9px;color:#444;margin-top:8px;">Perchance.org · Stable Horde · Gratuit · Sans compte</div>
   </div>
 
 </div>
@@ -4951,6 +4955,106 @@ function copyPercPrompt() {
     if (btn) { const old = btn.textContent; btn.textContent = "✅ Copié!"; setTimeout(()=>{ btn.textContent = old; }, 2000); }
   }
 }
+
+function openPerchanceTab() {
+  // Copy prompt then open Perchance
+  copyPercPrompt();
+  window.open("https://perchance.org/ai-text-to-image-generator", "_blank");
+}
+
+// ── STABLE HORDE generator ─────────────────────────
+// Free community-run Stable Diffusion API — no account needed
+
+function generateHorde() {
+  const wrap = document.getElementById("hordeImgWrap");
+  const prompt = buildPortraitPromptRaw();
+  let elapsed = 0;
+  let pollTimer;
+
+  const setStatus = (html) => { wrap.innerHTML = `<div style="padding:8px;font-size:10px;color:#888;text-align:center;">${html}</div>`; };
+  setStatus("⚡ Envoi de la requête à Stable Horde...");
+
+  fetch("https://stablehorde.net/api/v2/generate/async", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": "0000000000",
+      "Client-Agent": "AE5-CharacterSheet:1.0:github"
+    },
+    body: JSON.stringify({
+      prompt: prompt,
+      params: {
+        sampler_name: "k_euler_a",
+        steps: 25,
+        width: 512,
+        height: 512,
+        n: 1,
+        cfg_scale: 7.5
+      },
+      models: ["Deliberate"],
+      r2: true,
+      nsfw: false,
+      shared: false
+    })
+  })
+  .then(r => {
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return r.json();
+  })
+  .then(data => {
+    if (!data.id) throw new Error("Pas d'ID reçu : " + JSON.stringify(data));
+    const jobId = data.id;
+    setStatus("⏳ En attente dans la file… (peut prendre 1–5 min pour utilisateurs anonymes)");
+
+    pollTimer = setInterval(() => {
+      elapsed += 5;
+      fetch(`https://stablehorde.net/api/v2/generate/check/${jobId}`)
+        .then(r => r.json())
+        .then(check => {
+          if (check.faulted) {
+            clearInterval(pollTimer);
+            setStatus("❌ Génération échouée côté Horde. Réessaie.");
+            return;
+          }
+          if (check.done) {
+            clearInterval(pollTimer);
+            setStatus("📥 Récupération de l'image...");
+            return fetch(`https://stablehorde.net/api/v2/generate/status/${jobId}`)
+              .then(r => r.json())
+              .then(result => {
+                const gen = result.generations?.[0];
+                if (!gen) { setStatus("❌ Aucune image retournée."); return; }
+                const imgUrl = gen.img;
+                wrap.innerHTML = "";
+                const img = document.createElement("img");
+                img.style.cssText = "width:100%;height:auto;border-radius:6px;display:block;";
+                img.src = imgUrl;
+                img.onload = () => { wrap.innerHTML = ""; wrap.appendChild(img); };
+                img.onerror = () => {
+                  wrap.innerHTML = `<div style="padding:8px;font-size:10px;text-align:center;">
+                    <a href="${imgUrl}" target="_blank" style="color:#6a9fd8;">🔗 Voir l'image générée</a></div>`;
+                };
+                // Download button
+                const dlBtn = document.createElement("button");
+                dlBtn.textContent = "⬇ Télécharger";
+                dlBtn.style.cssText = "margin-top:6px;width:100%;padding:6px;background:none;border:1px solid #6a9fd8;border-radius:5px;color:#6a9fd8;font-size:10px;cursor:pointer;";
+                dlBtn.onclick = () => window.open(imgUrl, "_blank");
+                wrap.appendChild(dlBtn);
+              });
+          }
+          // Still waiting
+          const pos = check.queue_position || "?";
+          const wait = check.wait_time ? Math.round(check.wait_time) + "s" : "?";
+          setStatus(`⏳ File: position ${pos} · attente estimée ${wait} · ${elapsed}s écoulées`);
+        })
+        .catch(e => setStatus("⚠ Erreur polling: " + e.message));
+    }, 5000); // poll every 5 seconds
+  })
+  .catch(err => {
+    setStatus("❌ Erreur Stable Horde : " + err.message);
+  });
+}
+
 
 // Raw (non-encoded) version of the prompt for display
 function buildPortraitPromptRaw() {
