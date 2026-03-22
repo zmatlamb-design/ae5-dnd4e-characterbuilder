@@ -4629,21 +4629,54 @@ if ('serviceWorker' in navigator && location.protocol !== 'blob:' && !location.h
 </div>
 
 <!-- ═══════════════ PORTRAIT IA MODAL ═══════════════ -->
-<div id="portraitOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:10001;display:none;align-items:center;justify-content:center;flex-direction:column;">
-<div style="background:#12121e;border:1px solid #c9a260;border-radius:12px;padding:20px;max-width:500px;width:90%;text-align:center;">
-  <div style="font-weight:700;color:#c9a260;margin-bottom:12px;font-size:14px;">🎨 Portrait du Personnage</div>
-  <div id="portraitImgWrap" style="min-height:300px;background:#0a0a14;border-radius:8px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-    <div id="portraitStatus" style="color:#888;font-size:12px;">Génération en cours...</div>
+<div id="portraitOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:10001;align-items:center;justify-content:center;flex-direction:column;padding:10px;">
+<div style="background:#12121e;border:1px solid #c9a260;border-radius:12px;max-width:560px;width:100%;text-align:center;overflow:hidden;">
+
+  <!-- Portrait header with source tabs -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#0a0a14;border-bottom:1px solid #222;">
+    <div style="font-weight:700;color:#c9a260;font-size:13px;">🎨 Portrait du Personnage</div>
+    <div style="display:flex;gap:6px;">
+      <button id="ptabPoll" onclick="switchPortraitTab('pollinations')" style="padding:3px 10px;border:1px solid #c9a260;border-radius:5px;background:#c9a260;color:#12121e;font-size:10px;font-weight:700;cursor:pointer;">✨ Pollinations</button>
+      <button id="ptabPerc" onclick="switchPortraitTab('perchance')" style="padding:3px 10px;border:1px solid #444;border-radius:5px;background:none;color:#888;font-size:10px;cursor:pointer;">🎲 Perchance</button>
+      <button onclick="closePortrait()" style="padding:3px 8px;border:1px solid #333;border-radius:5px;background:none;color:#666;font-size:11px;cursor:pointer;">✕</button>
+    </div>
   </div>
-  <div style="margin-bottom:10px;">
-    <textarea id="portraitPromptExtra" rows="2" placeholder="Détails supplémentaires (ex: cheveux rouges, cicatrice, capuche noire...)" style="width:100%;background:#0a0a14;border:1px solid #333;border-radius:6px;color:#ccc;font-size:11px;padding:6px;font-family:inherit;resize:none;box-sizing:border-box;"></textarea>
+
+  <!-- POLLINATIONS TAB -->
+  <div id="portraitTabPoll" style="padding:16px;">
+    <div id="portraitImgWrap" style="min-height:280px;background:#0a0a14;border-radius:8px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+      <div id="portraitStatus" style="color:#888;font-size:12px;">Génération en cours...</div>
+    </div>
+    <textarea id="portraitPromptExtra" rows="2" placeholder="Détails supplémentaires (ex: cheveux rouges, cicatrice, capuche noire...)" style="width:100%;background:#0a0a14;border:1px solid #333;border-radius:6px;color:#ccc;font-size:11px;padding:6px;font-family:inherit;resize:none;box-sizing:border-box;margin-bottom:10px;"></textarea>
+    <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+      <button onclick="generatePortrait()" style="background:#c9a260;border:none;color:#12121e;border-radius:6px;padding:7px 14px;cursor:pointer;font-size:11px;font-weight:700;">🔄 Regénérer</button>
+      <button onclick="downloadPortrait()" style="background:none;border:1px solid #c9a260;color:#c9a260;border-radius:6px;padding:7px 14px;cursor:pointer;font-size:11px;">⬇ Télécharger</button>
+    </div>
+    <div style="font-size:9px;color:#444;margin-top:8px;">Pollinations.ai · Gratuit · Sans compte · Peut être lent</div>
   </div>
-  <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-    <button onclick="generatePortrait()" style="background:#c9a260;border:none;color:#12121e;border-radius:6px;padding:8px 16px;cursor:pointer;font-size:12px;font-weight:700;">🔄 Regénérer</button>
-    <button onclick="downloadPortrait()" style="background:none;border:1px solid #c9a260;color:#c9a260;border-radius:6px;padding:8px 16px;cursor:pointer;font-size:12px;">⬇ Télécharger</button>
-    <button onclick="closePortrait()" style="background:none;border:1px solid #444;color:#888;border-radius:6px;padding:8px 16px;cursor:pointer;font-size:12px;">Fermer</button>
+
+  <!-- PERCHANCE TAB -->
+  <div id="portraitTabPerc" style="display:none;padding:12px;">
+    <div style="background:#0a0a14;border:1px solid #2a2a3e;border-radius:8px;padding:10px;margin-bottom:10px;text-align:left;">
+      <div style="font-size:10px;color:#888;margin-bottom:5px;">📋 Prompt généré — colle-le dans Perchance ci-dessous :</div>
+      <div style="display:flex;gap:6px;align-items:flex-start;">
+        <textarea id="percPromptDisplay" readonly rows="3" style="flex:1;background:#050510;border:1px solid #333;border-radius:5px;color:#aaa;font-size:10px;padding:5px;font-family:monospace;resize:none;"></textarea>
+        <button onclick="copyPercPrompt()" id="percCopyBtn" style="padding:5px 10px;border:1px solid #c9a260;border-radius:5px;background:none;color:#c9a260;font-size:10px;cursor:pointer;white-space:nowrap;">📋 Copier</button>
+      </div>
+    </div>
+    <div style="font-size:10px;color:#5a9f7a;margin-bottom:8px;padding:6px 10px;background:#0a1a12;border-radius:6px;border:1px solid #1a3020;">
+      💡 Colle le prompt dans le champ texte Perchance, puis génère ton image directement dans le générateur ci-dessous.
+    </div>
+    <div style="border-radius:8px;overflow:hidden;border:1px solid #222;background:#000;">
+      <iframe id="perchanceIframe"
+        src="about:blank"
+        style="width:100%;height:480px;border:none;display:block;"
+        allow="clipboard-read; clipboard-write">
+      </iframe>
+    </div>
+    <div style="font-size:9px;color:#444;margin-top:6px;">Perchance.org · Gratuit · Aucun compte · Images haute qualité</div>
   </div>
-  <div style="font-size:9px;color:#555;margin-top:8px;">Généré par Pollinations.ai · Gratuit · Sans compte</div>
+
 </div>
 </div>
 
@@ -4873,6 +4906,71 @@ function buildPortraitPrompt() {
   const extra = document.getElementById('portraitPromptExtra')?.value || '';
   return encodeURIComponent(`fantasy portrait, ${raceEn} ${classeEn}, D&D 4th edition art style, dramatic lighting, detailed armor and weapons, dark fantasy, character art${extra ? ', '+extra : ''}${nom ? ', character named '+nom : ''}, cinematic, high quality, front-facing portrait`);
 }
+
+function switchPortraitTab(tab) {
+  const poll = document.getElementById("portraitTabPoll");
+  const perc = document.getElementById("portraitTabPerc");
+  const btnPoll = document.getElementById("ptabPoll");
+  const btnPerc = document.getElementById("ptabPerc");
+
+  if (tab === "pollinations") {
+    poll.style.display = "block";
+    perc.style.display = "none";
+    btnPoll.style.background = "#c9a260"; btnPoll.style.color = "#12121e"; btnPoll.style.borderColor = "#c9a260";
+    btnPerc.style.background = "none";   btnPerc.style.color = "#888";    btnPerc.style.borderColor = "#444";
+  } else {
+    poll.style.display = "none";
+    perc.style.display = "block";
+    btnPoll.style.background = "none";   btnPoll.style.color = "#888";    btnPoll.style.borderColor = "#444";
+    btnPerc.style.background = "#c9a260"; btnPerc.style.color = "#12121e"; btnPerc.style.borderColor = "#c9a260";
+
+    // Fill prompt display + lazy-load iframe
+    const rawPrompt = buildPortraitPromptRaw();
+    const ta = document.getElementById("percPromptDisplay");
+    if (ta) ta.value = rawPrompt;
+
+    const iframe = document.getElementById("perchanceIframe");
+    if (iframe && iframe.src === "about:blank") {
+      iframe.src = "https://perchance.org/ai-text-to-image-generator";
+    }
+  }
+}
+
+function copyPercPrompt() {
+  const ta = document.getElementById("percPromptDisplay");
+  if (!ta) return;
+  try {
+    navigator.clipboard.writeText(ta.value).then(() => {
+      const btn = document.getElementById("percCopyBtn");
+      if (btn) { const old = btn.textContent; btn.textContent = "✅ Copié!"; setTimeout(()=>{ btn.textContent = old; }, 2000); }
+    });
+  } catch(e) {
+    ta.select();
+    document.execCommand("copy");
+    const btn = document.getElementById("percCopyBtn");
+    if (btn) { const old = btn.textContent; btn.textContent = "✅ Copié!"; setTimeout(()=>{ btn.textContent = old; }, 2000); }
+  }
+}
+
+// Raw (non-encoded) version of the prompt for display
+function buildPortraitPromptRaw() {
+  const race = document.getElementById("race")?.value || wizState.race || "human adventurer";
+  const classe = document.getElementById("classe")?.value || wizState.classe || "warrior";
+  const nom = document.getElementById("nom")?.value || "";
+  const rd = RACE_DATA[race] || {};
+  const raceEn = rd.promptEn || race.toLowerCase().replace(/\(.*\)/,"").trim();
+  const classMap = {
+    "Paladin":"paladin holy warrior","Clerc (Prêtre)":"cleric priest divine","Avenger (Vengeur)":"avenger assassin divine",
+    "Guerrier (Fighter)":"fighter warrior","Rôdeur (Ranger)":"ranger archer scout","Voleur (Rogue)":"rogue thief shadow",
+    "Magicien (Wizard)":"wizard mage arcane","Sorcier (Warlock)":"warlock dark pact","Barde":"bard performer",
+    "Druide":"druid nature shapeshifter","Warden (Gardien)":"warden nature guardian","Armaturge":"artificer mechanical resonant armor",
+    "Barbare":"barbarian rage","Moine (Monk)":"monk psionic martial artist","Psion":"psion psionic mind",
+  };
+  const classeEn = classMap[classe] || classe.toLowerCase().replace(/\(.*\)/,"").trim();
+  const extra = document.getElementById("portraitPromptExtra")?.value || "";
+  return `fantasy portrait, ${raceEn} ${classeEn}, D&D 4th edition art style, dramatic lighting, detailed armor and weapons, dark fantasy, character art${extra ? ", "+extra : ""}${nom ? ", character named "+nom : ""}, cinematic, high quality, front-facing portrait`;
+}
+
 
 function openPortrait() {
   const overlay = document.getElementById('portraitOverlay');
