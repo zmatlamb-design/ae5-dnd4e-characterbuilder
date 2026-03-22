@@ -4885,84 +4885,124 @@ function closePortrait() {
 }
 
 function generatePortrait() {
+  const MODELS = ["flux", "flux-realism", "turbo"];
+  let modelIdx = 0;
+  let retryCount = 0;
+
   const wrap = document.getElementById("portraitImgWrap");
-  let dotsInterval;
-  let dotCount = 0;
+  let dotsInterval, countdownInterval;
+
+  const clearTimers = () => {
+    clearInterval(dotsInterval);
+    clearInterval(countdownInterval);
+  };
 
   const showLoading = (msg) => {
-    wrap.innerHTML = `<div style="color:#888;font-size:12px;line-height:2;">🎨 ${msg||"Génération IA en cours"}<span id="loadDots">...</span><br><span style="font-size:10px;color:#555;">Pollinations.ai · 10–40 sec</span></div>`;
+    wrap.innerHTML = `<div style="color:#888;font-size:12px;line-height:2;">🎨 ${msg||"Génération IA en cours"}<span id="loadDots">...</span><br><span style="font-size:10px;color:#555;">Pollinations.ai · 15–45 sec</span></div>`;
+    let d = 0;
     dotsInterval = setInterval(()=>{
       const el = document.getElementById("loadDots");
-      if (el) { dotCount=(dotCount+1)%4; el.textContent=".".repeat(dotCount+1); }
+      if (el) { d=(d+1)%4; el.textContent=".".repeat(d+1); }
     }, 600);
   };
 
-  const tryModel = (model, isRetry) => {
-    if (!isRetry) showLoading();
-    else {
-      clearInterval(dotsInterval);
-      showLoading("Retry avec flux-realism");
+  const showCountdown = (seconds, reason) => {
+    clearTimers();
+    let s = seconds;
+    const render = () => {
+      wrap.innerHTML = `<div style="text-align:center;padding:10px;">
+        <div style="color:#c9a260;font-size:11px;margin-bottom:6px;">${reason}</div>
+        <div style="font-size:28px;font-weight:700;color:#ccc;">${s}</div>
+        <div style="font-size:10px;color:#555;">Nouvel essai dans ${s} seconde${s>1?"s":""}…</div>
+      </div>`;
+    };
+    render();
+    countdownInterval = setInterval(()=>{
+      s--;
+      if (s <= 0) { clearInterval(countdownInterval); tryNext(); }
+      else render();
+    }, 1000);
+  };
+
+  const tryNext = () => {
+    modelIdx = (modelIdx + 1) % MODELS.length;
+    retryCount++;
+    if (retryCount > MODELS.length + 1) {
+      // Exhausted all retries
+      const url = buildUrl(MODELS[0]);
+      showFallback(url, "⚠ Pollinations.ai ne répond pas. Clique le lien pour essayer directement.");
+      return;
     }
+    doTry();
+  };
+
+  const buildUrl = (model) => {
     const prompt = buildPortraitPrompt();
-    const seed = Math.floor(Math.random()*999999);
+    const seed = Math.floor(Math.random() * 999999);
     const url = `https://image.pollinations.ai/prompt/${prompt}?width=512&height=512&seed=${seed}&nologo=true&model=${model}`;
     window.__lastPortraitUrl = url;
+    return url;
+  };
 
+  const doTry = () => {
+    clearTimers();
+    const model = MODELS[modelIdx];
+    showLoading(retryCount > 0 ? `Essai ${retryCount+1} · modèle ${model}` : null);
+
+    const url = buildUrl(model);
     const controller = new AbortController();
-    const timeout = setTimeout(()=>controller.abort(), 45000);
+    const networkTimeout = setTimeout(() => controller.abort(), 50000);
 
     fetch(url, { signal: controller.signal })
       .then(r => {
-        clearTimeout(timeout);
+        clearTimeout(networkTimeout);
+        if (r.status === 429) {
+          // Rate limited — wait 10s then retry
+          showCountdown(10, "⏳ Trop de requêtes (429) — pause obligatoire");
+          return null;
+        }
         if (!r.ok) throw new Error("HTTP " + r.status);
         return r.blob();
       })
       .then(blob => {
-        clearInterval(dotsInterval);
-        // If we got JSON instead of an image (API error with 200 status)
+        if (!blob) return; // countdown is running
+        clearTimers();
+
+        // Detect JSON error response masquerading as 200
         if (!blob.type.startsWith("image/")) {
-          return blob.text().then(text => {
-            if (!isRetry) {
-              // Try fallback model
-              tryModel("flux-realism", true);
-            } else {
-              let msg = "⚠ Le serveur a retourné une erreur.";
-              try {
-                const j = JSON.parse(text);
-                msg = "⚠ " + (j.message || j.error || "Erreur serveur") + " (modèle: " + (j.requestParameters?.model||"?") + ")";
-              } catch(e) {}
-              showFallback(url, msg);
-            }
+          return blob.text().then(txt => {
+            let reason = "⚠ Le serveur a retourné une erreur.";
+            try {
+              const j = JSON.parse(txt);
+              reason = "⚠ " + (j.message || j.error || "Erreur serveur") + ` (modèle: ${j.requestParameters?.model||model})`;
+            } catch(e) {}
+            // Wait 5s then try next model
+            showCountdown(5, reason);
           });
         }
-        // Success — display the image
+
+        // Success!
         const blobUrl = URL.createObjectURL(blob);
         window.__lastPortraitBlob = blobUrl;
         const img = document.createElement("img");
         img.style.cssText = "width:100%;height:auto;border-radius:6px;display:block;";
-        img.onload = () => { wrap.innerHTML = ""; wrap.appendChild(img); };
-        img.onerror = () => {
-          if (!isRetry) tryModel("flux-realism", true);
-          else showFallback(url, "⚠ Image reçue mais impossible à afficher.");
-        };
+        img.onload = () => { clearTimers(); wrap.innerHTML = ""; wrap.appendChild(img); };
+        img.onerror = () => { clearTimers(); showCountdown(5, "⚠ Image reçue mais illisible — réessai…"); };
         img.src = blobUrl;
       })
       .catch(err => {
-        clearTimeout(timeout);
-        clearInterval(dotsInterval);
+        clearTimeout(networkTimeout);
+        clearTimers();
         if (err.name === "AbortError") {
-          if (!isRetry) tryModel("flux-realism", true);
-          else showFallback(url, "⏱ Timeout (45s) — Pollinations.ai est très lent en ce moment.");
+          showCountdown(5, "⏱ Timeout réseau — réessai avec un autre modèle…");
         } else {
-          if (!isRetry) tryModel("flux-realism", true);
-          else showFallback(url, "⚠ Erreur réseau : " + err.message);
+          showFallback(url, "⚠ Erreur réseau : " + err.message);
         }
       });
   };
 
-  tryModel("flux", false);
+  doTry();
 }
-
 function showFallback(url, msg) {
   const wrap = document.getElementById("portraitImgWrap");
   wrap.innerHTML = `<div style="padding:12px;text-align:center;">
