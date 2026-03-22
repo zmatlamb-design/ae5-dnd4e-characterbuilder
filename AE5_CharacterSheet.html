@@ -2203,79 +2203,73 @@ const POWER_DEFAULTS = {
   utility: [],
 };
 
+
 // ═══════════════════════════════════════════════════
 //  RACE_DATA — Bonus raciaux AE5/D&D 4e
 // ═══════════════════════════════════════════════════
 const RACE_DATA = {
-  'Humain':           { stats:{any1:2,any2:2}, speed:6, vision:'Norm', bonusDefense:'Vol+1,Vig+1,Réf+1', skills:['any'], features:['Bonus de Feat au niv.1','Un pouvoir de Race humaine'], promptEn:'human' },
-  'Elfe':             { stats:{dex:2,sag:2}, speed:7, vision:'Basse-lumière', bonusDefense:'Réf+1,Vol+1', skills:['perception','nature'], features:['Évasion Elfique (tir ne provoque pas PdO)','Sens Magiques (+5 Perception)'], promptEn:'elf' },
-  'Demi-Elfe':        { stats:{con:2,cha:2}, speed:6, vision:'Basse-lumière', bonusDefense:'Vol+1', skills:['perspicacite'], features:['Diplomatie de Groupe (allié gagne +1 vs premier ennemi attaqué)','Pouvoir de classe supplémentaire (at-will d\'une autre classe)'], promptEn:'half-elf' },
-  'Nain':             { stats:{con:2,sag:2}, speed:5, vision:'Basse-lumière', bonusDefense:'Vig+2', skills:['metier'], features:['Endurance Naine (Surge gratuit 1×/rencontre)','Stabilité (+2 vs bousculade & déplacement forcé)'], promptEn:'dwarf' },
-  'Halfelin':         { stats:{dex:2,cha:2}, speed:6, vision:'Norm', bonusDefense:'Réf+1,Vol+1', skills:['acrobaties','furtivite'], features:['Audace Halfeline (+2 jets de sauvegarde contre effet Effrayé)','Seconde Chance (relancer jet d\'attaque ennemi 1×/rencontre)'], promptEn:'halfling' },
-  'Gnome':            { stats:{int:2,cha:2}, speed:5, vision:'Vision dans le noir', bonusDefense:'Réf+1,Vol+1', skills:['arcanes','furtivite'], features:['Disparition Illusoire (invisibilité jusqu\'à fin du tour 1×/rencontre)','Magie Naturelle (Illusion au toucher)'], promptEn:'gnome' },
-  'Tieflin':          { stats:{int:2,cha:2}, speed:6, vision:'Vision dans le noir', bonusDefense:'Réf+1,Vol+1', skills:['dissimuler','intimidation'], features:['Résistance Infernale (feu 5+½niv)','Châtiment Infernal (quand tu es touché, +1d6 feu à ta prochaine attaque)'], promptEn:'tiefling' },
-  'Dragonné':         { stats:{for:2,cha:2}, speed:6, vision:'Basse-lumière', bonusDefense:'Vig+2', skills:['histoire','intimidation'], features:['Souffle du Dragon (Attaque explosion 3 dégâts 1×/rencontre)','Héritage Draconique (+1 jet d\'attaque à Vigueur quand blessé)'], promptEn:'dragonborn' },
-  'Demi-Orc':         { stats:{for:2,dex:2}, speed:6, vision:'Basse-lumière', bonusDefense:'Réf+1', skills:['intimidation','athletisme'], features:['Vitesse Bestiale (+2 vitesse 1×/rencontre comme action libre)','Assault Éclair (+1d10 dégâts à l\'attaque si tu t\'es déplacé avant)'], promptEn:'half-orc' },
-  'Goliath':          { stats:{for:2,con:2}, speed:6, vision:'Norm', bonusDefense:'Vig+1', skills:['athletisme','nature'], features:['Résilience de Pierre (résistance temporaire = ½ niveau 1×/rencontre)','Stature Imposante (portée mêlée +1)'], promptEn:'goliath' },
-  'Githzeraï':        { stats:{sag:2,dex:2}, speed:6, vision:'Norm', bonusDefense:'Réf+1,Vol+2', skills:['acrobaties'], features:['Défenses Mentales (+2 jets de sauvegarde contre effets d\'étourdissement)','Flash de Télépathie (déplacement 3 hors-tour 1×/rencontre)'], promptEn:'githzerai' },
-  'Kalashtar':        { stats:{sag:2,cha:2}, speed:6, vision:'Norm', bonusDefense:'Vol+2', skills:['perspicacite','religion'], features:['Barrière Mentale (+2 contre effets psioniques et charmants)','Double Âme (+1 jet de sauvegarde de fin de tour)'], promptEn:'kalashtar' },
-  'Revenant':         { stats:{dex:2,con:2}, speed:6, vision:'Vision dans le noir', bonusDefense:'Vol+1,Vig+1', skills:['intimidation'], features:['Forme Fantomale (sans corps physique, invisible dans l\'obscurité)','Résurrection Funeste (reviens à 1 PV si mort 1×/rencontre)'], promptEn:'revenant undead' },
-  'Changeling':       { stats:{dex:2,cha:2}, speed:6, vision:'Norm', bonusDefense:'Réf+1,Vol+1', skills:['dissimuler','perspicacite'], features:['Imitation (changer d\'apparence humanoïde à volonté)','Infiltration Mentale (+5 Persuasion/Imposture vs cibles dupliquées)'], promptEn:'changeling shapeshifter' },
-  'Shifter (Bestial)':{ stats:{for:2,con:2}, speed:7, vision:'Basse-lumière', bonusDefense:'Vig+1', skills:['nature','athletisme'], features:['Forme Bestiale (vitesse+2 & Vig+2 jusqu\'à fin rencontre 1×/rencontre)'], promptEn:'shifter bestial lycanthrope' },
-  'Minotaure':        { stats:{for:2,con:2}, speed:6, vision:'Norm', bonusDefense:'Vig+2', skills:['athletisme','nature'], features:['Charge du Minotaure (+1d6 à la première charge)','Mémoire des Labyrinthes (jamais perdu)'], promptEn:'minotaur' },
-  'Deva (Bassin de Vie)': { stats:{sag:2,int:2}, speed:6, vision:'Norm', bonusDefense:'Vol+2', skills:['religion','histoire'], features:['Mémoire des Vies Passées (+1d6 à n\'importe quel jet 1×/rencontre)','Radiance Immortelle (résistance radiant 5+½niv)'], promptEn:'deva angel divine being' },
-  'Résonnant':        { stats:{con:2,int:2}, speed:6, vision:'Basse-lumière', bonusDefense:'Vig+1', skills:['arcanes','metier'], features:['Infatigable (pas de besoin de manger/dormir)','Correction Résonante (réduction dégâts 1 permanent)'], promptEn:'warforged construct resonant mechanical' },
-  'Warforged (Mécanique)': { stats:{con:2,for:2}, speed:5, vision:'Basse-lumière', bonusDefense:'Vig+2', skills:['metier'], features:['Armure Intégrée (+1 CA permanent)','Réparation Mécanique (se soigner avec la compétence Metier au lieu de Médecine)'], promptEn:'warforged mechanical construct' },
+  "Humain":              { stats:{any1:2,any2:2}, speed:6, vision:"Norm", bonusDef:"Vol+1,Vig+1,Réf+1", features:["Bonus de Feat au niv.1","Un pouvoir de Race humaine"], promptEn:"human" },
+  "Elfe":                { stats:{dex:2,sag:2}, speed:7, vision:"Basse-lumière", bonusDef:"Réf+1,Vol+1", features:["Évasion Elfique (tir ne provoque pas PdO)","Sens Magiques (+5 Perception)"], promptEn:"elf" },
+  "Demi-Elfe":           { stats:{con:2,cha:2}, speed:6, vision:"Basse-lumière", bonusDef:"Vol+1", features:["Diplomatie de Groupe (allié +1 vs premier ennemi attaqué)","At-will supplémentaire d'une autre classe"], promptEn:"half-elf" },
+  "Nain":                { stats:{con:2,sag:2}, speed:5, vision:"Basse-lumière", bonusDef:"Vig+2", features:["Endurance Naine (Surge gratuit 1×/rencontre)","Stabilité (+2 vs bousculade)"], promptEn:"dwarf" },
+  "Halfelin":            { stats:{dex:2,cha:2}, speed:6, vision:"Norm", bonusDef:"Réf+1,Vol+1", features:["Audace Halfeline (+2 saves vs Effrayé)","Seconde Chance (relancer jet ennemi 1×/rencontre)"], promptEn:"halfling" },
+  "Gnome":               { stats:{int:2,cha:2}, speed:5, vision:"Vision dans le noir", bonusDef:"Réf+1,Vol+1", features:["Disparition Illusoire (invisible 1×/rencontre)","Magie Naturelle (Illusion au toucher)"], promptEn:"gnome" },
+  "Tieflin":             { stats:{int:2,cha:2}, speed:6, vision:"Vision dans le noir", bonusDef:"Réf+1,Vol+1", features:["Résistance Infernale (feu 5+½niv)","Châtiment Infernal (+1d6 feu à prochaine attaque)"], promptEn:"tiefling" },
+  "Dragonné":            { stats:{for:2,cha:2}, speed:6, vision:"Basse-lumière", bonusDef:"Vig+2", features:["Souffle du Dragon (explosion 3, 1×/rencontre)","Héritage Draconique (+1 atk Vigueur quand blessé)"], promptEn:"dragonborn" },
+  "Demi-Orc":            { stats:{for:2,dex:2}, speed:6, vision:"Basse-lumière", bonusDef:"Réf+1", features:["Vitesse Bestiale (+2 vitesse 1×/rencontre)","Assault Éclair (+1d10 si déplacement avant attaque)"], promptEn:"half-orc" },
+  "Goliath":             { stats:{for:2,con:2}, speed:6, vision:"Norm", bonusDef:"Vig+1", features:["Résilience de Pierre (résistance temp 1×/rencontre)","Stature Imposante (portée mêlée +1)"], promptEn:"goliath" },
+  "Githzeraï":           { stats:{sag:2,dex:2}, speed:6, vision:"Norm", bonusDef:"Réf+1,Vol+2", features:["Défenses Mentales (+2 saves étourdissement)","Flash de Télépathie (téléportation 3 hors-tour)"], promptEn:"githzerai" },
+  "Kalashtar":           { stats:{sag:2,cha:2}, speed:6, vision:"Norm", bonusDef:"Vol+2", features:["Barrière Mentale (+2 vs psionique/charme)","Double Âme (+1 save fin de tour)"], promptEn:"kalashtar" },
+  "Revenant":            { stats:{dex:2,con:2}, speed:6, vision:"Vision dans le noir", bonusDef:"Vol+1,Vig+1", features:["Forme Fantomale (invisible dans obscurité)","Résurrection Funeste (reviens à 1 PV 1×/rencontre)"], promptEn:"revenant undead" },
+  "Changeling":          { stats:{dex:2,cha:2}, speed:6, vision:"Norm", bonusDef:"Réf+1,Vol+1", features:["Imitation (changer apparence à volonté)","Infiltration Mentale (+5 Persuasion vs cibles dupliquées)"], promptEn:"changeling shapeshifter" },
+  "Shifter (Bestial)":   { stats:{for:2,con:2}, speed:7, vision:"Basse-lumière", bonusDef:"Vig+1", features:["Forme Bestiale (vitesse+2 & Vig+2 1×/rencontre)"], promptEn:"shifter bestial lycanthrope" },
+  "Minotaure":           { stats:{for:2,con:2}, speed:6, vision:"Norm", bonusDef:"Vig+2", features:["Charge du Minotaure (+1d6 à la première charge)","Mémoire des Labyrinthes"], promptEn:"minotaur" },
+  "Deva (Bassin de Vie)":{ stats:{sag:2,int:2}, speed:6, vision:"Norm", bonusDef:"Vol+2", features:["Mémoire des Vies Passées (+1d6 à n'importe quel jet 1×/rencontre)","Radiance Immortelle (résistance radiant 5+½niv)"], promptEn:"deva angel divine" },
+  "Résonnant":           { stats:{con:2,int:2}, speed:6, vision:"Basse-lumière", bonusDef:"Vig+1", features:["Infatigable (pas besoin manger/dormir)","Correction Résonante (réduction dégâts 1)"], promptEn:"warforged construct resonant mechanical" },
+  "Warforged (Mécanique)":{ stats:{con:2,for:2}, speed:5, vision:"Basse-lumière", bonusDef:"Vig+2", features:["Armure Intégrée (+1 CA permanent)","Réparation Mécanique (Metier au lieu de Médecine)"], promptEn:"warforged mechanical construct" },
 };
 
-// ─── Appliquer les bonus raciaux ─────────────────────
 function onRaceChange(val) {
   const rd = RACE_DATA[val];
   if (!rd) { autoSave(); return; }
-
-  // Vitesse
-  const speedEl = document.getElementById('vitesse');
-  if (speedEl) { speedEl.value = rd.speed; }
-
-  // Vision
-  const visionEl = document.getElementById('vision');
-  if (visionEl && (!visionEl.value || visionEl.value === 'Norm')) visionEl.value = rd.vision;
-
-  // Afficher les bonus raciaux (toaster)
+  const speedEl = document.getElementById("vitesse");
+  if (speedEl) speedEl.value = rd.speed;
+  const visionEl = document.getElementById("vision");
+  if (visionEl && (!visionEl.value || visionEl.value === "Norm")) visionEl.value = rd.vision;
   showRaceToast(val, rd);
   updateAutoStats();
   autoSave();
 }
 
 function showRaceToast(raceName, rd) {
-  const existing = document.getElementById('race-toast');
+  const existing = document.getElementById("race-toast");
   if (existing) existing.remove();
-
-  const statStr = Object.entries(rd.stats).map(([k,v]) => k === 'any1' || k === 'any2' ? `+${v} (au choix)` : `+${v} ${k.toUpperCase()}`).join(', ');
-  const toast = document.createElement('div');
-  toast.id = 'race-toast';
-  toast.style.cssText = `position:fixed;bottom:70px;right:16px;max-width:300px;background:#1a1a2e;border:1px solid var(--gold);border-radius:8px;padding:12px 14px;z-index:9999;font-size:11px;color:var(--text);box-shadow:0 4px 20px rgba(0,0,0,0.5);`;
-  toast.innerHTML = `
-    <div style="font-weight:700;color:var(--gold);margin-bottom:6px;">🧬 ${raceName}</div>
-    <div style="margin-bottom:4px;"><span style="color:var(--text3);">Stats :</span> ${statStr}</div>
-    <div style="margin-bottom:4px;"><span style="color:var(--text3);">Vitesse :</span> ${rd.speed} · <span style="color:var(--text3);">Vision :</span> ${rd.vision}</div>
-    <div style="margin-bottom:4px;"><span style="color:var(--text3);">Défenses :</span> ${rd.bonusDefense || '—'}</div>
-    <div style="color:var(--text3);margin-bottom:2px;">Capacités raciales :</div>
-    ${rd.features.map(f=>`<div style="color:var(--gold2);margin-left:6px;">• ${f}</div>`).join('')}
-    <div style="font-size:9px;color:var(--text3);margin-top:8px;">Applique les bonus de stats manuellement dans Caractéristiques</div>
-    <button onclick="this.parentNode.remove()" style="position:absolute;top:6px;right:8px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;">×</button>
-  `;
+  const statStr = Object.entries(rd.stats).map(function(e) {
+    return e[0].startsWith("any") ? "+"+e[1]+" (libre)" : "+"+e[1]+" "+e[0].toUpperCase();
+  }).join(", ");
+  const toast = document.createElement("div");
+  toast.id = "race-toast";
+  toast.style.cssText = "position:fixed;bottom:70px;right:16px;max-width:300px;background:#1a1a2e;border:1px solid var(--gold);border-radius:8px;padding:12px 14px;z-index:9999;font-size:11px;color:var(--text);box-shadow:0 4px 20px rgba(0,0,0,0.5);";
+  toast.innerHTML = "<div style='font-weight:700;color:var(--gold);margin-bottom:6px;'>🧬 "+raceName+"</div>"
+    +"<div style='margin-bottom:4px;'><span style='color:var(--text3);'>Stats :</span> "+statStr+"</div>"
+    +"<div style='margin-bottom:4px;'><span style='color:var(--text3);'>Vitesse :</span> "+rd.speed+" · <span style='color:var(--text3);'>Vision :</span> "+rd.vision+"</div>"
+    +"<div style='margin-bottom:4px;'><span style='color:var(--text3);'>Défenses :</span> "+(rd.bonusDef||"—")+"</div>"
+    +"<div style='color:var(--text3);margin-bottom:2px;'>Capacités raciales :</div>"
+    +rd.features.map(function(f){return "<div style='color:var(--gold2);margin-left:6px;'>• "+f+"</div>";}).join("")
+    +"<div style='font-size:9px;color:var(--text3);margin-top:8px;'>Applique les bonus de stats manuellement</div>"
+    +"<button onclick='this.parentNode.remove()' style='position:absolute;top:6px;right:8px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;'>×</button>";
   document.body.appendChild(toast);
-  setTimeout(() => { if (toast.parentNode) toast.style.opacity='0'; toast.style.transition='opacity 0.5s'; setTimeout(()=>toast.remove(), 500); }, 9000);
+  setTimeout(function(){
+    if (toast.parentNode){ toast.style.opacity="0"; toast.style.transition="opacity 0.5s"; }
+    setTimeout(function(){ if(toast.parentNode) toast.remove(); }, 500);
+  }, 9000);
 }
 
-// ─── Auto-calc CA depuis armure ──────────────────────
 function onArmorChange(val) {
-  // Parse "Nom de l'armure (CA +X, Type)" pattern
   const m = val.match(/CA\s*\+?(\d+)/i);
   if (m) {
-    const caEl = document.getElementById('armorCA');
-    if (caEl) { caEl.value = '+' + m[1]; }
+    const caEl = document.getElementById("armorCA");
+    if (caEl) caEl.value = "+"+m[1];
     updateCAFromArmor();
   }
   autoSave();
@@ -2284,20 +2278,20 @@ function onArmorChange(val) {
 function onArmorCAInput() { updateCAFromArmor(); }
 
 function updateCAFromArmor() {
-  const className = document.getElementById('classe')?.value?.trim();
-  const niveau = parseInt(document.getElementById('niveau')?.value) || 1;
+  const className = document.getElementById("classe") ? document.getElementById("classe").value.trim() : "";
+  const niveau = parseInt(document.getElementById("niveau") ? document.getElementById("niveau").value : "1") || 1;
   const cd = CLASS_DATA[className];
   if (!cd) return;
   const blason = Math.floor(niveau / 2);
-  const dexMod = getMod(getStat('dex'));
-  const intMod = getMod(getStat('int'));
+  const dexMod = getMod(getStat("dex"));
+  const intMod = getMod(getStat("int"));
   const caBase = 10 + blason + Math.max(dexMod, intMod);
-  const armorBonusStr = document.getElementById('armorCA')?.value || '';
-  const armorBonus = parseInt(armorBonusStr.replace(/[^0-9\-]/g,'')) || 0;
+  const armorBonusStr = document.getElementById("armorCA") ? document.getElementById("armorCA").value : "";
+  const armorBonus = parseInt(armorBonusStr.replace(/[^0-9\-]/g,"")) || 0;
   const caTotal = caBase + armorBonus;
-  setAutoField('def-ca', caTotal);
-  const caHint = document.getElementById('caAutoHint');
-  if (caHint) caHint.textContent = `⚙ ${caBase} base + ${armorBonus} armure = ${caTotal}`;
+  setAutoField("def-ca", caTotal);
+  const caHint = document.getElementById("caAutoHint");
+  if (caHint) caHint.textContent = "⚙ "+caBase+" base + "+armorBonus+" armure = "+caTotal;
 }
 
 // ─────────────────── CLASS DATA ───────────────────
@@ -2585,23 +2579,23 @@ const CLASS_DATA = {
   'Chantelame (Bladesinger)': { hp1:12, hpLvl:5, surges:7, defBonus:{vig:0,ref:0,vol:2}, mainStats:['INT','DEX'], source:'Arcanique',
     powers: {
       atwill:[
-        { name:'Projectile Magique', nameEn:'Magic Missile (NCS p.66)', type:'À volonté · Arcanique · Évocation · Force · Implement', level:1, tags:['standard','distance 20'], atk:'Automatique (aucun jet)', dmg:'2+INT force', effect:'Touche automatiquement. Si l'Implement a un bonus d'amélioration, l'ajouter aux dégâts. Peut être utilisé comme Attaque de base à distance. Niv.11 : 3+INT. Niv.21 : 5+INT.' },
-        { name:'Givre Mordant (Sortilame)', nameEn:'Frost Bite Bladespell (NCS p.67)', type:'À volonté · Arcanique · Sortilame · Froid', level:1, tags:['sans action','distance 10'], atk:'— (déclencheur)', dmg:'DEX froid', effect:'Déclencheur : Tu touches un ennemi avec une ABM à une main (autre main vide/baguette). La cible est Ralentie jusqu'à la fin de son prochain tour. Niv.11 : 2+DEX. Niv.21 : 4+DEX. Un seul Sortilame par attaque déclenche.' },
+        { name:'Projectile Magique', nameEn:'Magic Missile (NCS p.66)', type:'À volonté · Arcanique · Évocation · Force · Implement', level:1, tags:['standard','distance 20'], atk:'Automatique (aucun jet)', dmg:'2+INT force', effect:'Touche automatiquement. Si l’Implement a un bonus d’amélioration, l’ajouter aux dégâts. Peut être utilisé comme Attaque de base à distance. Niv.11 : 3+INT. Niv.21 : 5+INT.' },
+        { name:'Givre Mordant (Sortilame)', nameEn:'Frost Bite Bladespell (NCS p.67)', type:'À volonté · Arcanique · Sortilame · Froid', level:1, tags:['sans action','distance 10'], atk:'— (déclencheur)', dmg:'DEX froid', effect:'Déclencheur : Tu touches un ennemi avec une ABM à une main (autre main vide/baguette). La cible est Ralentie jusqu’à la fin de son prochain tour. Niv.11 : 2+DEX. Niv.21 : 4+DEX. Un seul Sortilame par attaque déclenche.' },
       ],
       encounter:[
-        { name:'Choc Givrant', nameEn:'Chill Strike (NCS/PHB1 Bladesinger Daily L1)', type:'Par rencontre · Arcanique · Froid · Évocation · Implement', level:1, tags:['standard','distance 10'], atk:'+½NIV+INT vs Vigueur', dmg:'2d8+INT froid', effect:'Touché : la cible est Étourdie jusqu'à la fin de ton prochain tour. Raté : la cible est Ralentie jusqu'à la fin de ton prochain tour.' },
-        { name:'Jet de Couleurs', nameEn:'Color Spray (NCS/PHB1 L3)', type:'Par rencontre · Arcanique · Évocation · Radieux · Implement', level:3, tags:['standard','explosion rapprochée 5'], atk:'+½NIV+INT vs Volonté', dmg:'1d6+INT radiants', effect:'Touché : la cible est Étourdie jusqu'à la fin de ton prochain tour. Raté : moitié.' },
+        { name:'Choc Givrant', nameEn:'Chill Strike (NCS/PHB1 Bladesinger Daily L1)', type:'Par rencontre · Arcanique · Froid · Évocation · Implement', level:1, tags:['standard','distance 10'], atk:'+½NIV+INT vs Vigueur', dmg:'2d8+INT froid', effect:'Touché : la cible est Étourdie jusqu’à la fin de ton prochain tour. Raté : la cible est Ralentie jusqu’à la fin de ton prochain tour.' },
+        { name:'Jet de Couleurs', nameEn:'Color Spray (NCS/PHB1 L3)', type:'Par rencontre · Arcanique · Évocation · Radieux · Implement', level:3, tags:['standard','explosion rapprochée 5'], atk:'+½NIV+INT vs Volonté', dmg:'1d6+INT radiants', effect:'Touché : la cible est Étourdie jusqu’à la fin de ton prochain tour. Raté : moitié.' },
         { name:'Colère Hivernale', nameEn:"Winter's Wrath (NCS/PHB1 L7)", type:'Par rencontre · Arcanique · Froid · Zone · Implement', level:7, tags:['standard','explosion 2 dans 10'], atk:'+½NIV+INT vs Vigueur', dmg:'2d8+INT froid', effect:'Zone persistante (JS mineur pour maintenir) : légèrement obscurcie, toute créature commencçant son tour dans la zone subit ton mod INT en dégâts de froid. Raté : moitié.' },
       ],
       daily:[
         { name:'Mains Ardentes', nameEn:'Burning Hands (NCS/PHB1 L1)', type:'Quotidien · Arcanique · Feu · Évocation · Implement', level:1, tags:['standard','explosion rapprochée 5'], atk:'+½NIV+INT vs Réflexes', dmg:'2d6+INT feu', effect:'Raté : moitié.' },
-        { name:'Ignorance Béatie', nameEn:'Blissful Ignorance (NCS/PHB1 L3 as L5)', type:'Quotidien · Arcanique · Charme · Enchantement', level:5, tags:['standard','explosion 2 dans 10'], atk:'— (aucun jet d'attaque)', dmg:'—', effect:'Chaque cible dans la zone est Ralentie et ne peut pas effectuer d'actions d'opportunité ou d'actions immédiates jusqu'à la fin de ton prochain tour.' },
+        { name:'Ignorance Béatie', nameEn:'Blissful Ignorance (NCS/PHB1 L3 as L5)', type:'Quotidien · Arcanique · Charme · Enchantement', level:5, tags:['standard','explosion 2 dans 10'], atk:'— (aucun jet d’attaque)', dmg:'—', effect:'Chaque cible dans la zone est Ralentie et ne peut pas effectuer d’actions d’opportunité ou d’actions immédiates jusqu’à la fin de ton prochain tour.' },
         { name:'Bélier Spectral', nameEn:'Spectral Ram (NCS/PHB1 L7 as L9)', type:'Quotidien · Arcanique · Force · Évocation · Implement', level:9, tags:['standard','distance 10'], atk:'+½NIV+INT vs Vigueur', dmg:'2d10+INT force', effect:'Touché : repousse la cible de 3 cases et elle tombe à terre. Raté : repousse la cible de 3 cases.' },
       ],
       utility:[
-        { name:'Bouclier', nameEn:'Shield (NCS p.70)', type:'Utilitaire · Arcanique', level:2, tags:['interruption','personnel'], atk:'—', dmg:'—', effect:'Déclencheur : tu es touché par une attaque. Tu gagnes +4 bonus de pouvoir à CA et Réflexes contre cette attaque et jusqu'à la fin de ton prochain tour.' },
-        { name:'Porte Dimensionnelle', nameEn:'Dimension Door (NCS p.71)', type:'Utilitaire · Arcanique · Téléportation', level:6, tags:['déplacement','quotidien'], atk:'—', dmg:'—', effect:'Tu te téléportes jusqu'à 10 cases.' },
-        { name:'Images Miroir', nameEn:'Mirror Image (NCS p.72)', type:'Utilitaire · Arcanique · Illusion', level:10, tags:['mineure','quotidien'], atk:'—', dmg:'—', effect:'3 doubles apparaissent. Tu gagnes +6 à CA. Chaque fois qu'une attaque te rate, un double disparaît et le bonus baisse de −2. Dure 1 heure ou jusqu'à ce que le bonus atteigne 0.' },
+        { name:'Bouclier', nameEn:'Shield (NCS p.70)', type:'Utilitaire · Arcanique', level:2, tags:['interruption','personnel'], atk:'—', dmg:'—', effect:'Déclencheur : tu es touché par une attaque. Tu gagnes +4 bonus de pouvoir à CA et Réflexes contre cette attaque et jusqu’à la fin de ton prochain tour.' },
+        { name:'Porte Dimensionnelle', nameEn:'Dimension Door (NCS p.71)', type:'Utilitaire · Arcanique · Téléportation', level:6, tags:['déplacement','quotidien'], atk:'—', dmg:'—', effect:'Tu te téléportes jusqu’à 10 cases.' },
+        { name:'Images Miroir', nameEn:'Mirror Image (NCS p.72)', type:'Utilitaire · Arcanique · Illusion', level:10, tags:['mineure','quotidien'], atk:'—', dmg:'—', effect:'3 doubles apparaissent. Tu gagnes +6 à CA. Chaque fois qu’une attaque te rate, un double disparaît et le bonus baisse de −2. Dure 1 heure ou jusqu’à ce que le bonus atteigne 0.' },
       ]
     }
   },
@@ -3252,7 +3246,6 @@ function updateAutoStats() {
   setAutoField('def-vol', vol);
 
   // CA : base calculée + note "ajouter bonus d'armure"
-  // CA : updated via updateCAFromArmor (also called here)
   updateCAFromArmor();
 
   // ── Initiative (DEX mod + blason) ──
@@ -3674,62 +3667,41 @@ function closePicker(type) {
 }
 
 function buildPickerContent(type) {
-  const className = document.getElementById('classe')?.value?.trim();
-  const cd = className ? CLASS_DATA[className] : null;
-  const allPowers = cd?.powers?.[type] || [];
-  const niveau = parseInt(document.getElementById('niveau')?.value) || 1;
-  const typeLabels = { atwill:'À volonté', encounter:'Par rencontre', daily:'Quotidien', utility:'Utilitaire' };
+  var className = document.getElementById("classe") ? document.getElementById("classe").value.trim() : "";
+  var cd = className ? CLASS_DATA[className] : null;
+  var allPowers = cd && cd.powers && cd.powers[type] ? cd.powers[type] : [];
+  var niveau = parseInt(document.getElementById("niveau") ? document.getElementById("niveau").value : "1") || 1;
+  var typeLabels = { atwill:"À volonté", encounter:"Par rencontre", daily:"Quotidien", utility:"Utilitaire" };
+  var levelGate = { atwill: 99, encounter: niveau, daily: niveau, utility: niveau };
+  var filteredPowers = allPowers.filter(function(p){ return (p.level||1) <= levelGate[type]; });
+  var lockedPowers   = allPowers.filter(function(p){ return (p.level||1) > levelGate[type]; });
 
-  // Level gates per power type (D&D 4e rules)
-  const levelGate = { atwill: 99, encounter: niveau, daily: niveau, utility: niveau };
-
-  // Filter by level
-  const filteredPowers = allPowers.filter(p => (p.level||1) <= levelGate[type]);
-  const lockedPowers   = allPowers.filter(p => (p.level||1) > levelGate[type]);
-
-  let classTab = '';
+  var classTab = "";
   if (allPowers.length > 0) {
-    const rows = filteredPowers.map((p,i) => {
-      const realIdx = allPowers.indexOf(p);
-      const enSub = p.nameEn ? `<div class="picker-power-sub">${p.nameEn}</div>` : '';
-      const atkSub = p.atk && p.atk !== '—' ? `<div class="picker-power-sub">${p.atk} · ${p.dmg||'—'}</div>` : '';
-      return `<div class="picker-power-option" onclick="addPickerPower('${type}',${realIdx})">
-        <div class="picker-power-lvl" style="color:var(--gold2);">N.${p.level||1}</div>
-        <div class="picker-power-info">
-          <div class="picker-power-name">${p.name}</div>
-          ${enSub}${atkSub}
-        </div>
-      </div>`;
-    }).join('');
-    const lockedRows = lockedPowers.map(p => `
-      <div class="picker-power-option" style="opacity:0.35;cursor:not-allowed;" title="Disponible au niveau ${p.level}">
-        <div class="picker-power-lvl" style="color:#e05;">N.${p.level||1}</div>
-        <div class="picker-power-info">
-          <div class="picker-power-name" style="color:#888;">🔒 ${p.name}</div>
-          <div class="picker-power-sub">Débloque au niveau ${p.level}</div>
-        </div>
-      </div>`).join('');
-    const lockNote = lockedPowers.length > 0 ? `<div style="font-size:9px;color:#666;margin:4px 0 2px;padding:4px 6px;border-top:1px solid #2a2a3e;">${lockedPowers.length} pouvoir(s) verouillé(s) — niveau insuffisant</div>` : '';
-    classTab = `<div id="pickerClassList-${type}" class="picker-class-list">${rows}${lockNote}${lockedRows}</div>`;
+    var rows = filteredPowers.map(function(p, i) {
+      var realIdx = allPowers.indexOf(p);
+      var enSub = p.nameEn ? "<div class='picker-power-sub'>"+p.nameEn+"</div>" : "";
+      var atkSub = p.atk && p.atk !== "—" ? "<div class='picker-power-sub'>"+p.atk+" · "+(p.dmg||"—")+"</div>" : "";
+      return "<div class='picker-power-option' onclick=\"addPickerPower('"+type+"',"+realIdx+")\"><div class='picker-power-lvl' style='color:var(--gold2);'>N."+(p.level||1)+"</div><div class='picker-power-info'><div class='picker-power-name'>"+p.name+"</div>"+enSub+atkSub+"</div></div>";
+    }).join("");
+    var lockedRows = lockedPowers.map(function(p) {
+      return "<div class='picker-power-option' style='opacity:0.35;cursor:not-allowed;' title='Disponible au niveau "+p.level+"'><div class='picker-power-lvl' style='color:#e05;'>N."+(p.level||1)+"</div><div class='picker-power-info'><div class='picker-power-name' style='color:#888;'>🔒 "+p.name+"</div><div class='picker-power-sub'>Niveau "+p.level+" requis</div></div></div>";
+    }).join("");
+    var lockNote = lockedPowers.length > 0 ? "<div style='font-size:9px;color:#666;margin:4px 0 2px;padding:4px 6px;border-top:1px solid #2a2a3e;'>"+lockedPowers.length+" pouvoir(s) verrouillé(s)</div>" : "";
+    classTab = "<div id='pickerClassList-"+type+"' class='picker-class-list'>"+rows+lockNote+lockedRows+"</div>";
   } else {
-    classTab = `<div class="picker-no-class">${cd ? 'Aucun pouvoir de ce type dans CLASS_DATA.' : 'Sélectionne d\'abord une classe dans le profil.'}</div>`;
+    classTab = "<div class='picker-no-class'>"+(cd ? "Aucun pouvoir de ce type." : "Sélectionne d'abord une classe.")+"</div>";
   }
-
-  const levelBadge = type !== 'atwill' ? `<span style="font-size:9px;color:#888;margin-left:6px;">· Niv. max affiché : ${niveau}</span>` : '';
-
-  return `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-      <span style="font-size:10px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Ajouter un pouvoir ${typeLabels[type]||type}${levelBadge}</span>
-      <button class="picker-close" onclick="closePicker('${type}')">✕</button>
-    </div>
-    <div class="picker-tabs">
-      <button class="picker-tab active" id="ptab-class-${type}" onclick="switchPickerTab('${type}','class')">📖 Classe${className?' — '+className:''}</button>
-      <button class="picker-tab" id="ptab-blank-${type}" onclick="switchPickerTab('${type}','blank')">✏️ Vierge</button>
-    </div>
-    <div id="pickerBody-class-${type}">${classTab}</div>
-    <div id="pickerBody-blank-${type}" style="display:none;">
-      <button class="picker-blank-btn" onclick="addBlankPower('${type}');closePicker('${type}')">+ Créer une carte vierge</button>
-    </div>`;
+  var levelBadge = type !== "atwill" ? "<span style='font-size:9px;color:#888;margin-left:6px;'>· Niv. max : "+niveau+"</span>" : "";
+  return "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;'>"
+    +"<span style='font-size:10px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:1px;'>Ajouter "+typeLabels[type]+" "+levelBadge+"</span>"
+    +"<button class='picker-close' onclick=\"closePicker('"+type+"')\">✕</button></div>"
+    +"<div class='picker-tabs'>"
+    +"<button class='picker-tab active' id='ptab-class-"+type+"' onclick=\"switchPickerTab('"+type+"','class')\">📖 Classe"+(className?" — "+className:"")+"</button>"
+    +"<button class='picker-tab' id='ptab-blank-"+type+"' onclick=\"switchPickerTab('"+type+"','blank')\">✏️ Vierge</button></div>"
+    +"<div id='pickerBody-class-"+type+"'>"+classTab+"</div>"
+    +"<div id='pickerBody-blank-"+type+"' style='display:none;'>"
+    +"<button class='picker-blank-btn' onclick=\"addBlankPower('"+type+"');closePicker('"+type+"')\">+ Créer une carte vierge</button></div>";
 }
 
 function switchPickerTab(type, tab) {
@@ -4052,7 +4024,7 @@ function toggleWeaponEditor() {
   const btn = document.getElementById('weaponEditorToggle');
   const open = ed.style.display === 'none' || ed.style.display === '';
   ed.style.display = open ? 'block' : 'none';
-  btn.textContent = (open ? '⚙ Personnaliser la liste d'armes ▾' : '⚙ Personnaliser la liste d'armes ▸');
+  btn.textContent = (open ? '⚙ Personnaliser la liste d’armes ▾' : '⚙ Personnaliser la liste d’armes ▸');
   if (open) {
     // Load saved list into textarea
     const saved = localStorage.getItem('ae5_custom_weapons') || '';
@@ -4088,7 +4060,7 @@ function initWeaponEditor() {
       'Épée longue (1d8, Martial)',
       'Épée courte (1d6, Militaire)',
       'Hache de guerre (1d10, Martial)',
-      'Masse d'armes (1d8, Militaire)',
+      'Masse d’armes (1d8, Militaire)',
       'Marteau de guerre (1d10)',
       'Lance (1d8, Allonge)',
       'Fléau (1d10, Martial)',
@@ -4098,7 +4070,7 @@ function initWeaponEditor() {
       'Arbalète légère (1d6, dist.10/20)',
       'Arbalète lourde (1d10)',
       'Épée large (2d6, deux-mains)',
-      'Hache d'armes (1d12, deux-mains)',
+      'Hache d’armes (1d12, deux-mains)',
       'Bâton de combat (1d8)',
       'Fokker Résonant (1d8, Arma)'
     ].join('\n');
@@ -4952,6 +4924,5 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 });
 </script>
-
 </body>
 </html>
