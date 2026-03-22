@@ -1564,7 +1564,15 @@
   <div class="identity-grid">
     <div class="id-field">
       <label>Nom du Personnage</label>
-      <input type="text" id="nom" placeholder="Nom..." oninput="autoSave()">
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input type="text" id="nom" placeholder="Nom..." oninput="autoSave()" style="flex:1;">
+        <div style="display:flex;gap:2px;flex-shrink:0;" title="Genre du personnage">
+          <button id="genre-h" onclick="setGenre('H')" style="background:#1a1a2e;border:1px solid #333;color:#888;padding:2px 7px;border-radius:4px 0 0 4px;cursor:pointer;font-size:11px;font-weight:700;">H</button>
+          <button id="genre-f" onclick="setGenre('F')" style="background:#1a1a2e;border:1px solid #333;border-left:none;color:#888;padding:2px 7px;border-radius:0;cursor:pointer;font-size:11px;font-weight:700;">F</button>
+          <button id="genre-a" onclick="setGenre('A')" style="background:#1a1a2e;border:1px solid #333;border-left:none;color:#888;padding:2px 7px;border-radius:0 4px 4px 0;cursor:pointer;font-size:11px;font-weight:700;">A</button>
+        </div>
+        <input type="hidden" id="genre" value="" oninput="autoSave()">
+      </div>
     </div>
     <div class="id-field">
       <label>Race</label>
@@ -2547,6 +2555,26 @@ function confirmFreeStats(freeVals) {
   setTimeout(function(){ if(msg.parentNode) msg.remove(); }, 2500);
 }
 
+function setGenre(val) {
+  document.getElementById('genre').value = val;
+  ['H','F','A'].forEach(function(g) {
+    var btn = document.getElementById('genre-' + g.toLowerCase());
+    if (!btn) return;
+    var active = val === g;
+    btn.style.background  = active ? 'var(--gold)' : '#1a1a2e';
+    btn.style.color        = active ? '#000'        : '#888';
+    btn.style.borderColor  = active ? 'var(--gold)'  : '#333';
+    // fix borders for middle button
+    if (g === 'F') btn.style.borderLeft = active ? '1px solid var(--gold)' : 'none';
+  });
+  autoSave();
+}
+
+function loadGenreButtons() {
+  var val = document.getElementById('genre')?.value || '';
+  if (val) setGenre(val);
+}
+
 function recallRaceToast() {
   const val = document.getElementById("race")?.value?.trim();
   if (!val) { alert("Aucune race sélectionnée."); return; }
@@ -3459,6 +3487,7 @@ function init() {
   buildMagicItems();
   buildRelicaire();
   loadSheet();
+  loadGenreButtons();
   updateNiveau();
   initWeaponEditor();
 }
@@ -4540,6 +4569,7 @@ function loadSheet() {
       const el = document.getElementById(id);
       if (el) el.value = val;
     });
+    loadGenreButtons();
 
     // Skills — restore trained state and misc bonus
     Object.entries(data.skills || {}).forEach(([key, skData]) => {
@@ -5496,7 +5526,9 @@ function buildPortraitPrompt() {
   const classeEn = classMap[classe] || classe.toLowerCase().replace(/\(.*\)/,'').trim();
 
   const extra = document.getElementById('portraitPromptExtra')?.value || '';
-  return encodeURIComponent(`fantasy portrait, ${raceEn} ${classeEn}, D&D 4th edition art style, dramatic lighting, detailed armor and weapons, dark fantasy, character art${extra ? ', '+extra : ''}${nom ? ', character named '+nom : ''}, cinematic, high quality, front-facing portrait`);
+  const genre = document.getElementById('genre')?.value || '';
+  const genreEn = genre === 'F' ? 'female woman' : genre === 'A' ? 'androgynous nonbinary' : 'male man';
+  return encodeURIComponent(`fantasy portrait, ${genreEn} ${raceEn} ${classeEn}, D&D 4th edition art style, dramatic lighting, detailed armor and weapons, dark fantasy, character art${extra ? ', '+extra : ''}${nom ? ', character named '+nom : ''}, cinematic, high quality, front-facing portrait`);
 }
 
 function switchPortraitTab(tab) {
