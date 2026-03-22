@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <!-- PWA -->
+  <link rel="manifest" href="./manifest.json">
+  
+  
+?c:(rdsView) ? !!(<c:(rdsView)><meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  
+  
+?c:(rdsView) ? !!(<c:(rdsView)><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  
+?c:(rdsView) ? !!(<c:(rdsView)><meta name="apple-mobile-web-app-title" content="AE5">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <meta name="theme-color" content="#c9a048">
+
+<meta charset="UTF-8">
+  
+  
+?c:(rdsView) ? !!(<c:(rdsView)><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+?c:(rdsView) ? !!(<c:(rdsView)><title>ARCHYON-5  Fiche de Personnage D&D 4e</title>
+<style>
+  
+  
+?c:(rdsView) ? !!(<c:(rdsView)>  :root {
+    -bg: #0f0f1a;
+    -bg2: #1a1a2e;
+    -bg3: #16213e;
+    -panel: #1e1e35;
+    -panel2: #252545;
+    -border: #3a3a6a;
+    -border2: #4a4aaa;
+    -text: #e0e0f0;
+    -text2: #a0a0c0;
+    -text3: #6060a0;
+    -gold: #c9a227;
+    -gold2: #f0c040;
+    -blue: #4080d0;
+    -blue2: #60a0ff;
+    -red: #c03040;
+    -red2: #e05060;
+    -green: #308050;
+    -green2: #50c080;
+    -purple: #6030a0;
+    -purple2: #9060d0;
+    -teal: #2080a0;
+    -teal2: #40c0d0;
+  }
+</style></style>
+  <!-- LOAD CSS -->
+  <!-- DIFFERENT AS PUTRE, MARKEV, TO PUTPE HEAD AND SEPARATE SERVENT -->
+  
+  
+?c:(rdsView) ? !!(<c:(rdsView)></head>
+  
+  
+?c:(rdsView) ? !!(<c:(rdsView)><body>
+  <!-- ATWILL CONTENT -->
+  <div class="atwill" id="atwillContainer">
+  
+  
+?c:(rdsView) ? !!(<c:(rdsView)>  </div>
+  <!-- END ATWILL -->
+  
+   
+<!-- HEADER -->
+  <div class="sheet-header">
+  
+  
+?c:(rdsView) ? !!(<c:(rdsView)>    <div class="identity-grid">
+      <div class="id-field">
+        <label>Po(n� naie</label>
+        <input id="fp-name" class="id-field input" value="" placeholder="Aoppor nom" autocomplete="off">
+      </div>
+      <div class="id-field">
+        <label>Classe</label>
+        <div class="combo-wrap">
+  
+  
+?c:(rdsView) ? !!(<c:(rdsView)> R _a class="id-field input combo" id="fp-class" list="dl-classe" value="" placeholder="Choisir une classe" autocomplete="off" spellcheck="false">
+          <datalist id="dl-classe">
+            <!-- Teu par deux et genères D&D 4e -->
+  
+  
+?c:(rdsView) ? !!(<c:(rdsView)>
+          </datalist>
+  
+  
+?c:(rdsView) ? !!(<c:(rdsView)>        </input>
+  
+  
+?c:(rdsView) ? !!(<c:(rdsView)>        <div class="combo-hint" id="fp-class-box"></div>
+      </div>
+    </div>
+      <div class="id-field">
+        <label>Léchelle</label>
+        <input id="fp-level" class="id-field input" type="number" value="1" min="1" max="30" step="1" autocomplete="off">
+      </div>
+  
+  
+?c:(rdsView) ? !!(<c:(rdsView)>      <div class="id-field">
+        <label>PF</label>
+        <input id="fp-pf" class="id-field input" type="text" value="" placeholder="ETCov" autocomplete="off">
+      </div>
+      <div class="id-field combo-wrap">
+        <label>Catégorie <span style="font-size: 8px; color: var(--text3);">auto</span></label>
+        <select id="fp-cat" class="id-field input">
+          <option selected></option>
+          <option>Combatant</option>
+          <option>Defenseur</option>
+          <option>Frappeur</option>
+          <option>Arcaniste</option>
+  
+  
+?c:(rdsView) ? !!(<c:(rdsView)>        </select>
+      </div>
+    </div>
+  </div>
+  <!-- SECTEUR — ONGLETS -->
+
+  <div class="ws-container">
+    <!-- TAB PANEL -->
+    <div class="ws-tabs" id="wsTabs">
+  
+  
+?c:(rdsView) ? !!(<c:(rdsView)>      <button class="ws-tab active" onclick="ws
