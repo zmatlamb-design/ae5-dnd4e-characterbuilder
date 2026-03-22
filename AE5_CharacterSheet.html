@@ -2585,23 +2585,23 @@ const CLASS_DATA = {
   'Chantelame (Bladesinger)': { hp1:12, hpLvl:5, surges:7, defBonus:{vig:0,ref:0,vol:2}, mainStats:['INT','DEX'], source:'Arcanique',
     powers: {
       atwill:[
-        { name:'Projectile Magique', nameEn:'Magic Missile (NCS p.66)', type:'À volonté · Arcanique · Évocation · Force · Implement', level:1, tags:['standard','distance 20'], atk:'Automatique (aucun jet)', dmg:'2+INT force', effect:'Touche automatiquement. Si l’Implement a un bonus d’amélioration, l’ajouter aux dégâts. Peut être utilisé comme Attaque de base à distance. Niv.11 : 3+INT. Niv.21 : 5+INT.' },
-        { name:'Givre Mordant (Sortilame)', nameEn:'Frost Bite Bladespell (NCS p.67)', type:'À volonté · Arcanique · Sortilame · Froid', level:1, tags:['sans action','distance 10'], atk:'— (déclencheur)', dmg:'DEX froid', effect:'Déclencheur : Tu touches un ennemi avec une ABM à une main (autre main vide/baguette). La cible est Ralentie jusqu’à la fin de son prochain tour. Niv.11 : 2+DEX. Niv.21 : 4+DEX. Un seul Sortilame par attaque déclenche.' },
+        { name:'Projectile Magique', nameEn:'Magic Missile (NCS p.66)', type:'À volonté · Arcanique · Évocation · Force · Implement', level:1, tags:['standard','distance 20'], atk:'Automatique (aucun jet)', dmg:'2+INT force', effect:'Touche automatiquement. Si l'Implement a un bonus d'amélioration, l'ajouter aux dégâts. Peut être utilisé comme Attaque de base à distance. Niv.11 : 3+INT. Niv.21 : 5+INT.' },
+        { name:'Givre Mordant (Sortilame)', nameEn:'Frost Bite Bladespell (NCS p.67)', type:'À volonté · Arcanique · Sortilame · Froid', level:1, tags:['sans action','distance 10'], atk:'— (déclencheur)', dmg:'DEX froid', effect:'Déclencheur : Tu touches un ennemi avec une ABM à une main (autre main vide/baguette). La cible est Ralentie jusqu'à la fin de son prochain tour. Niv.11 : 2+DEX. Niv.21 : 4+DEX. Un seul Sortilame par attaque déclenche.' },
       ],
       encounter:[
-        { name:'Choc Givrant', nameEn:'Chill Strike (NCS/PHB1 Bladesinger Daily L1)', type:'Par rencontre · Arcanique · Froid · Évocation · Implement', level:1, tags:['standard','distance 10'], atk:'+½NIV+INT vs Vigueur', dmg:'2d8+INT froid', effect:'Touché : la cible est Étourdie jusqu’à la fin de ton prochain tour. Raté : la cible est Ralentie jusqu’à la fin de ton prochain tour.' },
-        { name:'Jet de Couleurs', nameEn:'Color Spray (NCS/PHB1 L3)', type:'Par rencontre · Arcanique · Évocation · Radieux · Implement', level:3, tags:['standard','explosion rapprochée 5'], atk:'+½NIV+INT vs Volonté', dmg:'1d6+INT radiants', effect:'Touché : la cible est Étourdie jusqu’à la fin de ton prochain tour. Raté : moitié.' },
+        { name:'Choc Givrant', nameEn:'Chill Strike (NCS/PHB1 Bladesinger Daily L1)', type:'Par rencontre · Arcanique · Froid · Évocation · Implement', level:1, tags:['standard','distance 10'], atk:'+½NIV+INT vs Vigueur', dmg:'2d8+INT froid', effect:'Touché : la cible est Étourdie jusqu'à la fin de ton prochain tour. Raté : la cible est Ralentie jusqu'à la fin de ton prochain tour.' },
+        { name:'Jet de Couleurs', nameEn:'Color Spray (NCS/PHB1 L3)', type:'Par rencontre · Arcanique · Évocation · Radieux · Implement', level:3, tags:['standard','explosion rapprochée 5'], atk:'+½NIV+INT vs Volonté', dmg:'1d6+INT radiants', effect:'Touché : la cible est Étourdie jusqu'à la fin de ton prochain tour. Raté : moitié.' },
         { name:'Colère Hivernale', nameEn:"Winter's Wrath (NCS/PHB1 L7)", type:'Par rencontre · Arcanique · Froid · Zone · Implement', level:7, tags:['standard','explosion 2 dans 10'], atk:'+½NIV+INT vs Vigueur', dmg:'2d8+INT froid', effect:'Zone persistante (JS mineur pour maintenir) : légèrement obscurcie, toute créature commencçant son tour dans la zone subit ton mod INT en dégâts de froid. Raté : moitié.' },
       ],
       daily:[
         { name:'Mains Ardentes', nameEn:'Burning Hands (NCS/PHB1 L1)', type:'Quotidien · Arcanique · Feu · Évocation · Implement', level:1, tags:['standard','explosion rapprochée 5'], atk:'+½NIV+INT vs Réflexes', dmg:'2d6+INT feu', effect:'Raté : moitié.' },
-        { name:'Ignorance Béatie', nameEn:'Blissful Ignorance (NCS/PHB1 L3 as L5)', type:'Quotidien · Arcanique · Charme · Enchantement', level:5, tags:['standard','explosion 2 dans 10'], atk:'— (aucun jet d’attaque)', dmg:'—', effect:'Chaque cible dans la zone est Ralentie et ne peut pas effectuer d’actions d’opportunité ou d’actions immédiates jusqu’à la fin de ton prochain tour.' },
+        { name:'Ignorance Béatie', nameEn:'Blissful Ignorance (NCS/PHB1 L3 as L5)', type:'Quotidien · Arcanique · Charme · Enchantement', level:5, tags:['standard','explosion 2 dans 10'], atk:'— (aucun jet d'attaque)', dmg:'—', effect:'Chaque cible dans la zone est Ralentie et ne peut pas effectuer d'actions d'opportunité ou d'actions immédiates jusqu'à la fin de ton prochain tour.' },
         { name:'Bélier Spectral', nameEn:'Spectral Ram (NCS/PHB1 L7 as L9)', type:'Quotidien · Arcanique · Force · Évocation · Implement', level:9, tags:['standard','distance 10'], atk:'+½NIV+INT vs Vigueur', dmg:'2d10+INT force', effect:'Touché : repousse la cible de 3 cases et elle tombe à terre. Raté : repousse la cible de 3 cases.' },
       ],
       utility:[
-        { name:'Bouclier', nameEn:'Shield (NCS p.70)', type:'Utilitaire · Arcanique', level:2, tags:['interruption','personnel'], atk:'—', dmg:'—', effect:'Déclencheur : tu es touché par une attaque. Tu gagnes +4 bonus de pouvoir à CA et Réflexes contre cette attaque et jusqu’à la fin de ton prochain tour.' },
-        { name:'Porte Dimensionnelle', nameEn:'Dimension Door (NCS p.71)', type:'Utilitaire · Arcanique · Téléportation', level:6, tags:['déplacement','quotidien'], atk:'—', dmg:'—', effect:'Tu te téléportes jusqu’à 10 cases.' },
-        { name:'Images Miroir', nameEn:'Mirror Image (NCS p.72)', type:'Utilitaire · Arcanique · Illusion', level:10, tags:['mineure','quotidien'], atk:'—', dmg:'—', effect:'3 doubles apparaissent. Tu gagnes +6 à CA. Chaque fois qu’une attaque te rate, un double disparaît et le bonus baisse de −2. Dure 1 heure ou jusqu’à ce que le bonus atteigne 0.' },
+        { name:'Bouclier', nameEn:'Shield (NCS p.70)', type:'Utilitaire · Arcanique', level:2, tags:['interruption','personnel'], atk:'—', dmg:'—', effect:'Déclencheur : tu es touché par une attaque. Tu gagnes +4 bonus de pouvoir à CA et Réflexes contre cette attaque et jusqu'à la fin de ton prochain tour.' },
+        { name:'Porte Dimensionnelle', nameEn:'Dimension Door (NCS p.71)', type:'Utilitaire · Arcanique · Téléportation', level:6, tags:['déplacement','quotidien'], atk:'—', dmg:'—', effect:'Tu te téléportes jusqu'à 10 cases.' },
+        { name:'Images Miroir', nameEn:'Mirror Image (NCS p.72)', type:'Utilitaire · Arcanique · Illusion', level:10, tags:['mineure','quotidien'], atk:'—', dmg:'—', effect:'3 doubles apparaissent. Tu gagnes +6 à CA. Chaque fois qu'une attaque te rate, un double disparaît et le bonus baisse de −2. Dure 1 heure ou jusqu'à ce que le bonus atteigne 0.' },
       ]
     }
   },
@@ -3674,11 +3674,11 @@ function closePicker(type) {
 }
 
 function buildPickerContent(type) {
-  const className = document.getElementById(‘classe’)?.value?.trim();
+  const className = document.getElementById('classe')?.value?.trim();
   const cd = className ? CLASS_DATA[className] : null;
   const allPowers = cd?.powers?.[type] || [];
-  const niveau = parseInt(document.getElementById(‘niveau’)?.value) || 1;
-  const typeLabels = { atwill:’À volonté’, encounter:’Par rencontre’, daily:’Quotidien’, utility:’Utilitaire’ };
+  const niveau = parseInt(document.getElementById('niveau')?.value) || 1;
+  const typeLabels = { atwill:'À volonté', encounter:'Par rencontre', daily:'Quotidien', utility:'Utilitaire' };
 
   // Level gates per power type (D&D 4e rules)
   const levelGate = { atwill: 99, encounter: niveau, daily: niveau, utility: niveau };
@@ -3687,20 +3687,20 @@ function buildPickerContent(type) {
   const filteredPowers = allPowers.filter(p => (p.level||1) <= levelGate[type]);
   const lockedPowers   = allPowers.filter(p => (p.level||1) > levelGate[type]);
 
-  let classTab = ‘’;
+  let classTab = '';
   if (allPowers.length > 0) {
     const rows = filteredPowers.map((p,i) => {
       const realIdx = allPowers.indexOf(p);
-      const enSub = p.nameEn ? `<div class="picker-power-sub">${p.nameEn}</div>` : ‘’;
-      const atkSub = p.atk && p.atk !== ‘—‘ ? `<div class="picker-power-sub">${p.atk} · ${p.dmg||’—‘}</div>` : ‘’;
-      return `<div class="picker-power-option" onclick="addPickerPower(‘${type}’,${realIdx})">
+      const enSub = p.nameEn ? `<div class="picker-power-sub">${p.nameEn}</div>` : '';
+      const atkSub = p.atk && p.atk !== '—' ? `<div class="picker-power-sub">${p.atk} · ${p.dmg||'—'}</div>` : '';
+      return `<div class="picker-power-option" onclick="addPickerPower('${type}',${realIdx})">
         <div class="picker-power-lvl" style="color:var(--gold2);">N.${p.level||1}</div>
         <div class="picker-power-info">
           <div class="picker-power-name">${p.name}</div>
           ${enSub}${atkSub}
         </div>
       </div>`;
-    }).join(‘’);
+    }).join('');
     const lockedRows = lockedPowers.map(p => `
       <div class="picker-power-option" style="opacity:0.35;cursor:not-allowed;" title="Disponible au niveau ${p.level}">
         <div class="picker-power-lvl" style="color:#e05;">N.${p.level||1}</div>
@@ -3708,27 +3708,27 @@ function buildPickerContent(type) {
           <div class="picker-power-name" style="color:#888;">🔒 ${p.name}</div>
           <div class="picker-power-sub">Débloque au niveau ${p.level}</div>
         </div>
-      </div>`).join(‘’);
-    const lockNote = lockedPowers.length > 0 ? `<div style="font-size:9px;color:#666;margin:4px 0 2px;padding:4px 6px;border-top:1px solid #2a2a3e;">${lockedPowers.length} pouvoir(s) verouillé(s) — niveau insuffisant</div>` : ‘’;
+      </div>`).join('');
+    const lockNote = lockedPowers.length > 0 ? `<div style="font-size:9px;color:#666;margin:4px 0 2px;padding:4px 6px;border-top:1px solid #2a2a3e;">${lockedPowers.length} pouvoir(s) verouillé(s) — niveau insuffisant</div>` : '';
     classTab = `<div id="pickerClassList-${type}" class="picker-class-list">${rows}${lockNote}${lockedRows}</div>`;
   } else {
-    classTab = `<div class="picker-no-class">${cd ? ‘Aucun pouvoir de ce type dans CLASS_DATA.’ : ‘Sélectionne d\’abord une classe dans le profil.’}</div>`;
+    classTab = `<div class="picker-no-class">${cd ? 'Aucun pouvoir de ce type dans CLASS_DATA.' : 'Sélectionne d\'abord une classe dans le profil.'}</div>`;
   }
 
-  const levelBadge = type !== ‘atwill’ ? `<span style="font-size:9px;color:#888;margin-left:6px;">· Niv. max affiché : ${niveau}</span>` : ‘’;
+  const levelBadge = type !== 'atwill' ? `<span style="font-size:9px;color:#888;margin-left:6px;">· Niv. max affiché : ${niveau}</span>` : '';
 
   return `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
       <span style="font-size:10px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Ajouter un pouvoir ${typeLabels[type]||type}${levelBadge}</span>
-      <button class="picker-close" onclick="closePicker(‘${type}’)">✕</button>
+      <button class="picker-close" onclick="closePicker('${type}')">✕</button>
     </div>
     <div class="picker-tabs">
-      <button class="picker-tab active" id="ptab-class-${type}" onclick="switchPickerTab(‘${type}’,’class’)">📖 Classe${className?’ — ‘+className:’’}</button>
-      <button class="picker-tab" id="ptab-blank-${type}" onclick="switchPickerTab(‘${type}’,’blank’)">✏️ Vierge</button>
+      <button class="picker-tab active" id="ptab-class-${type}" onclick="switchPickerTab('${type}','class')">📖 Classe${className?' — '+className:''}</button>
+      <button class="picker-tab" id="ptab-blank-${type}" onclick="switchPickerTab('${type}','blank')">✏️ Vierge</button>
     </div>
     <div id="pickerBody-class-${type}">${classTab}</div>
     <div id="pickerBody-blank-${type}" style="display:none;">
-      <button class="picker-blank-btn" onclick="addBlankPower(‘${type}’);closePicker(‘${type}’)">+ Créer une carte vierge</button>
+      <button class="picker-blank-btn" onclick="addBlankPower('${type}');closePicker('${type}')">+ Créer une carte vierge</button>
     </div>`;
 }
 
@@ -4052,7 +4052,7 @@ function toggleWeaponEditor() {
   const btn = document.getElementById('weaponEditorToggle');
   const open = ed.style.display === 'none' || ed.style.display === '';
   ed.style.display = open ? 'block' : 'none';
-  btn.textContent = (open ? '⚙ Personnaliser la liste d’armes ▾' : '⚙ Personnaliser la liste d’armes ▸');
+  btn.textContent = (open ? '⚙ Personnaliser la liste d'armes ▾' : '⚙ Personnaliser la liste d'armes ▸');
   if (open) {
     // Load saved list into textarea
     const saved = localStorage.getItem('ae5_custom_weapons') || '';
@@ -4088,7 +4088,7 @@ function initWeaponEditor() {
       'Épée longue (1d8, Martial)',
       'Épée courte (1d6, Militaire)',
       'Hache de guerre (1d10, Martial)',
-      'Masse d’armes (1d8, Militaire)',
+      'Masse d'armes (1d8, Militaire)',
       'Marteau de guerre (1d10)',
       'Lance (1d8, Allonge)',
       'Fléau (1d10, Martial)',
@@ -4098,7 +4098,7 @@ function initWeaponEditor() {
       'Arbalète légère (1d6, dist.10/20)',
       'Arbalète lourde (1d10)',
       'Épée large (2d6, deux-mains)',
-      'Hache d’armes (1d12, deux-mains)',
+      'Hache d'armes (1d12, deux-mains)',
       'Bâton de combat (1d8)',
       'Fokker Résonant (1d8, Arma)'
     ].join('\n');
