@@ -1571,7 +1571,10 @@
       <div class="combo-wrap">
         <input type="text" id="race" class="combo" list="dl-race" placeholder="Humain, Deva..." oninput="autoSave()" onchange="onRaceChange(this.value)" autocomplete="off" title="Choisir dans la liste ou saisir une race homebrew">
       </div>
-      <div class="combo-hint">↕ Canon AE5 · Homebrew libre</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;">
+        <div class="combo-hint">↕ Canon AE5 · Homebrew libre</div>
+        <button onclick="recallRaceToast()" title="Rappeler les bonus raciaux" style="background:none;border:1px solid #333;border-radius:4px;color:#c9a260;font-size:9px;padding:1px 6px;cursor:pointer;line-height:1.6;flex-shrink:0;">🧬 Bonus</button>
+      </div>
     </div>
     <div class="id-field">
       <label>Culture / Bastion</label>
@@ -2259,6 +2262,14 @@ const RACE_DATA = {
   "Résonnant":           { stats:{con:2,int:2}, speed:6, vision:"Basse-lumière", bonusDef:"Vig+1", features:["Infatigable (pas besoin manger/dormir)","Correction Résonante (réduction dégâts 1)"], promptEn:"warforged construct resonant mechanical" },
   "Warforged (Mécanique)":{ stats:{con:2,for:2}, speed:5, vision:"Basse-lumière", bonusDef:"Vig+2", features:["Armure Intégrée (+1 CA permanent)","Réparation Mécanique (Metier au lieu de Médecine)"], promptEn:"warforged mechanical construct" },
 };
+
+function recallRaceToast() {
+  const val = document.getElementById("race")?.value?.trim();
+  if (!val) { alert("Aucune race sélectionnée."); return; }
+  const rd = RACE_DATA[val];
+  if (!rd) { alert(`Race "${val}" introuvable dans les données — vérifie l'orthographe ou ajoute-la via 📋 Races & Classes.`); return; }
+  showRaceToast(val, rd);
+}
 
 function onRaceChange(val) {
   const rd = RACE_DATA[val];
