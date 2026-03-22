@@ -142,7 +142,25 @@
     margin-top: 2px;
     letter-spacing: 0.5px;
   }
-  .niveau-big {
+  /* ── Portrait slot on character sheet ── */
+  .header-body { display:flex; gap:12px; align-items:flex-start; }
+  .portrait-slot {
+    width:100px; min-width:100px; height:128px;
+    background:var(--bg); border:2px dashed #333; border-radius:8px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    overflow:hidden; position:relative; flex-shrink:0;
+    transition:border-color .2s, box-shadow .2s;
+  }
+  .portrait-slot:hover { border-color:var(--gold); box-shadow:0 0 10px rgba(201,162,96,.2); }
+  .portrait-slot img { width:100%;height:100%;object-fit:cover;border-radius:6px;display:block; }
+  .portrait-slot .ps-edit {
+    display:none; position:absolute; inset:0; background:rgba(0,0,0,.65);
+    align-items:center; justify-content:center; font-size:10px; color:var(--gold);
+    flex-direction:column; gap:3px; border-radius:6px;
+  }
+  .portrait-slot:hover .ps-edit { display:flex; }
+
+    .niveau-big {
     font-size: 32px;
     font-weight: 900;
     color: var(--gold2);
@@ -1542,6 +1560,7 @@
 <!-- ═══════════════ HEADER IDENTITÉ ═══════════════ -->
 <div class="sheet-header">
   <div class="header-title">◇ Fiche de Personnage</div>
+  <div class="header-body">
   <div class="identity-grid">
     <div class="id-field">
       <label>Nom du Personnage</label>
@@ -1585,7 +1604,18 @@
              style="display:none;"
              oninput="updateNiveau()">
     </div>
+  </div><!-- /identity-grid -->
+  <!-- ── Portrait Slot ── -->
+  <div class="portrait-slot" id="portraitSlot" onclick="openPortrait()" oncontextmenu="portraitSlotRightClick(event)" title="Clic: générer/modifier · Clic droit: effacer">
+    <img id="sheetPortraitImg" src="" style="display:none;">
+    <div id="portraitPlaceholder" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:4px;">
+      <div style="font-size:28px;opacity:.4;">🧙</div>
+      <div style="font-size:8px;color:#444;text-align:center;letter-spacing:.5px;">PORTRAIT</div>
+      <div style="font-size:7px;color:#333;text-align:center;">Cliquer pour<br>générer</div>
+    </div>
+    <div class="ps-edit">✏ Modifier</div>
   </div>
+  </div><!-- /header-body -->
 </div>
 
 <!-- ═══════════════ TAB: COMBAT ═══════════════ -->
@@ -4650,9 +4680,17 @@ if ('serviceWorker' in navigator && location.protocol !== 'blob:' && !location.h
     <textarea id="portraitPromptExtra" rows="2" placeholder="Détails supplémentaires (ex: cheveux rouges, cicatrice, capuche noire...)" style="width:100%;background:#0a0a14;border:1px solid #333;border-radius:6px;color:#ccc;font-size:11px;padding:6px;font-family:inherit;resize:none;box-sizing:border-box;margin-bottom:10px;"></textarea>
     <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
       <button onclick="generatePortrait()" style="background:#c9a260;border:none;color:#12121e;border-radius:6px;padding:7px 14px;cursor:pointer;font-size:11px;font-weight:700;">🔄 Regénérer</button>
+      <button onclick="savePortraitToSheet()" style="background:#5a9f7a;border:none;color:#12121e;border-radius:6px;padding:7px 14px;cursor:pointer;font-size:11px;font-weight:700;">💾 Sauver sur la fiche</button>
       <button onclick="downloadPortrait()" style="background:none;border:1px solid #c9a260;color:#c9a260;border-radius:6px;padding:7px 14px;cursor:pointer;font-size:11px;">⬇ Télécharger</button>
     </div>
-    <div style="font-size:9px;color:#444;margin-top:8px;">Pollinations.ai · Gratuit · Sans compte · Peut être lent</div>
+    <!-- Upload -->
+    <div style="margin-top:8px;display:flex;align-items:center;gap:8px;justify-content:center;">
+      <label style="padding:6px 14px;border:1px dashed #444;border-radius:6px;color:#888;font-size:10px;cursor:pointer;display:inline-block;">
+        📁 Uploader une image
+        <input type="file" accept="image/*" onchange="uploadPortraitFromFile(this)" style="display:none;">
+      </label>
+    </div>
+    <div style="font-size:9px;color:#444;margin-top:6px;">Pollinations.ai · Gratuit · Sans compte · Peut être lent</div>
   </div>
 
   <!-- PERCHANCE TAB -->
@@ -5034,12 +5072,23 @@ function generateHorde() {
                   wrap.innerHTML = `<div style="padding:8px;font-size:10px;text-align:center;">
                     <a href="${imgUrl}" target="_blank" style="color:#6a9fd8;">🔗 Voir l'image générée</a></div>`;
                 };
-                // Download button
+                // Action buttons
+                const btnRow = document.createElement("div");
+                btnRow.style.cssText = "display:flex;gap:6px;margin-top:6px;";
+                const saveBtn = document.createElement("button");
+                saveBtn.textContent = "💾 Sauver sur la fiche";
+                saveBtn.style.cssText = "flex:1;padding:6px;background:#5a9f7a;border:none;border-radius:5px;color:#12121e;font-size:10px;font-weight:700;cursor:pointer;";
+                saveBtn.onclick = () => {
+                  window.__lastPortraitBlob = imgUrl;
+                  savePortraitToSheet.call({target:saveBtn});
+                };
                 const dlBtn = document.createElement("button");
                 dlBtn.textContent = "⬇ Télécharger";
-                dlBtn.style.cssText = "margin-top:6px;width:100%;padding:6px;background:none;border:1px solid #6a9fd8;border-radius:5px;color:#6a9fd8;font-size:10px;cursor:pointer;";
+                dlBtn.style.cssText = "padding:6px 10px;background:none;border:1px solid #6a9fd8;border-radius:5px;color:#6a9fd8;font-size:10px;cursor:pointer;";
                 dlBtn.onclick = () => window.open(imgUrl, "_blank");
-                wrap.appendChild(dlBtn);
+                btnRow.appendChild(saveBtn);
+                btnRow.appendChild(dlBtn);
+                wrap.appendChild(btnRow);
               });
           }
           // Still waiting
@@ -5081,6 +5130,100 @@ function openPortrait() {
   overlay.style.display = 'flex';
   generatePortrait();
 }
+
+function portraitSlotRightClick(e) {
+  e.preventDefault();
+  const img = document.getElementById("sheetPortraitImg");
+  if (!img || img.style.display === "none") {
+    openPortrait(); return;
+  }
+  if (confirm("Effacer le portrait de la fiche ?")) clearSheetPortrait();
+}
+
+
+// ── Portrait on Sheet ─────────────────────────────
+
+function setSheetPortrait(dataUrl) {
+  const img = document.getElementById("sheetPortraitImg");
+  const ph  = document.getElementById("portraitPlaceholder");
+  if (!img) return;
+  img.src = dataUrl;
+  img.style.display = "block";
+  if (ph) ph.style.display = "none";
+  // Persist separately (can be large)
+  try { localStorage.setItem("ae5_portrait", dataUrl); } catch(e) {}
+  autoSave();
+}
+
+function clearSheetPortrait() {
+  const img = document.getElementById("sheetPortraitImg");
+  const ph  = document.getElementById("portraitPlaceholder");
+  if (img) { img.src = ""; img.style.display = "none"; }
+  if (ph)  ph.style.display = "flex";
+  try { localStorage.removeItem("ae5_portrait"); } catch(e) {}
+}
+
+function loadSheetPortrait() {
+  try {
+    const saved = localStorage.getItem("ae5_portrait");
+    if (saved) setSheetPortrait(saved);
+  } catch(e) {}
+}
+
+function savePortraitToSheet() {
+  // Try blob URL first (Pollinations fetch result)
+  const blobUrl = window.__lastPortraitBlob;
+  const directUrl = window.__lastPortraitUrl;
+  if (!blobUrl && !directUrl) {
+    alert("Génère d'abord un portrait avant de le sauvegarder.");
+    return;
+  }
+  const btn = event?.target;
+  if (btn) { btn.textContent = "⏳..."; btn.disabled = true; }
+
+  const toBase64 = (url) => fetch(url)
+    .then(r => r.blob())
+    .then(blob => new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload = () => res(reader.result);
+      reader.onerror = rej;
+      reader.readAsDataURL(blob);
+    }));
+
+  toBase64(blobUrl || directUrl)
+    .then(dataUrl => {
+      setSheetPortrait(dataUrl);
+      if (btn) { btn.textContent = "✅ Sauvegardé!"; setTimeout(()=>{ btn.textContent = "💾 Sauver sur la fiche"; btn.disabled = false; }, 2000); }
+    })
+    .catch(() => {
+      if (btn) { btn.textContent = "💾 Sauver sur la fiche"; btn.disabled = false; }
+      // Fallback: save the URL directly (won't persist offline)
+      if (directUrl) {
+        setSheetPortrait(directUrl);
+        if (btn) btn.textContent = "✅ Sauvegardé!";
+      } else {
+        alert("Impossible de convertir l'image. Télécharge-la et utilise Uploader.");
+      }
+    });
+}
+
+function uploadPortraitFromFile(input) {
+  const file = input?.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    setSheetPortrait(e.target.result);
+    window.__lastPortraitBlob = e.target.result;
+    // Show a quick confirmation
+    const label = input.parentElement;
+    if (label) { const old = label.innerHTML; label.textContent = "✅ Portrait chargé!"; setTimeout(()=>{ label.innerHTML = old; }, 2000); }
+  };
+  reader.readAsDataURL(file);
+}
+
+// Load portrait on page init
+document.addEventListener("DOMContentLoaded", loadSheetPortrait);
+
 
 function closePortrait() {
   document.getElementById('portraitOverlay').style.display = 'none';
