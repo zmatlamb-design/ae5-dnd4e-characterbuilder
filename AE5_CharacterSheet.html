@@ -1534,6 +1534,7 @@
     <div class="toolbar-sep"></div>
     <button class="btn btn-red" onclick="nouveauPersonnage()" title="Effacer toutes les données et repartir de zéro">🆕 Nouveau</button>
     <button class="btn btn-outline" onclick="openCreationWizard()" title="Créer un personnage guidé étape par étape" style="border-color:#6a9fd8;color:#6a9fd8;">✨ Créer</button>
+    <button class="btn btn-outline" onclick="openPNJGenerator()" title="Générer un PNJ aléatoire" style="border-color:#b070f0;color:#b070f0;">🎲 PNJ</button>
     <button class="btn btn-outline" onclick="window.print()" title="Imprimer la fiche complète">🖨️ Imprimer</button>
     <span class="toolbar-info">Auto-sauvegarde · ARCHYON-5</span>
       <a class="btn btn-outline" href="https://iws.mx/dnd/?list" target="_blank" title="D&D 4e Compendium en ligne" style="text-decoration:none;font-size:10px;padding:4px 8px;">📖 Compendium</a>
@@ -7533,13 +7534,17 @@ var __wizSteps = ['identity','race','stats','class'];
 var __pointBuyPts = 27;
 
 function wizRoll4d6() {
-  var keys = ['for','con','dex','int','sag','cha'];
-  keys.forEach(function(k) {
-    var dice = [0,0,0,0].map(function(){ return Math.floor(Math.random()*6)+1; });
-    dice.sort(function(a,b){return b-a;});
-    var total = dice[0]+dice[1]+dice[2];
-    __wizData.stats[k] = total;
+  // Roll 4d6 drop lowest, assign by class stat priority
+  const cd = CLASS_DATA[wizState.classe];
+  const mainStats = (cd?.mainStats||[]).map(s=>s.toLowerCase());
+  const priority = [...mainStats, ...STAT_KEYS.filter(k=>!mainStats.includes(k))];
+  const rolls = STAT_KEYS.map(()=>{
+    const d = [1,2,3,4].map(()=>Math.floor(Math.random()*6)+1);
+    d.sort((a,b)=>b-a);
+    return d[0]+d[1]+d[2];
   });
+  rolls.sort((a,b)=>b-a); // best scores to priority stats
+  priority.forEach((k,i)=>{ wizState.stats[k] = rolls[i]||10; });
   renderWizStep();
 }
 
@@ -7806,6 +7811,7 @@ function renderWizStats(el) {
   <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
     ${STANDARD_ARRAYS.map((arr,i)=>`<button onclick="applyStatArray(${i})" style="background:${i===0?'rgba(201,162,39,0.1)':'none'};border:1px solid ${i===0?'#c9a260':'#333'};color:${i===0?'#c9a260':'#888'};border-radius:6px;padding:6px 12px;cursor:pointer;font-size:10px;">${arr.join('/')}</button>`).join('')}
     <button onclick="wizState.statMethod='buy';renderWizStep()" style="background:none;border:1px solid #333;color:#888;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:10px;">⚖️ Achat de points</button>
+    <button onclick="wizRoll4d6()" style="background:rgba(106,159,216,0.15);border:1px solid #6a9fd8;color:#6a9fd8;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:10px;font-weight:700;">🎲 4d6 garde 3</button>
   </div>
   <div id="wizStatGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
   ${STAT_KEYS.map((k,i)=>{
@@ -8830,6 +8836,178 @@ function deLoadCustomData() {
 
 // Load custom data on startup
 document.addEventListener("DOMContentLoaded", deLoadCustomData);
+
+// ═══════════════ PNJ GENERATOR ═══════════════
+const PNJ_NOMS_M = ['Aldric','Bram','Caelum','Doran','Erwin','Falk','Gavril','Hectar',
+  'Ivar','Jareth','Kael','Leoric','Moric','Navar','Osric','Patrek','Rayan','Sorn',
+  'Tarek','Ulrik','Varek','Wulfram','Xan','Yorick','Zarek','Aldren','Baelric',
+  'Corvus','Dain','Edric','Falon','Garen','Harek','Iskar','Jarek','Kovar'];
+const PNJ_NOMS_F = ['Aela','Briala','Caela','Daria','Elara','Faela','Gwynn','Hera',
+  'Isara','Jael','Kaela','Lyra','Mira','Naela','Odara','Petra','Rael','Sera',
+  'Talia','Ulara','Vaela','Wren','Xara','Yriel','Zara','Aria','Brea','Caela',
+  'Dira','Eris','Fyra','Gael','Hael','Imara','Jara','Kira'];
+const PNJ_NOMS_FAMILLE = ['Fer-Noir','Pierre-d’Or','Flamme-Pâle','Vent-de-Cendre',
+  'Lame-d’Argent','Oeil-de-Tempête','Brise-Roc','Cœur-de-Forge','Ombre-Vive',
+  'Marche-Loin','Sang-Fort','Croc-d’Ivoire','Poing-de-Fer','Aile-Noire','Voix-du-Vide'];
+
+let __lastPNJ = null;
+
+function openPNJGenerator() {
+  // Populate race/class selects
+  const raceEl = document.getElementById('pnjOptRace');
+  const classeEl = document.getElementById('pnjOptClasse');
+  if (raceEl.options.length <= 1) {
+    Object.keys(RACE_DATA).forEach(r => {
+      const opt = document.createElement('option'); opt.value=r; opt.textContent=r;
+      raceEl.appendChild(opt);
+    });
+  }
+  if (classeEl.options.length <= 1) {
+    Object.keys(CLASS_DATA).forEach(c => {
+      const opt = document.createElement('option'); opt.value=c; opt.textContent=c;
+      classeEl.appendChild(opt);
+    });
+  }
+  document.getElementById('pnjOverlay').style.display = 'flex';
+}
+
+function closePNJGenerator() {
+  document.getElementById('pnjOverlay').style.display = 'none';
+}
+
+function pnjRand(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+function pnjRoll4d6() {
+  const d = [1,2,3,4].map(()=>Math.floor(Math.random()*6)+1);
+  d.sort((a,b)=>b-a);
+  return d[0]+d[1]+d[2];
+}
+
+function generatePNJ() {
+  const raceOpt = document.getElementById('pnjOptRace').value;
+  const classeOpt = document.getElementById('pnjOptClasse').value;
+  const genreOpt = document.getElementById('pnjOptGenre').value;
+  const nivMin = parseInt(document.getElementById('pnjOptNivMin').value)||1;
+  const nivMax = Math.max(parseInt(document.getElementById('pnjOptNivMax').value)||5, nivMin);
+
+  const raceKeys = Object.keys(RACE_DATA);
+  const classeKeys = Object.keys(CLASS_DATA);
+
+  const race = raceOpt === 'random' ? pnjRand(raceKeys) : raceOpt;
+  const classe = classeOpt === 'random' ? pnjRand(classeKeys) : classeOpt;
+  const genre = genreOpt === 'random' ? pnjRand(['M','F']) : genreOpt;
+  const niveau = nivMin + Math.floor(Math.random()*(nivMax-nivMin+1));
+
+  const nom = (genre === 'F' ? pnjRand(PNJ_NOMS_F) : pnjRand(PNJ_NOMS_M))
+              + ' ' + pnjRand(PNJ_NOMS_FAMILLE);
+
+  // Roll stats, assign by class priority
+  const cd = CLASS_DATA[classe] || {};
+  const rd = RACE_DATA[race] || {};
+  const mainStats = (cd.mainStats||[]).map(s=>s.toLowerCase());
+  const SK = ['for','con','dex','int','sag','cha'];
+  const SL = {for:'FOR',con:'CON',dex:'DEX',int:'INT',sag:'SAG',cha:'CHA'};
+  const priority = [...mainStats, ...SK.filter(k=>!mainStats.includes(k))];
+  const rolls = SK.map(()=>pnjRoll4d6()).sort((a,b)=>b-a);
+  const stats = {};
+  priority.forEach((k,i)=>{ stats[k]=rolls[i]||10; });
+
+  // Apply racial bonuses
+  if (rd.stats) {
+    Object.entries(rd.stats).forEach(([k,v])=>{
+      if (k.startsWith('any')) {
+        // +v to best non-boosted stat
+        const best = SK.filter(s=>!Object.keys(rd.stats).includes(s)).sort((a,b)=>stats[b]-stats[a])[0];
+        if (best) stats[best] = (stats[best]||10) + v;
+      } else if (stats[k] !== undefined) {
+        stats[k] = (stats[k]||10) + v;
+      }
+    });
+  }
+
+  // Compute mods & derived stats
+  const mod = k => Math.floor(((stats[k]||10)-10)/2);
+  const blason = Math.floor(niveau/2);
+  const hp1 = (cd.hp1||10) + (stats.con||10);
+  const hpLvl = cd.hpLvl || 5;
+  const hpMax = hp1 + (niveau-1)*hpLvl;
+  const surges = (cd.surges||6) + mod('con');
+  const init = mod('dex') + blason;
+  const ca = 10 + blason + (cd.armorType==='heavy'?8:cd.armorType==='medium'?6:3);
+  const vig = 10 + blason + Math.max(mod('for'),mod('con'));
+  const ref = 10 + blason + Math.max(mod('dex'),mod('int'));
+  const vol = 10 + blason + Math.max(mod('sag'),mod('cha'));
+
+  // Level 1 powers
+  const atwill = (cd.powers?.atwill||[]).filter(p=>p.level<=1).slice(0,2).map(p=>p.name);
+  const encounter = (cd.powers?.encounter||[]).filter(p=>p.level<=1).slice(0,1).map(p=>p.name);
+  const daily = (cd.powers?.daily||[]).filter(p=>p.level<=1).slice(0,1).map(p=>p.name);
+
+  __lastPNJ = {nom, race, classe, genre, niveau, stats, hp1, hpMax, surges, init, ca, vig, ref, vol, atwill, encounter, daily};
+
+  // Render
+  const statColor = k => ['for','con','dex','int','sag','cha'].indexOf(k) >=0 &&
+    mainStats.includes(k) ? '#c9a260' : '#e0e0f0';
+  const genreLabel = genre==='F' ? '♀ Féminin' : '♂ Masculin';
+
+  document.getElementById('pnjResult').innerHTML = `
+  <div style="border:1px solid #b070f0;border-radius:8px;overflow:hidden;">
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,rgba(176,112,240,0.2),rgba(18,18,46,0.8));padding:14px 16px;border-bottom:1px solid #2a2a3e;">
+      <div style="font-size:16px;font-weight:700;color:#e0e0f0;">${nom}</div>
+      <div style="font-size:11px;color:#b070f0;margin-top:3px;">${race} · ${classe} · Niv.${niveau} · ${genreLabel}</div>
+      <div style="font-size:10px;color:#666;margin-top:2px;">V${rd.speed||6} · ${rd.vision||'Normale'} · PV max ${hpMax} · Surges ${surges}</div>
+    </div>
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:0;border-bottom:1px solid #1a1a2e;">
+      ${SK.map(k=>`<div style="padding:8px 4px;text-align:center;border-right:1px solid #1a1a2e;">
+        <div style="font-size:8px;color:${statColor(k)};font-weight:700;">${SL[k]}</div>
+        <div style="font-size:16px;font-weight:700;color:#f0c040;">${stats[k]}</div>
+        <div style="font-size:9px;color:#888;">${mod(k)>=0?'+':''}${mod(k)}</div>
+      </div>`).join('')}
+    </div>
+    <!-- Defenses -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid #1a1a2e;">
+      ${[['CA',ca,'#e0e0f0'],['VIG',vig,'#e07050'],['RÉF',ref,'#50a8e0'],['VOL',vol,'#a070d0']].map(([label,val,col])=>`
+      <div style="padding:8px 4px;text-align:center;border-right:1px solid #1a1a2e;">
+        <div style="font-size:8px;color:${col};font-weight:700;">${label}</div>
+        <div style="font-size:15px;font-weight:700;color:${col};">${val}</div>
+      </div>`).join('')}
+    </div>
+    <!-- Powers -->
+    <div style="padding:10px 14px;">
+      <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Pouvoirs (Niv.1)</div>
+      ${atwill.length ? `<div style="margin-bottom:4px;"><span style="font-size:9px;color:#4ec94e;font-weight:700;">À VOL · </span><span style="font-size:10px;color:#c0c0c0;">${atwill.join(', ')}</span></div>` : ''}
+      ${encounter.length ? `<div style="margin-bottom:4px;"><span style="font-size:9px;color:#e05050;font-weight:700;">RENC · </span><span style="font-size:10px;color:#c0c0c0;">${encounter.join(', ')}</span></div>` : ''}
+      ${daily.length ? `<div style="margin-bottom:4px;"><span style="font-size:9px;color:#b070f0;font-weight:700;">QUOT · </span><span style="font-size:10px;color:#c0c0c0;">${daily.join(', ')}</span></div>` : ''}
+    </div>
+  </div>
+  <div style="font-size:10px;color:#555;text-align:center;margin-top:8px;">Initiative ${init>=0?'+':''}${init} · Blason +${blason}</div>`;
+
+  document.getElementById('pnjApplyBtn').style.display = 'block';
+}
+
+function applyPNJToSheet() {
+  if (!__lastPNJ) return;
+  const p = __lastPNJ;
+  const nameEl = document.getElementById('name'); if (nameEl) nameEl.value = p.nom;
+  const genreEl = document.getElementById('genre'); if (genreEl) genreEl.value = p.genre;
+  const raceEl = document.getElementById('race'); if (raceEl) { raceEl.value = p.race; onRaceChange(p.race); }
+  const classeEl = document.getElementById('classe'); if (classeEl) { classeEl.value = p.classe; onClassChange(p.classe); }
+  const nivEl = document.getElementById('niveau'); if (nivEl) { nivEl.value = p.niveau; updateNiveau(); }
+  ['for','con','dex','int','sag','cha'].forEach(k=>{
+    const el = document.getElementById('stat-'+k);
+    if (el) { el.value = p.stats[k]; updateStatMod(k); }
+  });
+  updateAutoStats();
+  autoSave();
+  closePNJGenerator();
+  const msg = document.createElement('div');
+  msg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a0a2e;border:2px solid #b070f0;border-radius:10px;padding:16px 28px;color:#b070f0;font-size:14px;font-weight:700;z-index:13000;pointer-events:none;';
+  msg.textContent = '🎲 PNJ ' + p.nom + ' appliqué !';
+  document.body.appendChild(msg);
+  setTimeout(()=>{ if(msg.parentNode) msg.remove(); }, 2500);
+}
+
 </script>
 
 <!-- ══════════════════ WIZARD DE CRÉATION ══════════════════ -->
@@ -8856,5 +9034,61 @@ document.addEventListener("DOMContentLoaded", deLoadCustomData);
     </div>
   </div>
 </div>
+
+<!-- ═══════════════ PNJ GENERATOR ═══════════════ -->
+<div id="pnjOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:11000;overflow-y:auto;align-items:flex-start;justify-content:center;padding:20px 12px;">
+  <div style="background:#12121e;border:1px solid #b070f0;border-radius:12px;max-width:600px;width:100%;margin:0 auto;box-shadow:0 0 30px rgba(176,112,240,0.3);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid #2a2a3e;">
+      <div>
+        <div style="font-size:15px;font-weight:700;color:#b070f0;">🎲 Générateur de PNJ</div>
+        <div style="font-size:10px;color:#666;margin-top:2px;">Personnage Non-Joueur aléatoire</div>
+      </div>
+      <button onclick="closePNJGenerator()" style="background:none;border:none;color:#666;font-size:18px;cursor:pointer;padding:4px 8px;">✕</button>
+    </div>
+    <!-- Options -->
+    <div style="padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;border-bottom:1px solid #1a1a2e;">
+      <label style="font-size:11px;color:#888;">
+        Race
+        <select id="pnjOptRace" style="display:block;width:100%;margin-top:4px;background:#0d0d1a;border:1px solid #333;color:#e0e0f0;padding:6px;border-radius:5px;font-size:11px;">
+          <option value="random">🎲 Aléatoire</option>
+        </select>
+      </label>
+      <label style="font-size:11px;color:#888;">
+        Classe
+        <select id="pnjOptClasse" style="display:block;width:100%;margin-top:4px;background:#0d0d1a;border:1px solid #333;color:#e0e0f0;padding:6px;border-radius:5px;font-size:11px;">
+          <option value="random">🎲 Aléatoire</option>
+        </select>
+      </label>
+      <label style="font-size:11px;color:#888;">
+        Niveau
+        <div style="display:flex;gap:6px;margin-top:4px;align-items:center;">
+          <input id="pnjOptNivMin" type="number" value="1" min="1" max="30" style="width:50px;background:#0d0d1a;border:1px solid #333;color:#e0e0f0;padding:5px;border-radius:4px;font-size:11px;text-align:center;">
+          <span style="color:#555;font-size:10px;">–</span>
+          <input id="pnjOptNivMax" type="number" value="5" min="1" max="30" style="width:50px;background:#0d0d1a;border:1px solid #333;color:#e0e0f0;padding:5px;border-radius:4px;font-size:11px;text-align:center;">
+          <span style="color:#555;font-size:9px;">(min–max)</span>
+        </div>
+      </label>
+      <label style="font-size:11px;color:#888;">
+        Genre
+        <select id="pnjOptGenre" style="display:block;width:100%;margin-top:4px;background:#0d0d1a;border:1px solid #333;color:#e0e0f0;padding:6px;border-radius:5px;font-size:11px;">
+          <option value="random">🎲 Aléatoire</option>
+          <option value="M">Masculin</option>
+          <option value="F">Féminin</option>
+        </select>
+      </label>
+    </div>
+    <!-- Result area -->
+    <div id="pnjResult" style="padding:16px 20px;min-height:200px;">
+      <div style="text-align:center;padding:40px 0;color:#444;font-size:12px;">Clique "Générer" pour créer un PNJ aléatoire</div>
+    </div>
+    <!-- Buttons -->
+    <div style="padding:12px 20px;display:flex;gap:8px;border-top:1px solid #1a1a2e;">
+      <button onclick="generatePNJ()" style="flex:1;background:#b070f0;border:none;color:#12121e;border-radius:6px;padding:10px;cursor:pointer;font-size:12px;font-weight:700;">🎲 Générer</button>
+      <button id="pnjApplyBtn" onclick="applyPNJToSheet()" style="display:none;flex:1;background:#4ec94e;border:none;color:#12121e;border-radius:6px;padding:10px;cursor:pointer;font-size:12px;font-weight:700;">✅ Appliquer à la fiche</button>
+      <button onclick="closePNJGenerator()" style="background:none;border:1px solid #333;color:#888;border-radius:6px;padding:10px 16px;cursor:pointer;font-size:12px;">Fermer</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
