@@ -1590,7 +1590,7 @@
     <div class="id-field">
       <label>Culture / Bastion</label>
       <div class="combo-wrap">
-        <input type="text" id="culture" class="combo" list="dl-bastion" placeholder="Bastion Divin..." oninput="autoSave()" autocomplete="off" title="Choisir dans la liste ou saisir librement">
+        <input type="text" id="culture" class="combo" list="dl-bastion" placeholder="Bastion Divin..." oninput="autoSave()" onchange="onCultureChange(this.value)" autocomplete="off" title="Choisir dans la liste ou saisir librement">
       </div>
       <div class="combo-hint">↕ 5 Bastions + Contrées</div>
     </div>
@@ -2573,6 +2573,81 @@ function setGenre(val) {
 function loadGenreButtons() {
   var val = document.getElementById('genre')?.value || '';
   if (val) setGenre(val);
+}
+
+
+const BASTION_DATA = {
+  "Bastin Divin": {
+    promptEn: "divine holy order robes golden runes sacred symbols ornate armor blessed warrior",
+    backgrounds: ["Acolyte du Temple", "Paladin Errant", "Inquisiteur de la Foi", "Guérisseur de Guerre", "Moine Combattant"]
+  },
+  "Bastion Divin": {
+    promptEn: "divine holy order robes golden runes sacred symbols ornate armor blessed warrior",
+    backgrounds: ["Acolyte du Temple", "Paladin Errant", "Inquisiteur de la Foi", "Guérisseur de Guerre", "Moine Combattant"]
+  },
+  "Bastion Engrenage": {
+    promptEn: "steampunk techno-magic gear-covered armor mechanical augmentations resonant construct industrial dark city",
+    backgrounds: ["Ingénieur Résonant", "Pilote d’Arma", "Artificier de Rue", "Contrebandier Technologique", "Mécanicien de Combat"]
+  },
+  "Bastion Azur": {
+    promptEn: "arcane maritime blue magical robes sea-weathered staff crystal focus waves ocean spells",
+    backgrounds: ["Mage des Marées", "Navigateur Arcanique", "Chercheur de l’Eternflux", "Espion du Port", "Marchand Mystique"]
+  },
+  "Bastion Flèche": {
+    promptEn: "scout ranger dark leather armor hidden blades hood cloak urban shadow infiltrator agile",
+    backgrounds: ["Éclaireur d’Élite", "Assassin de la Flèche", "Espion Infiltré", "Chasseur de Primes", "Voleur à la Tire"]
+  },
+  "Bastion Rempart": {
+    promptEn: "heavy fortress armor battle-scarred warrior shield massive weapon fortified steel mercenary soldier",
+    backgrounds: ["Soldat de Fortune", "Gardien du Rempart", "Champion de Tournoi", "Vétéran de Guerre", "Gladiateur"]
+  },
+  "Contrées Primales": {
+    promptEn: "primal nature wild leather fur tribal tattoos druid shaman wilderness untamed beast spirit",
+    backgrounds: ["Chamane de la Forêt", "Druide des Plaines", "Barbare Tribal", "Bête-Liée", "Hermite des Contrées"]
+  },
+  "Face Cachée": {
+    promptEn: "underground shadow dark city criminal network disguise changeling espionage underworld cloak dagger",
+    backgrounds: ["Criminel de la Face Cachée", "Informateur", "Maître du Déguisement", "Trafiquant", "Manipulateur des Ombres"]
+  },
+  "Errant (Sans Bastion)": {
+    promptEn: "wanderer traveler mixed gear weathered cloak adventurer no allegiance free spirit road-worn",
+    backgrounds: ["Errant sans Maître", "Réfugié en Transit", "Mercenaire Indépendant", "Voyageur des Routes", "Aventurier Solitaire"]
+  },
+  "Interbastion": {
+    promptEn: "mixed faction gear diplomat envoy layered armor symbolic insignia multiple allegiances",
+    backgrounds: ["Diplomate Interbastion", "Double Agent", "Négociateur Neutre", "Espion Multilatéral", "Ambassadeur"]
+  }
+};
+
+function applyBastionBg(el, bgs) {
+  var idx = parseInt(el.getAttribute('data-bg'));
+  var bg = bgs[idx];
+  if (bg) { document.getElementById('background').value = bg; autoSave(); }
+  var toast = document.getElementById('culture-toast');
+  if (toast) toast.remove();
+}
+
+function onCultureChange(val) {
+  autoSave();
+  if (!val || typeof BASTION_DATA === 'undefined') return;
+  var bd = BASTION_DATA[val];
+  if (!bd || !bd.backgrounds || !bd.backgrounds.length) return;
+  // If background field is empty, suggest options
+  var bgEl = document.getElementById('background');
+  if (!bgEl || bgEl.value.trim()) return; // don’t overwrite existing content
+  var toast = document.createElement('div');
+  toast.id = 'culture-toast';
+  var existing = document.getElementById('culture-toast');
+  if (existing) existing.remove();
+  toast.style.cssText = 'position:fixed;bottom:70px;left:16px;max-width:280px;background:#1a1a2e;border:1px solid #4a6fa5;border-radius:8px;padding:12px 14px;z-index:9999;font-size:11px;color:var(--text);box-shadow:0 4px 20px rgba(0,0,0,0.5);';
+  toast.innerHTML = '<div style="font-weight:700;color:#7ab3e0;margin-bottom:8px;">🏰 Backgrounds suggérés — ' + val + '</div>'
+    + bd.backgrounds.map(function(b, bi){
+        return '<div data-bg="' + bi + '" onclick="applyBastionBg(this,' + JSON.stringify(bd.backgrounds) + ')" style="color:var(--gold2);margin-left:4px;margin-bottom:3px;cursor:pointer;padding:3px 6px;border-radius:3px;border:1px solid #2a2a4e;">▸ ' + b + '</div>';
+      }).join('')
+    + '<div style="font-size:9px;color:var(--text3);margin-top:8px;">Clique pour appliquer · Le style vestimentaire est aussi inclus dans le portrait IA.</div>'
+    + '<button onclick="this.parentNode.remove()" style="position:absolute;top:6px;right:8px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;">✕</button>';
+  document.body.appendChild(toast);
+  setTimeout(function(){ var t=document.getElementById('culture-toast'); if(t) t.remove(); }, 12000);
 }
 
 function recallRaceToast() {
@@ -5528,7 +5603,10 @@ function buildPortraitPrompt() {
   const extra = document.getElementById('portraitPromptExtra')?.value || '';
   const genre = document.getElementById('genre')?.value || '';
   const genreEn = genre === 'F' ? 'female woman' : genre === 'A' ? 'androgynous nonbinary' : 'male man';
-  return encodeURIComponent(`fantasy portrait, ${genreEn} ${raceEn} ${classeEn}, D&D 4th edition art style, dramatic lighting, detailed armor and weapons, dark fantasy, character art${extra ? ', '+extra : ''}${nom ? ', character named '+nom : ''}, cinematic, high quality, front-facing portrait`);
+  const culture = document.getElementById('culture')?.value?.trim() || '';
+  const bd = (typeof BASTION_DATA !== 'undefined') ? BASTION_DATA[culture] : null;
+  const bastionStyle = bd ? bd.promptEn : '';
+  return encodeURIComponent(`fantasy portrait, ${genreEn} ${raceEn} ${classeEn}${bastionStyle ? ', '+bastionStyle : ''}, D&D 4th edition art style, dramatic lighting, dark fantasy, character art${extra ? ', '+extra : ''}${nom ? ', character named '+nom : ''}, cinematic, high quality, front-facing portrait`);
 }
 
 function switchPortraitTab(tab) {
