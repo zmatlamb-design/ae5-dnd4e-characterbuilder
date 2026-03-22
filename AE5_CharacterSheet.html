@@ -1573,7 +1573,10 @@
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;">
         <div class="combo-hint">↕ Canon AE5 · Homebrew libre</div>
-        <button onclick="recallRaceToast()" title="Rappeler les bonus raciaux" style="background:none;border:1px solid #333;border-radius:4px;color:#c9a260;font-size:9px;padding:1px 6px;cursor:pointer;line-height:1.6;flex-shrink:0;">🧬 Bonus</button>
+        <div style="display:flex;gap:4px;">
+          <button onclick="recallRaceToast()" title="Rappeler les bonus raciaux" style="background:none;border:1px solid #333;border-radius:4px;color:#c9a260;font-size:9px;padding:1px 6px;cursor:pointer;line-height:1.6;flex-shrink:0;">🧬 Bonus</button>
+          <button onclick="openCreationWizard()" title="Wizard de création de personnage" style="background:none;border:1px solid #5a7a5a;border-radius:4px;color:#7db87d;font-size:9px;padding:1px 6px;cursor:pointer;line-height:1.6;flex-shrink:0;">⚡ Wizard</button>
+        </div>
       </div>
     </div>
     <div class="id-field">
@@ -2371,19 +2374,32 @@ const RACE_DATA = {
     ], promptEn:"minotaur" },
 
   "Deva (Bassin de Vie)": {
-    stats:{sag:2,int:2}, speed:6, vision:"Norm", bonusDef:"Vol+2",
-    features:["M\u00e9moire des Vies Pass\u00e9es (+1d6 \u00e0 n\u2019importe quel jet 1\u00d7/rencontre)","Radiance Immortelle (r\u00e9sistance radiant 5+\u00bdniv)"],
+    stats:{sag:2,int:2}, speed:6, vision:"Normale + Sens Résonant 2 cases", bonusDef:"Vol+2",
+    features:[
+      "Mémoire Immémoriale (2 compétences maîtrisées sans entraînement, hors classe, vie antérieure)",
+      "Nature Formée (+2 sauvegardes vs contrôle mental, domination et corruption résonante)",
+      "Émergence de Pool (pouvoir racial)",
+      "Résonance Profonde (journée, pouvoir racial)"
+    ],
     racialPowers:[
-      { name:"M\u00e9moire des Vies Pass\u00e9es", nameEn:"Memory of a Thousand Lifetimes (PHB2 p.9)", type:"Par rencontre \u00b7 Racial \u00b7 Deva", level:0, tags:["libre","personnel"], atk:"\u2014", dmg:"\u2014",
-        effect:"D\u00e9clencheur : tu effectues un jet d20 (attaque, comp\u00e9tence, sauvegarde). Ajoute 1d6 au r\u00e9sultat. S\u2019applique apr\u00e8s avoir vu le d\u00e9 mais avant de savoir si tu r\u00e9ussis." }
-    ], promptEn:"deva angel divine" },
-
-  "R\u00e9sonnant": {
-    stats:{con:2,int:2}, speed:6, vision:"Basse-lumi\u00e8re", bonusDef:"Vig+1",
-    features:["Infatigable (pas besoin manger/dormir)","Correction R\u00e9sonante (r\u00e9duction d\u00e9g\u00e2ts 1)"],
+      { name:"Émergence de Pool", nameEn:"Pool Emergence (AE5 Homebrew)", type:"Par rencontre · Racial · Deva", level:0, tags:["standard","personnel ou adjacent"], atk:"—", dmg:"—",
+        effect:"Déclencheur : toi ou un allié adjacent tombez à 0 PV. La cible remonte à 1 PV et gagne +2 à sa prochaine attaque ou jet de sauvegarde. Ne peut pas te cibler si tu es à 0 PV." },
+      { name:"Résonance Profonde", nameEn:"Deep Resonance (AE5 Homebrew)", type:"Journée · Racial · Deva", level:0, tags:["libre","toucher","concentration"], atk:"—", dmg:"—",
+        effect:"En touchant une créature ou objet imprégné de Résonance : tu perçois l’empreinte émotionnelle et l’intention des 3 dernières interactions significatives. Pas de lecture de pensées — seulement l’intention. Durée : 1 minute, concentration." }
+    ], promptEn:"deva angel divine sacred pool" },
+  "Résonnant": {
+    stats:{int:2,con:2}, speed:5, vision:"Obscurité 5 cases", bonusDef:"Vig+1",
+    features:[
+      "Châssis Artificiel (pas besoin manger/boire/dormir/respirer, repos long 4h, immunisé poison+maladie)",
+      "Mémoire Résiduelle (1×/session +2 à un jet lié à une vie antérieure, accord MJ)",
+      "Surcharge de Châssis (pouvoir racial)",
+      "Intégration Résonante (journée, pouvoir racial)"
+    ],
     racialPowers:[
-      { name:"R\u00e9solution R\u00e9sonante", nameEn:"Warforged Resolve (PHB2 p.19)", type:"Par rencontre \u00b7 Racial \u00b7 R\u00e9sonnant", level:0, tags:["mineure","personnel"], atk:"\u2014", dmg:"\u2014",
-        effect:"R\u00e9cup\u00e8re PV = \u00bdniv + mod CON. R\u00e9sistance 2 \u00e0 tous les d\u00e9g\u00e2ts jusqu\u2019\u00e0 la fin de ton prochain tour. Pendant cet effet, tu n\u2019es pas Mis hors de combat par les d\u00e9g\u00e2ts continus." }
+      { name:"Surcharge de Châssis", nameEn:"Chassis Overload (AE5 Homebrew)", type:"Par rencontre · Racial · Résonnant", level:0, tags:["mineure","réaction","personnel"], atk:"—", dmg:"—",
+        effect:"Déclencheur : tu subis des dégâts. Tu gagnes 5 PV temporaires et ton prochain jet d’attaque bénéficie d’un bonus de +2. Jusqu’à ton prochain repos court, −1 à tous tes jets d’attaque." },
+      { name:"Intégration Résonante", nameEn:"Resonant Interface (AE5 Homebrew)", type:"Journée · Racial · Résonnant", level:0, tags:["libre","1 minute"], atk:"—", dmg:"—",
+        effect:"Tu t’interfaces avec un artefact ou infrastructure résonante (borne Azur, nœud Rail, archivage Eternflux). Informations équivalentes à un jet de Magie Arcanique ou Histoire à +5, sans jet. Durée : 1 minute." }
     ], promptEn:"warforged construct resonant mechanical" },
 
   "Warforged (M\u00e9canique)": {
@@ -2393,14 +2409,149 @@ const RACE_DATA = {
       { name:"R\u00e9solution M\u00e9canique", nameEn:"Warforged Resolve (PHB2 p.19)", type:"Par rencontre \u00b7 Racial \u00b7 Warforged", level:0, tags:["mineure","personnel"], atk:"\u2014", dmg:"\u2014",
         effect:"R\u00e9cup\u00e8re PV = \u00bdniv + mod CON. R\u00e9sistance 2 \u00e0 tous les d\u00e9g\u00e2ts jusqu\u2019\u00e0 la fin de ton prochain tour. Pendant cet effet, tu n\u2019es pas Mis hors de combat par les d\u00e9g\u00e2ts continus." }
     ], promptEn:"warforged mechanical construct" },
+  "Re-Rhun": {
+    stats:{dex:2,sag:2}, speed:6, vision:"Normale", bonusDef:"Vol+1",
+    features:[
+      "Flux de Forme — apparence physique change chaque long repos (non reconnu des étrangers)",
+      "Ancrage au Présent — immunisé charm/peur par souvenir, +2 sauvegardes vs illusions",
+      "Compétences raciales : Discrétion, Perspicacité",
+      "Disparaître dans la Foule (pouvoir racial)",
+      "Présence Éphémère (journée, pouvoir racial)"
+    ],
+    racialPowers:[
+      { name:"Disparaître dans la Foule", nameEn:"Vanish into the Crowd (AE5 Homebrew)", type:"Par rencontre · Racial · Re-Rhun", level:0, tags:["mineure","personnel"], atk:"—", dmg:"—",
+        effect:"Déclencheur : immédiatement après un changement de zone ou un repos court. Jusqu’à la fin de ton prochain tour, avantage aux jets de Discrétion contre les ennemis qui t’avaient observé avant le déplacement." },
+      { name:"Présence Éphémère", nameEn:"Ephemeral Presence (AE5 Homebrew)", type:"Journée · Racial · Re-Rhun", level:0, tags:["libre","personnel"], atk:"—", dmg:"—",
+        effect:"Quand une créature tente de te cibler avec un pouvoir nécessitant de te reconnaître spécifiquement (localisation, détection de pensées, lien mental) : elle doit réussir Perspicacité vs ton DD de Discrétion ou Charisme. En cas d’échec, la capacité échoue." }
+    ], promptEn:"shapeshifter fluid identity mysterious figure" },
+
+  "Vulkaris": {
+    stats:{for:2,cha:2}, speed:6, vision:"Aiguisée (avantage Perception à distance)", bonusDef:"Vig+1",
+    features:[
+      "Vol du Pacte — vitesse de vol 4 cases (armure non-lourde ; 6 cases au-delà de 100m)",
+      "Héritage Draconique — résistance élémentaire au choix (foudre/feu/froid/acide) + souffle",
+      "Compétences raciales : Diplomatie, Perception",
+      "Souffle Draconique (pouvoir racial)",
+      "Médiation du Pacte (journée, pouvoir racial)"
+    ],
+    racialPowers:[
+      { name:"Souffle Draconique", nameEn:"Draconic Breath (AE5 Homebrew)", type:"Par rencontre · Racial · Vulkaris", level:0, tags:["standard","zone 3×1"], atk:"Réflexes DD10+CON", dmg:"1d6+CON (type élémentaire)",
+        effect:"Zone de 3×1 cases devant toi. Dégâts du type élémentaire choisi à la création (Héritage Draconique). Jet de sauvegarde Réflexes (DD 10 + mod CON) pour demi-dégâts." },
+      { name:"Médiation du Pacte", nameEn:"Pact Mediation (AE5 Homebrew)", type:"Journée · Racial · Vulkaris", level:0, tags:["libre","zone burst 10"], atk:"—", dmg:"—",
+        effect:"Dans une scène de diplomatie ou résolution de conflit non-violent : invoque le Pacte du Ciel. Toutes les créatures présentes doivent réussir Volonté (DD 12 + mod CHA) pour refuser la médiation ou agir hostilement pendant 1 round. Réduit contre créatures ignorant le Pacte." }
+    ], promptEn:"dragonborn wings dragon heritage celestial pact" },
+
+  "Vespérine": {
+    stats:{sag:2,dex:2}, speed:6, vision:"Obscurité 10 cases + Résidus émotionnels", bonusDef:"Vol+1",
+    features:[
+      "Écoute des Résidus — perçoit l’émotion dominante dans les lieux récemment marqués (24h)",
+      "Voile Fin — +2 sauvegardes vs effets Eternflux (possession, drain d’âme, spectral)",
+      "Compétences raciales : Perspicacité, Discrétion",
+      "Lecture Silencieuse (pouvoir racial)",
+      "Présence du Seuil (journée, pouvoir racial)"
+    ],
+    racialPowers:[
+      { name:"Lecture Silencieuse", nameEn:"Silent Reading (AE5 Homebrew)", type:"Par rencontre · Racial · Vespérine", level:0, tags:["mineure","portée regard"], atk:"Perspicacité vs Bluff", dmg:"—",
+        effect:"En observant une créature 1 round sans combat actif : jet de Perspicacité opposé à son Bluff. Succès : tu connais son état émotionnel réel et sais si elle ment dans la conversation en cours." },
+      { name:"Présence du Seuil", nameEn:"Threshold Presence (AE5 Homebrew)", type:"Journée · Racial · Vespérine", level:0, tags:["libre","personnel"], atk:"—", dmg:"—",
+        effect:"Pendant 1 minute : +5 à Discrétion, déplacement à vitesse normale sans pénalité de Discrétion. Qualité d’absence — les gens ne pensent pas à te regarder (pas d’invisibilité). Annulé dès que tu attaques ou effectues une action hostile." }
+    ], promptEn:"mystic empath night creature ethereal sense shadow" },
+
 };
 
+
+var __appliedRacialBonuses = {};
+
+function removeRacialBonuses() {
+  Object.keys(__appliedRacialBonuses).forEach(function(k) {
+    var el = document.getElementById('stat-' + k);
+    if (el) {
+      el.value = Math.max(1, (parseInt(el.value) || 10) - __appliedRacialBonuses[k]);
+      updateStatMod(k);
+    }
+  });
+  __appliedRacialBonuses = {};
+}
+
+function applyRacialStats(rd) {
+  removeRacialBonuses();
+  if (!rd) return;
+  var freeVals = [];
+  var applied = [];
+  Object.entries(rd.stats).forEach(function(pair) {
+    var k = pair[0], v = pair[1];
+    if (k.startsWith('any')) {
+      freeVals.push(v);
+    } else {
+      var el = document.getElementById('stat-' + k);
+      if (el) {
+        el.value = Math.min(30, (parseInt(el.value) || 10) + v);
+        updateStatMod(k);
+        __appliedRacialBonuses[k] = (__appliedRacialBonuses[k] || 0) + v;
+        applied.push('+' + v + ' ' + k.toUpperCase());
+      }
+    }
+  });
+  if (freeVals.length > 0) {
+    showFreeStatPicker(freeVals);
+  }
+  if (applied.length > 0) {
+    var msg = document.createElement('div');
+    msg.style.cssText = 'position:fixed;bottom:130px;right:16px;background:#1a2e1a;border:1px solid #4caf50;border-radius:6px;padding:8px 12px;color:#4caf50;font-size:11px;z-index:10000;pointer-events:none;';
+    msg.textContent = '✓ Stats raciales : ' + applied.join(', ');
+    document.body.appendChild(msg);
+    setTimeout(function(){ if(msg.parentNode) msg.remove(); }, 3500);
+  }
+}
+
+function showFreeStatPicker(freeVals) {
+  var statKeys = ['for','con','dex','int','sag','cha'];
+  var statLabels = {for:'FOR — Force',con:'CON — Constitution',dex:'DEX — Dextérité',int:'INT — Intelligence',sag:'SAG — Sagesse',cha:'CHA — Charisme'};
+  var overlay = document.createElement('div');
+  overlay.id = 'freeStatOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:11000;display:flex;align-items:center;justify-content:center;';
+  var selects = freeVals.map(function(v, i) {
+    return '<div style="margin-bottom:12px;"><label style="color:var(--gold2);font-size:12px;">Bonus libre ' + (i+1) + ' (+' + v + ') — choisir la stat :</label><br>'
+      + '<select id="freeStatSel_' + i + '" style="margin-top:4px;width:100%;background:#1a1a2e;color:var(--text);border:1px solid var(--gold);padding:6px 8px;border-radius:4px;font-size:13px;">'
+      + statKeys.map(function(k){ return '<option value="' + k + '">' + statLabels[k] + '</option>'; }).join('')
+      + '</select></div>';
+  }).join('');
+  overlay.innerHTML = '<div style="background:var(--panel);border:1px solid var(--gold);border-radius:10px;padding:24px 24px 20px;max-width:380px;width:92%;color:var(--text);">'
+    + '<div style="font-weight:700;color:var(--gold);font-size:15px;margin-bottom:8px;">🧬 Bonus racial libre</div>'
+    + '<div style="font-size:11px;color:var(--text2);margin-bottom:14px;">Ta race te permet de placer ce bonus sur la stat de ton choix.</div>'
+    + selects
+    + '<button onclick="confirmFreeStats(' + JSON.stringify(freeVals) + ')" style="background:var(--gold);color:#000;border:none;padding:9px 20px;border-radius:6px;cursor:pointer;font-weight:700;width:100%;font-size:13px;">Confirmer</button>'
+    + '</div>';
+  document.body.appendChild(overlay);
+}
+
+function confirmFreeStats(freeVals) {
+  freeVals.forEach(function(v, i) {
+    var sel = document.getElementById('freeStatSel_' + i);
+    if (!sel) return;
+    var k = sel.value;
+    var el = document.getElementById('stat-' + k);
+    if (el) {
+      el.value = Math.min(30, (parseInt(el.value) || 10) + v);
+      updateStatMod(k);
+      __appliedRacialBonuses[k] = (__appliedRacialBonuses[k] || 0) + v;
+    }
+  });
+  var ov = document.getElementById('freeStatOverlay');
+  if (ov) ov.remove();
+  autoSave();
+  var msg = document.createElement('div');
+  msg.style.cssText = 'position:fixed;bottom:130px;right:16px;background:#1a2e1a;border:1px solid #4caf50;border-radius:6px;padding:8px 12px;color:#4caf50;font-size:11px;z-index:10000;pointer-events:none;';
+  msg.textContent = '✓ Bonus libres appliqués !';
+  document.body.appendChild(msg);
+  setTimeout(function(){ if(msg.parentNode) msg.remove(); }, 2500);
+}
 
 function recallRaceToast() {
   const val = document.getElementById("race")?.value?.trim();
   if (!val) { alert("Aucune race sélectionnée."); return; }
   const rd = RACE_DATA[val];
-  if (!rd) { alert(`Race "${val}" introuvable dans les données — vérifie l'orthographe ou ajoute-la via 📋 Races & Classes.`); return; }
+  if (!rd) { alert(`Race "${val}" introuvable dans les données — vérifie l’orthographe ou ajoute-la via 📋 Races & Classes.`); return; }
   showRaceToast(val, rd);
 }
 
@@ -2410,7 +2561,8 @@ function onRaceChange(val) {
   const speedEl = document.getElementById("vitesse");
   if (speedEl) speedEl.value = rd.speed;
   const visionEl = document.getElementById("vision");
-  if (visionEl && (!visionEl.value || visionEl.value === "Norm")) visionEl.value = rd.vision;
+  if (visionEl && (!visionEl.value || visionEl.value === "Norm" || visionEl.value === "Normale")) visionEl.value = rd.vision;
+  applyRacialStats(rd);
   showRaceToast(val, rd);
   updateAutoStats();
   autoSave();
@@ -3841,6 +3993,24 @@ function closePicker(type) {
   if (picker) { picker.classList.remove('open'); picker.innerHTML = ''; }
 }
 
+function matchLevelFilter(level, filter) {
+  if (!filter || filter === 'all') return true;
+  var l = level || 1;
+  if (filter === '1-4')  return l >= 1  && l <= 4;
+  if (filter === '5-8')  return l >= 5  && l <= 8;
+  if (filter === '9-12') return l >= 9  && l <= 12;
+  if (filter === '13+')  return l >= 13;
+  return true;
+}
+
+function setPowerLevelFilter(type, filter) {
+  window.__pickerLevelFilter = filter;
+  var picker = document.getElementById('picker-'+type);
+  if (picker && picker.classList.contains('open')) {
+    picker.innerHTML = buildPickerContent(type);
+  }
+}
+
 function buildPickerContent(type) {
   var className = document.getElementById("classe") ? document.getElementById("classe").value.trim() : "";
   var raceName  = document.getElementById("race")   ? document.getElementById("race").value.trim()   : "";
@@ -3868,7 +4038,7 @@ function buildPickerContent(type) {
     var lockNote = lockedPowers.length > 0 ? "<div style='font-size:9px;color:#666;margin:4px 0 2px;padding:4px 6px;border-top:1px solid #2a2a3e;'>"+lockedPowers.length+" pouvoir(s) verrouillé(s)</div>" : "";
     classTab = "<div id='pickerClassList-"+type+"' class='picker-class-list'>"+rows+lockNote+lockedRows+"</div>";
   } else {
-    classTab = "<div class='picker-no-class'>"+(cd ? "Aucun pouvoir de ce type." : "Sélectionne d'abord une classe.")+"</div>";
+    classTab = "<div class='picker-no-class'>"+(cd ? "Aucun pouvoir de ce type." : "Sélectionne d’abord une classe.")+"</div>";
   }
 
   // Racial tab (shown in encounter picker + utility picker)
@@ -3885,7 +4055,7 @@ function buildPickerContent(type) {
     }).join("");
     racialTabBtn  = "<button class='picker-tab' id='ptab-racial-"+type+"' onclick=\"switchPickerTab('"+type+"','racial')\">🧬 "+raceName+"</button>";
     racialTabBody = "<div id='pickerBody-racial-"+type+"' style='display:none;'>"
-      +"<div style='font-size:9px;color:#5a9f7a;padding:4px 6px;margin-bottom:4px;background:#0a1a12;border-radius:4px;'>Pouvoirs raciaux de "+raceName+" — s'ajoutent dans la colonne "+typeLabels[type]+"</div>"
+      +"<div style='font-size:9px;color:#5a9f7a;padding:4px 6px;margin-bottom:4px;background:#0a1a12;border-radius:4px;'>Pouvoirs raciaux de "+raceName+" — s’ajoutent dans la colonne "+typeLabels[type]+"</div>"
       +racialRows+"</div>";
   }
 
@@ -4685,6 +4855,9 @@ function removeCFCard(id) {
   <option value="Warforged (Mécanique)">Variante Résonnant à dominante Engrenage</option>
   <option value="Shifter (Bestial)"></option>
   <option value="Minotaure"></option>
+  <option value="Re-Rhun">Race AE5 — Changeant d'identité, immunisé charm/peur lié au passé</option>
+  <option value="Vulkaris">Race AE5 — Dracomorphe ailé, Pacte du Ciel, souffle élémentaire</option>
+  <option value="Vespérine">Race AE5 — Perceptrice de résidus émotionnels, vision dans l'obscurité</option>
 </datalist>
 
 <!-- BASTIONS / CULTURES -->
@@ -4905,6 +5078,186 @@ if ('serviceWorker' in navigator && location.protocol !== 'blob:' && !location.h
 
 <script>
 // ═══════════════ WIZARD LOGIC ═══════════════
+var __wizStep = 0;
+var __wizData = { name:'', race:'', classe:'', statMethod:'standard', stats:{for:8,con:8,dex:8,int:8,sag:8,cha:8} };
+var __wizSteps = ['identity','race','stats','class'];
+var __pointBuyPts = 27;
+
+function wizUpdateStat(el) {
+  var k = el.getAttribute('data-statkey');
+  if (k) __wizData.stats[k] = parseInt(el.value) || 10;
+}
+
+function wizSetMethod(el) {
+  var m = el.getAttribute('data-method');
+  if (m) { __wizData.statMethod = m; renderWizStep(); }
+}
+
+function openCreationWizard() {
+  __wizStep = 0;
+  __wizData = { name:'', race:document.getElementById('name')?.value||'', classe:'', statMethod:'standard', stats:{for:10,con:10,dex:10,int:10,sag:10,cha:10} };
+  // Pre-fill from sheet
+  __wizData.name = document.getElementById('name')?.value?.trim()||'';
+  __wizData.race = document.getElementById('race')?.value?.trim()||'';
+  __wizData.classe = document.getElementById('classe')?.value?.trim()||'';
+  var ov = document.getElementById('wizardOverlay');
+  ov.style.display = 'flex';
+  renderWizStep();
+}
+
+function closeWizard() {
+  document.getElementById('wizardOverlay').style.display = 'none';
+}
+
+function renderWizStep() {
+  var steps = __wizSteps;
+  var s = steps[__wizStep];
+  document.getElementById('wizStepLabel').textContent = 'Étape ' + (__wizStep+1) + ' / ' + steps.length;
+  document.getElementById('wizProgressBar').style.width = ((__wizStep+1)/steps.length*100) + '%';
+  var backBtn = document.getElementById('wizBtnBack');
+  var nextBtn = document.getElementById('wizBtnNext');
+  backBtn.style.visibility = __wizStep === 0 ? 'hidden' : 'visible';
+  nextBtn.textContent = __wizStep === steps.length-1 ? '✓ Appliquer au personnage' : 'Suivant →';
+
+  var html = '';
+  if (s === 'identity') {
+    html = '<div style="font-weight:700;color:var(--gold);font-size:14px;margin-bottom:14px;">🧙 Identité du personnage</div>'
+      + '<label style="display:block;margin-bottom:10px;font-size:12px;color:var(--text2);">Nom du personnage<br>'
+      + '<input id="wiz_name" type="text" value="' + esc(__wizData.name) + '" placeholder="Entrer un nom..." style="width:100%;margin-top:4px;background:#1a1a2e;border:1px solid var(--gold);color:var(--text);padding:8px 10px;border-radius:5px;font-size:14px;box-sizing:border-box;"></label>'
+      + '<label style="display:block;margin-bottom:10px;font-size:12px;color:var(--text2);">Niveau de départ<br>'
+      + '<input id="wiz_niveau" type="number" value="1" min="1" max="30" style="width:80px;margin-top:4px;background:#1a1a2e;border:1px solid var(--gold);color:var(--text);padding:8px 10px;border-radius:5px;font-size:14px;"></label>'
+      + '<label style="display:block;font-size:12px;color:var(--text2);">Culture / Bastion (optionnel)<br>'
+      + '<input id="wiz_culture" type="text" value="" placeholder="Bastion Divin, Contrées..." style="width:100%;margin-top:4px;background:#1a1a2e;border:1px solid #555;color:var(--text);padding:7px 10px;border-radius:5px;font-size:13px;box-sizing:border-box;"></label>';
+  }
+  else if (s === 'race') {
+    var raceOpts = Object.keys(RACE_DATA).map(function(r){
+      return '<option value="' + esc(r) + '"' + (__wizData.race===r?' selected':'') + '>' + r + '</option>';
+    }).join('');
+    var rdInfo = __wizData.race ? RACE_DATA[__wizData.race] : null;
+    var rdHtml = rdInfo ? '<div style="background:#1a1a2e;border:1px solid #333;border-radius:6px;padding:10px 12px;margin-top:12px;font-size:11px;">'
+      + '<div style="color:var(--gold2);font-weight:700;margin-bottom:6px;">🧬 ' + __wizData.race + '</div>'
+      + '<div style="color:var(--text3);margin-bottom:4px;">Stats : ' + Object.entries(rdInfo.stats).map(function(e){return (e[0].startsWith('any')?'+'+e[1]+' (libre)':'+'+e[1]+' '+e[0].toUpperCase());}).join(', ') + '</div>'
+      + '<div style="color:var(--text3);margin-bottom:4px;">Vitesse : ' + rdInfo.speed + ' · Vision : ' + rdInfo.vision + '</div>'
+      + '<div style="color:var(--text3);">Défenses : ' + (rdInfo.bonusDef||'—') + '</div>'
+      + rdInfo.features.map(function(f){return '<div style="color:var(--gold2);margin-top:3px;">• '+f+'</div>';}).join('')
+      + '</div>' : '<div style="color:var(--text3);font-size:11px;margin-top:10px;">Sélectionne une race pour voir ses capacités.</div>';
+    html = '<div style="font-weight:700;color:var(--gold);font-size:14px;margin-bottom:14px;">🧬 Choisir une Race</div>'
+      + '<label style="display:block;font-size:12px;color:var(--text2);">Race<br>'
+      + '<select id="wiz_race" onchange="__wizData.race=this.value;renderWizStep();" style="width:100%;margin-top:4px;background:#1a1a2e;border:1px solid var(--gold);color:var(--text);padding:8px 10px;border-radius:5px;font-size:13px;box-sizing:border-box;">'
+      + '<option value="">-- Choisir une race --</option>' + raceOpts
+      + '</select></label>'
+      + rdHtml;
+  }
+  else if (s === 'stats') {
+    var STAT_KEYS = ['for','con','dex','int','sag','cha'];
+    var STAT_LABELS = {for:'FOR',con:'CON',dex:'DEX',int:'INT',sag:'SAG',cha:'CHA'};
+    var STANDARD_ARRAY = [16,14,13,12,11,10];
+    var isArr = __wizData.statMethod === 'array';
+    var isPb = __wizData.statMethod === 'pointbuy';
+    var isMan = __wizData.statMethod === 'manual';
+    var statInputs = STAT_KEYS.map(function(k,i){
+      var v = __wizData.stats[k]||10;
+      if (isArr) {
+        var arrOpts = STANDARD_ARRAY.map(function(n){return '<option value="'+n+'"'+(v==n?' selected':'')+'>'+n+'</option>';}).join('');
+        return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+          +'<span style="color:var(--text2);font-size:12px;width:32px;">'+STAT_LABELS[k]+'</span>'
+          +'<select id="ws_'+k+'" data-statkey="'+k+'" onchange="wizUpdateStat(this)" style="flex:1;background:#1a1a2e;border:1px solid #555;color:var(--text);padding:5px;border-radius:4px;font-size:12px;">'
+          +arrOpts+'</select></div>';
+      }
+      return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+        +'<span style="color:var(--text2);font-size:12px;width:32px;">'+STAT_LABELS[k]+'</span>'
+        +'<input id="ws_'+k+'" type="number" value="'+v+'" min="3" max="18" data-statkey="'+k+'" onchange="wizUpdateStat(this)" style="width:60px;background:#1a1a2e;border:1px solid #555;color:var(--text);padding:5px 8px;border-radius:4px;font-size:12px;"></div>';
+    }).join('');
+    var methodBtns = ['standard','array','pointbuy','manual'].map(function(m){
+      var labels = {standard:'Standard (valeurs libres)',array:'Array (16,14,13,12,11,10)',pointbuy:'Achat 27pts',manual:'Manuel'};
+      return '<button data-method="'+m+'" onclick="wizSetMethod(this)" style="background:'+(__wizData.statMethod===m?'var(--gold)':'#1a1a2e')+';color:'+(__wizData.statMethod===m?'#000':'var(--text2)')+';border:1px solid '+(__wizData.statMethod===m?'var(--gold)':'#444')+';padding:5px 10px;border-radius:4px;cursor:pointer;font-size:11px;">'+labels[m]+'</button>';
+    }).join('');
+    html = '<div style="font-weight:700;color:var(--gold);font-size:14px;margin-bottom:10px;">📊 Distribution des Caractéristiques</div>'
+      + '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;">' + methodBtns + '</div>'
+      + statInputs
+      + '<div style="font-size:10px;color:var(--text3);margin-top:8px;">Les bonus raciaux seront appliqués automatiquement à l’étape suivante.</div>';
+  }
+  else if (s === 'class') {
+    var classOpts = Object.keys(CLASS_DATA).map(function(c){
+      return '<option value="' + esc(c) + '"' + (__wizData.classe===c?' selected':'') + '>' + c + '</option>';
+    }).join('');
+    var cdInfo = __wizData.classe ? CLASS_DATA[__wizData.classe] : null;
+    var cdHtml = cdInfo ? '<div style="background:#1a1a2e;border:1px solid #333;border-radius:6px;padding:10px 12px;margin-top:10px;font-size:11px;">'
+      + '<div style="color:var(--gold2);font-weight:700;margin-bottom:5px;">⚔ ' + __wizData.classe + '</div>'
+      + (cdInfo.atWill ? '<div style="color:var(--text3);">À volonté : ' + cdInfo.atWill.filter(function(p){return p.level<=1;}).map(function(p){return p.name;}).join(', ') + '</div>' : '')
+      + '</div>' : '<div style="color:var(--text3);font-size:11px;margin-top:10px;">Sélectionne une classe pour voir ses pouvoirs de base.</div>';
+    html = '<div style="font-weight:700;color:var(--gold);font-size:14px;margin-bottom:14px;">⚔ Choisir une Classe</div>'
+      + '<label style="display:block;font-size:12px;color:var(--text2);">Classe<br>'
+      + '<select id="wiz_class" onchange="__wizData.classe=this.value;renderWizStep();" style="width:100%;margin-top:4px;background:#1a1a2e;border:1px solid var(--gold);color:var(--text);padding:8px 10px;border-radius:5px;font-size:13px;box-sizing:border-box;">'
+      + '<option value="">-- Choisir une classe --</option>' + classOpts
+      + '</select></label>'
+      + cdHtml
+      + '<div style="font-size:10px;color:var(--text3);margin-top:12px;">✓ Cliquer "Appliquer" remplira les champs du personnage avec tes choix.</div>';
+  }
+  document.getElementById('wizStepContent').innerHTML = html;
+}
+
+function esc(s) { return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function wizardNext() {
+  var s = __wizSteps[__wizStep];
+  // Collect values
+  if (s === 'identity') {
+    __wizData.name = document.getElementById('wiz_name')?.value?.trim()||'';
+  } else if (s === 'race') {
+    __wizData.race = document.getElementById('wiz_race')?.value||'';
+  } else if (s === 'stats') {
+    var keys = ['for','con','dex','int','sag','cha'];
+    keys.forEach(function(k){ var el=document.getElementById('ws_'+k); if(el) __wizData.stats[k]=parseInt(el.value)||10; });
+  } else if (s === 'class') {
+    __wizData.classe = document.getElementById('wiz_class')?.value||'';
+    applyWizardToSheet();
+    closeWizard();
+    return;
+  }
+  if (__wizStep < __wizSteps.length - 1) {
+    __wizStep++;
+    renderWizStep();
+  }
+}
+
+function wizardBack() {
+  if (__wizStep > 0) { __wizStep--; renderWizStep(); }
+}
+
+function applyWizardToSheet() {
+  // Name
+  var nameEl = document.getElementById('name'); if (nameEl && __wizData.name) nameEl.value = __wizData.name;
+  // Niveau from wizard
+  var nivEl = document.getElementById('niveau'); var wNiv = parseInt(document.getElementById('wiz_niveau')?.value)||1; if (nivEl) { nivEl.value = wNiv; updateNiveau(); }
+  // Culture
+  var cultEl = document.getElementById('culture'); var wCult = document.getElementById('wiz_culture')?.value?.trim(); if (cultEl && wCult) cultEl.value = wCult;
+  // Stats — apply base stats first
+  var keys = ['for','con','dex','int','sag','cha'];
+  keys.forEach(function(k) {
+    var el = document.getElementById('stat-'+k);
+    if (el) { el.value = __wizData.stats[k]||10; updateStatMod(k); }
+  });
+  __appliedRacialBonuses = {};
+  // Race
+  if (__wizData.race) {
+    var raceEl = document.getElementById('race'); if (raceEl) { raceEl.value = __wizData.race; onRaceChange(__wizData.race); }
+  }
+  // Classe
+  if (__wizData.classe) {
+    var classeEl = document.getElementById('classe'); if (classeEl) { classeEl.value = __wizData.classe; if(typeof onClassChange==='function') onClassChange(__wizData.classe); }
+  }
+  updateAutoStats();
+  autoSave();
+  // Flash
+  var msg = document.createElement('div');
+  msg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a2e1a;border:2px solid #4caf50;border-radius:10px;padding:16px 28px;color:#4caf50;font-size:14px;font-weight:700;z-index:13000;pointer-events:none;';
+  msg.textContent = '✓ Personnage créé ! Bonne aventure !';
+  document.body.appendChild(msg);
+  setTimeout(function(){ if(msg.parentNode) msg.remove(); }, 3000);
+}
+
+
 let wizStep = 0;
 const WIZ_STEPS = 5;
 const wizState = { race:'', classe:'', stats:{for:10,con:10,dex:10,int:10,sag:10,cha:10}, statMethod:'standard', skills:[], powers:[] };
@@ -5221,7 +5574,7 @@ function generateHorde() {
     return r.json();
   })
   .then(data => {
-    if (!data.id) throw new Error("Pas d'ID reçu : " + JSON.stringify(data));
+    if (!data.id) throw new Error("Pas d’ID reçu : " + JSON.stringify(data));
     const jobId = data.id;
     setStatus("⏳ En attente dans la file… (peut prendre 1–5 min pour utilisateurs anonymes)");
 
@@ -5237,7 +5590,7 @@ function generateHorde() {
           }
           if (check.done) {
             clearInterval(pollTimer);
-            setStatus("📥 Récupération de l'image...");
+            setStatus("📥 Récupération de l’image...");
             return fetch(`https://stablehorde.net/api/v2/generate/status/${jobId}`)
               .then(r => r.json())
               .then(result => {
@@ -5251,7 +5604,7 @@ function generateHorde() {
                 img.onload = () => { wrap.innerHTML = ""; wrap.appendChild(img); };
                 img.onerror = () => {
                   wrap.innerHTML = `<div style="padding:8px;font-size:10px;text-align:center;">
-                    <a href="${imgUrl}" target="_blank" style="color:#6a9fd8;">🔗 Voir l'image générée</a></div>`;
+                    <a href="${imgUrl}" target="_blank" style="color:#6a9fd8;">🔗 Voir l’image générée</a></div>`;
                 };
                 // Action buttons
                 const btnRow = document.createElement("div");
@@ -5356,7 +5709,7 @@ function savePortraitToSheet() {
   const blobUrl = window.__lastPortraitBlob;
   const directUrl = window.__lastPortraitUrl;
   if (!blobUrl && !directUrl) {
-    alert("Génère d'abord un portrait avant de le sauvegarder.");
+    alert("Génère d’abord un portrait avant de le sauvegarder.");
     return;
   }
   const btn = event?.target;
@@ -5378,12 +5731,12 @@ function savePortraitToSheet() {
     })
     .catch(() => {
       if (btn) { btn.textContent = "💾 Sauver sur la fiche"; btn.disabled = false; }
-      // Fallback: save the URL directly (won't persist offline)
+      // Fallback: save the URL directly (won’t persist offline)
       if (directUrl) {
         setSheetPortrait(directUrl);
         if (btn) btn.textContent = "✅ Sauvegardé!";
       } else {
-        alert("Impossible de convertir l'image. Télécharge-la et utilise Uploader.");
+        alert("Impossible de convertir l’image. Télécharge-la et utilise Uploader.");
       }
     });
 }
@@ -5884,7 +6237,7 @@ function deEditClass(key) {
     </div>
     <div style="padding:10px;background:#0a0a14;border:1px solid #1a3020;border-radius:6px;">
       <div style="font-size:10px;color:#5a9f7a;margin-bottom:6px;">💡 Pouvoirs AEDU</div>
-      <div style="font-size:10px;color:#666;line-height:1.6;">Les pouvoirs complets (À volonté, Rencontre, Quotidien, Utilitaire) peuvent être ajoutés via <strong style="color:#c9a260;">🛠️ Atelier</strong> après avoir créé la classe. L'éditeur ici gère les statistiques de base et le profil de la classe.</div>
+      <div style="font-size:10px;color:#666;line-height:1.6;">Les pouvoirs complets (À volonté, Rencontre, Quotidien, Utilitaire) peuvent être ajoutés via <strong style="color:#c9a260;">🛠️ Atelier</strong> après avoir créé la classe. L’éditeur ici gère les statistiques de base et le profil de la classe.</div>
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;padding-top:8px;">
       <button onclick="deRenderClassList()" style="padding:8px 16px;border:1px solid #444;border-radius:6px;background:none;color:#888;font-size:11px;cursor:pointer;">Annuler</button>
@@ -6003,5 +6356,30 @@ function deLoadCustomData() {
 // Load custom data on startup
 document.addEventListener("DOMContentLoaded", deLoadCustomData);
 </script>
+
+<!-- ══════════════════ WIZARD DE CRÉATION ══════════════════ -->
+<div id="wizardOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:12000;overflow-y:auto;align-items:flex-start;justify-content:center;padding:20px 12px;">
+  <div style="background:#12121e;border:1px solid var(--gold);border-radius:12px;max-width:560px;width:100%;padding:0;overflow:hidden;margin:auto;">
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#1a1a2e,#2a1a3e);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #333;">
+      <div>
+        <div style="color:var(--gold);font-weight:700;font-size:16px;">⚡ Wizard de Création</div>
+        <div id="wizStepLabel" style="color:var(--text3);font-size:11px;margin-top:2px;">Étape 1 / 4</div>
+      </div>
+      <button onclick="closeWizard()" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:4px;">✕</button>
+    </div>
+    <!-- Progress bar -->
+    <div style="height:3px;background:#222;">
+      <div id="wizProgressBar" style="height:100%;background:var(--gold);transition:width 0.3s;width:25%;"></div>
+    </div>
+    <!-- Step content -->
+    <div id="wizStepContent" style="padding:20px 22px 16px;"></div>
+    <!-- Footer nav -->
+    <div style="padding:12px 22px 18px;display:flex;justify-content:space-between;gap:10px;border-top:1px solid #222;">
+      <button id="wizBtnBack" onclick="wizardBack()" style="background:#1a1a2e;border:1px solid #444;color:var(--text2);padding:8px 18px;border-radius:6px;cursor:pointer;font-size:13px;">← Retour</button>
+      <button id="wizBtnNext" onclick="wizardNext()" style="background:var(--gold);border:none;color:#000;padding:8px 22px;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;">Suivant →</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
