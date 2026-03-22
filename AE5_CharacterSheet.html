@@ -2210,7 +2210,7 @@ const POWER_DEFAULTS = {
 const RACE_DATA = {
   "Humain":              { stats:{any1:2,any2:2}, speed:6, vision:"Norm", bonusDef:"Vol+1,Vig+1,Réf+1", features:["Bonus de Feat au niv.1","Un pouvoir de Race humaine"], promptEn:"human" },
   "Elfe":                { stats:{dex:2,sag:2}, speed:7, vision:"Basse-lumière", bonusDef:"Réf+1,Vol+1", features:["Évasion Elfique (tir ne provoque pas PdO)","Sens Magiques (+5 Perception)"], promptEn:"elf" },
-  "Demi-Elfe":           { stats:{con:2,cha:2}, speed:6, vision:"Basse-lumière", bonusDef:"Vol+1", features:["Diplomatie de Groupe (allié +1 vs premier ennemi attaqué)","At-will supplémentaire d'une autre classe"], promptEn:"half-elf" },
+  "Demi-Elfe":           { stats:{con:2,cha:2}, speed:6, vision:"Basse-lumière", bonusDef:"Vol+1", features:["Diplomatie de Groupe (allié +1 vs premier ennemi attaqué)","At-will supplémentaire d’une autre classe"], promptEn:"half-elf" },
   "Nain":                { stats:{con:2,sag:2}, speed:5, vision:"Basse-lumière", bonusDef:"Vig+2", features:["Endurance Naine (Surge gratuit 1×/rencontre)","Stabilité (+2 vs bousculade)"], promptEn:"dwarf" },
   "Halfelin":            { stats:{dex:2,cha:2}, speed:6, vision:"Norm", bonusDef:"Réf+1,Vol+1", features:["Audace Halfeline (+2 saves vs Effrayé)","Seconde Chance (relancer jet ennemi 1×/rencontre)"], promptEn:"halfling" },
   "Gnome":               { stats:{int:2,cha:2}, speed:5, vision:"Vision dans le noir", bonusDef:"Réf+1,Vol+1", features:["Disparition Illusoire (invisible 1×/rencontre)","Magie Naturelle (Illusion au toucher)"], promptEn:"gnome" },
@@ -2224,7 +2224,7 @@ const RACE_DATA = {
   "Changeling":          { stats:{dex:2,cha:2}, speed:6, vision:"Norm", bonusDef:"Réf+1,Vol+1", features:["Imitation (changer apparence à volonté)","Infiltration Mentale (+5 Persuasion vs cibles dupliquées)"], promptEn:"changeling shapeshifter" },
   "Shifter (Bestial)":   { stats:{for:2,con:2}, speed:7, vision:"Basse-lumière", bonusDef:"Vig+1", features:["Forme Bestiale (vitesse+2 & Vig+2 1×/rencontre)"], promptEn:"shifter bestial lycanthrope" },
   "Minotaure":           { stats:{for:2,con:2}, speed:6, vision:"Norm", bonusDef:"Vig+2", features:["Charge du Minotaure (+1d6 à la première charge)","Mémoire des Labyrinthes"], promptEn:"minotaur" },
-  "Deva (Bassin de Vie)":{ stats:{sag:2,int:2}, speed:6, vision:"Norm", bonusDef:"Vol+2", features:["Mémoire des Vies Passées (+1d6 à n'importe quel jet 1×/rencontre)","Radiance Immortelle (résistance radiant 5+½niv)"], promptEn:"deva angel divine" },
+  "Deva (Bassin de Vie)":{ stats:{sag:2,int:2}, speed:6, vision:"Norm", bonusDef:"Vol+2", features:["Mémoire des Vies Passées (+1d6 à n’importe quel jet 1×/rencontre)","Radiance Immortelle (résistance radiant 5+½niv)"], promptEn:"deva angel divine" },
   "Résonnant":           { stats:{con:2,int:2}, speed:6, vision:"Basse-lumière", bonusDef:"Vig+1", features:["Infatigable (pas besoin manger/dormir)","Correction Résonante (réduction dégâts 1)"], promptEn:"warforged construct resonant mechanical" },
   "Warforged (Mécanique)":{ stats:{con:2,for:2}, speed:5, vision:"Basse-lumière", bonusDef:"Vig+2", features:["Armure Intégrée (+1 CA permanent)","Réparation Mécanique (Metier au lieu de Médecine)"], promptEn:"warforged mechanical construct" },
 };
@@ -2585,7 +2585,7 @@ const CLASS_DATA = {
       encounter:[
         { name:'Choc Givrant', nameEn:'Chill Strike (NCS/PHB1 Bladesinger Daily L1)', type:'Par rencontre · Arcanique · Froid · Évocation · Implement', level:1, tags:['standard','distance 10'], atk:'+½NIV+INT vs Vigueur', dmg:'2d8+INT froid', effect:'Touché : la cible est Étourdie jusqu’à la fin de ton prochain tour. Raté : la cible est Ralentie jusqu’à la fin de ton prochain tour.' },
         { name:'Jet de Couleurs', nameEn:'Color Spray (NCS/PHB1 L3)', type:'Par rencontre · Arcanique · Évocation · Radieux · Implement', level:3, tags:['standard','explosion rapprochée 5'], atk:'+½NIV+INT vs Volonté', dmg:'1d6+INT radiants', effect:'Touché : la cible est Étourdie jusqu’à la fin de ton prochain tour. Raté : moitié.' },
-        { name:'Colère Hivernale', nameEn:"Winter's Wrath (NCS/PHB1 L7)", type:'Par rencontre · Arcanique · Froid · Zone · Implement', level:7, tags:['standard','explosion 2 dans 10'], atk:'+½NIV+INT vs Vigueur', dmg:'2d8+INT froid', effect:'Zone persistante (JS mineur pour maintenir) : légèrement obscurcie, toute créature commencçant son tour dans la zone subit ton mod INT en dégâts de froid. Raté : moitié.' },
+        { name:'Colère Hivernale', nameEn:"Winter’s Wrath (NCS/PHB1 L7)", type:'Par rencontre · Arcanique · Froid · Zone · Implement', level:7, tags:['standard','explosion 2 dans 10'], atk:'+½NIV+INT vs Vigueur', dmg:'2d8+INT froid', effect:'Zone persistante (JS mineur pour maintenir) : légèrement obscurcie, toute créature commencçant son tour dans la zone subit ton mod INT en dégâts de froid. Raté : moitié.' },
       ],
       daily:[
         { name:'Mains Ardentes', nameEn:'Burning Hands (NCS/PHB1 L1)', type:'Quotidien · Arcanique · Feu · Évocation · Implement', level:1, tags:['standard','explosion rapprochée 5'], atk:'+½NIV+INT vs Réflexes', dmg:'2d6+INT feu', effect:'Raté : moitié.' },
@@ -3245,7 +3245,7 @@ function updateAutoStats() {
   setAutoField('def-ref', ref);
   setAutoField('def-vol', vol);
 
-  // CA : base calculée + note "ajouter bonus d'armure"
+  // CA : base calculée + note "ajouter bonus d’armure"
   updateCAFromArmor();
 
   // ── Initiative (DEX mod + blason) ──
@@ -3470,7 +3470,7 @@ function toggleSurge(i) {
 
 function buildAP() {
   const row = document.getElementById('apRow');
-  row.innerHTML = `<span class="ap-label">Points d'Action :</span>`;
+  row.innerHTML = `<span class="ap-label">Points d’Action :</span>`;
   for (let i = 0; i < 3; i++) {
     const pip = document.createElement('div');
     pip.className = 'ap-pip' + (i >= state.apTotal ? ' used' : (i < state.apUsed ? ' used' : ''));
@@ -3638,7 +3638,7 @@ function createPowerCard(id, type, data) {
 }
 
 function togglePower(id, type) {
-  if (type === 'atwill') return; // À volonté ne s'épuise pas
+  if (type === 'atwill') return; // À volonté ne s’épuise pas
   state.powerStates[id] = !state.powerStates[id];
   const card = document.getElementById('pcard-'+id);
   if (card) card.classList.toggle('used', state.powerStates[id]);
@@ -3690,7 +3690,7 @@ function buildPickerContent(type) {
     var lockNote = lockedPowers.length > 0 ? "<div style='font-size:9px;color:#666;margin:4px 0 2px;padding:4px 6px;border-top:1px solid #2a2a3e;'>"+lockedPowers.length+" pouvoir(s) verrouillé(s)</div>" : "";
     classTab = "<div id='pickerClassList-"+type+"' class='picker-class-list'>"+rows+lockNote+lockedRows+"</div>";
   } else {
-    classTab = "<div class='picker-no-class'>"+(cd ? "Aucun pouvoir de ce type." : "Sélectionne d'abord une classe.")+"</div>";
+    classTab = "<div class='picker-no-class'>"+(cd ? "Aucun pouvoir de ce type." : "Sélectionne d’abord une classe.")+"</div>";
   }
   var levelBadge = type !== "atwill" ? "<span style='font-size:9px;color:#888;margin-left:6px;'>· Niv. max : "+niveau+"</span>" : "";
   return "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;'>"
@@ -3800,7 +3800,7 @@ function addMagicItemCard(list) {
   card.className = 'magic-item-card';
   card.innerHTML = `
     <div class="magic-item-name" style="display:flex;justify-content:space-between;">
-      <input type="text" placeholder="Nom de l'objet magique..." oninput="autoSave()">
+      <input type="text" placeholder="Nom de l’objet magique..." oninput="autoSave()">
       <button onclick="this.closest('.magic-item-card').remove();autoSave();" style="background:none;border:none;color:var(--text3);cursor:pointer;">✕</button>
     </div>
     <div class="magic-item-desc">
@@ -3844,7 +3844,7 @@ function resetEncounter() {
       if (card) card.classList.remove('used');
     }
   });
-  // Récupère 1 point d'action
+  // Récupère 1 point d’action
   state.apUsed = 0;
   buildAP();
   // Réinitialise conditions temporaires
