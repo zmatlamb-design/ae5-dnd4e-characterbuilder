@@ -1703,8 +1703,11 @@
     </div>
   </div><!-- /identity-grid -->
   <!-- ── Portrait Slot ── -->
-  <div class="portrait-slot" id="portraitSlot" onclick="openPortrait()" oncontextmenu="portraitSlotRightClick(event)" title="Clic: générer/modifier · Clic droit: effacer">
+  <div class="portrait-slot" id="portraitSlot" onclick="openPortrait()" title="Clic : ouvrir générateur de portrait" style="position:relative;">
     <img id="sheetPortraitImg" src="" style="display:none;">
+    <button id="portraitRemoveBtn" onclick="event.stopPropagation();clearSheetPortrait()"
+      title="Retirer le portrait"
+      style="display:none;position:absolute;top:4px;right:4px;z-index:2;background:rgba(20,0,0,.75);border:1px solid #c04040;color:#ff6060;border-radius:4px;font-size:10px;padding:2px 6px;cursor:pointer;line-height:1.4;">🗑</button>
     <div id="portraitPlaceholder" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:4px;">
       <div style="font-size:28px;opacity:.4;">🧙</div>
       <div style="font-size:8px;color:#444;text-align:center;letter-spacing:.5px;">PORTRAIT</div>
@@ -6778,7 +6781,7 @@ const SKILL_LABEL_TO_KEY = {
   'Guérison':'guérison', 'Histoire':'histoire', 'Perspicacité':'insight',
   'Intimidation':'intimider', 'Nature':'nature', 'Perception':'perception',
   'Persuasion':'diplomatie', 'Religion':'religion', 'Rue':'rue',
-  'Survie':'survie', 'Exploration':'rue', 'Résonance':'resonance',
+  'Survie':'survie', 'Arcanes':'arcanes', 'Exploration':'arcanes', 'Résonance':'resonance',
   'Technomagie':'technomagie'
 };
 
@@ -6789,7 +6792,12 @@ function getFeatSkillBonus(key) {
     if (!fd) return;
     (fd.bonus || []).forEach(b => {
       if (!b.type || !b.type.startsWith('skill:')) return;
-      if (b.type === 'skill:*') { total += (b.val || 0); return; }
+      if (b.type === 'skill:*')      { total += (b.val || 0); return; }
+      if (b.type === 'skill:choice') {
+        // Apply only to the skill the player chose for this slot
+        if (slot.skillChoice && slot.skillChoice === key) total += (b.val || 0);
+        return;
+      }
       const label = b.type.slice(6);
       if (SKILL_LABEL_TO_KEY[label] === key) total += (b.val || 0);
     });
@@ -8164,64 +8172,63 @@ if ('serviceWorker' in navigator && location.protocol !== 'blob:' && !location.h
 </div>
 
 <!-- ═══════════════ PORTRAIT IA MODAL ═══════════════ -->
-<div id="portraitOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:10001;align-items:center;justify-content:center;flex-direction:column;padding:10px;">
-<div style="background:#12121e;border:1px solid #c9a260;border-radius:12px;max-width:560px;width:100%;text-align:center;overflow:hidden;">
+<div id="portraitOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:10001;align-items:center;justify-content:center;flex-direction:column;padding:10px;">
+<div style="background:#12121e;border:1px solid #c9a260;border-radius:12px;max-width:520px;width:100%;text-align:center;overflow:hidden;">
 
-  <!-- Portrait header with source tabs -->
+  <!-- Header -->
   <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#0a0a14;border-bottom:1px solid #222;">
     <div style="font-weight:700;color:#c9a260;font-size:13px;">🎨 Portrait du Personnage</div>
     <div style="display:flex;gap:6px;">
-      <button id="ptabPoll" onclick="switchPortraitTab('pollinations')" style="padding:3px 10px;border:1px solid #c9a260;border-radius:5px;background:#c9a260;color:#12121e;font-size:10px;font-weight:700;cursor:pointer;">✨ Pollinations</button>
-      <button id="ptabPerc" onclick="switchPortraitTab('perchance')" style="padding:3px 10px;border:1px solid #444;border-radius:5px;background:none;color:#888;font-size:10px;cursor:pointer;">🎲 Perchance</button>
-      <button onclick="closePortrait()" style="padding:3px 8px;border:1px solid #333;border-radius:5px;background:none;color:#666;font-size:11px;cursor:pointer;">✕</button>
+      <button onclick="clearSheetPortrait();closePortrait()" title="Retirer le portrait de la fiche"
+        style="padding:3px 10px;border:1px solid #c04040;border-radius:5px;background:none;color:#ff6060;font-size:10px;cursor:pointer;">🗑 Retirer</button>
+      <button onclick="closePortrait()"
+        style="padding:3px 8px;border:1px solid #333;border-radius:5px;background:none;color:#666;font-size:11px;cursor:pointer;">✕</button>
     </div>
   </div>
 
-  <!-- POLLINATIONS TAB -->
-  <div id="portraitTabPoll" style="padding:16px;">
-    <div id="portraitImgWrap" style="min-height:280px;background:#0a0a14;border-radius:8px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-      <div id="portraitStatus" style="color:#888;font-size:12px;">Génération en cours...</div>
+  <!-- Prompt -->
+  <div style="padding:12px 14px 0;">
+    <div style="font-size:10px;color:#888;margin-bottom:4px;text-align:left;">📋 Prompt IA généré depuis ta fiche — copie-le dans le générateur :</div>
+    <div style="display:flex;gap:6px;align-items:flex-start;margin-bottom:6px;">
+      <textarea id="percPromptDisplay" readonly rows="2"
+        style="flex:1;background:#050510;border:1px solid #333;border-radius:5px;color:#aaa;font-size:10px;padding:5px;font-family:monospace;resize:none;"></textarea>
+      <button onclick="copyPercPrompt()" id="percCopyBtn"
+        style="padding:5px 10px;border:1px solid #c9a260;border-radius:5px;background:none;color:#c9a260;font-size:10px;cursor:pointer;white-space:nowrap;">📋 Copier</button>
     </div>
-    <textarea id="portraitPromptExtra" rows="2" placeholder="Détails supplémentaires (ex: cheveux rouges, cicatrice, capuche noire...)" style="width:100%;background:#0a0a14;border:1px solid #333;border-radius:6px;color:#ccc;font-size:11px;padding:6px;font-family:inherit;resize:none;box-sizing:border-box;margin-bottom:10px;"></textarea>
-    <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
-      <button onclick="generatePortrait()" style="background:#c9a260;border:none;color:#12121e;border-radius:6px;padding:7px 14px;cursor:pointer;font-size:11px;font-weight:700;">🔄 Regénérer</button>
-      <button onclick="savePortraitToSheet()" style="background:#5a9f7a;border:none;color:#12121e;border-radius:6px;padding:7px 14px;cursor:pointer;font-size:11px;font-weight:700;">💾 Sauver sur la fiche</button>
-      <button onclick="downloadPortrait()" style="background:none;border:1px solid #c9a260;color:#c9a260;border-radius:6px;padding:7px 14px;cursor:pointer;font-size:11px;">⬇ Télécharger</button>
-    </div>
-    <!-- Upload -->
-    <div style="margin-top:8px;display:flex;align-items:center;gap:8px;justify-content:center;">
-      <label style="padding:6px 14px;border:1px dashed #444;border-radius:6px;color:#888;font-size:10px;cursor:pointer;display:inline-block;">
-        📁 Uploader une image
-        <input type="file" accept="image/*" onchange="uploadPortraitFromFile(this)" style="display:none;">
-      </label>
-    </div>
-    <div style="font-size:9px;color:#444;margin-top:6px;">Pollinations.ai · Gratuit · Sans compte · Peut être lent</div>
+    <textarea id="portraitPromptExtra" rows="2"
+      placeholder="Détails supplémentaires (ex : cheveux rouges, cicatrice, capuche noire...)"
+      onchange="openPortraitUpdatePrompt()"
+      style="width:100%;background:#0a0a14;border:1px solid #2a2a3e;border-radius:5px;color:#ccc;font-size:11px;padding:6px;font-family:inherit;resize:none;box-sizing:border-box;"></textarea>
   </div>
 
-  <!-- PERCHANCE TAB -->
-  <div id="portraitTabPerc" style="display:none;padding:12px;">
-    <div style="background:#0a0a14;border:1px solid #2a2a3e;border-radius:8px;padding:10px;margin-bottom:10px;text-align:left;">
-      <div style="font-size:10px;color:#888;margin-bottom:5px;">📋 Prompt généré — copie-le et colle-le dans Perchance :</div>
-      <div style="display:flex;gap:6px;align-items:flex-start;">
-        <textarea id="percPromptDisplay" readonly rows="3" style="flex:1;background:#050510;border:1px solid #333;border-radius:5px;color:#aaa;font-size:10px;padding:5px;font-family:monospace;resize:none;"></textarea>
-        <button onclick="copyPercPrompt()" id="percCopyBtn" style="padding:5px 10px;border:1px solid #c9a260;border-radius:5px;background:none;color:#c9a260;font-size:10px;cursor:pointer;white-space:nowrap;">📋 Copier</button>
-      </div>
+  <!-- Stable Horde -->
+  <div style="margin:10px 14px;padding:10px;background:#0a1020;border:1px solid #1a2040;border-radius:8px;text-align:left;">
+    <div style="font-size:10px;color:#6a9fd8;font-weight:700;margin-bottom:4px;">⚡ Stable Horde — Gratuit · Communautaire · Sans compte</div>
+    <div id="hordeImgWrap" style="min-height:60px;background:#050510;border-radius:6px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
+      <span style="font-size:10px;color:#444;">Clique Générer pour lancer</span>
     </div>
-    <div style="padding:14px 0;display:flex;flex-direction:column;gap:8px;align-items:center;">
-      <button onclick="openPerchanceTab()" style="width:100%;max-width:320px;padding:10px 0;background:#7b5ea7;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.3px;">
-        🎲 Ouvrir Perchance.org dans un onglet
-      </button>
-      <div style="font-size:10px;color:#555;text-align:center;">Perchance.org bloque l'intégration directe (X-Frame-Options).<br>Le prompt est copié — colle-le dans le générateur Perchance.</div>
+    <div style="display:flex;gap:6px;">
+      <button onclick="generateHorde()" style="flex:1;padding:8px 0;background:#1a3050;border:1px solid #6a9fd8;border-radius:6px;color:#6a9fd8;font-size:11px;font-weight:700;cursor:pointer;">⚡ Générer via Stable Horde</button>
+      <button onclick="saveHordePortrait()" style="padding:8px 12px;background:#5a9f7a;border:none;border-radius:6px;color:#12121e;font-size:11px;font-weight:700;cursor:pointer;">💾 Sauver</button>
     </div>
-    <div style="margin-top:8px;padding:10px;background:#0a1020;border:1px solid #1a2040;border-radius:8px;">
-      <div style="font-size:10px;color:#6a9fd8;font-weight:700;margin-bottom:6px;">⚡ Stable Horde — Gratuit, communautaire, sans compte</div>
-      <div style="font-size:10px;color:#666;margin-bottom:10px;">GPU communautaire · Plus lent mais aucun rate limit · Résultats variables</div>
-      <div id="hordeImgWrap" style="min-height:80px;background:#050510;border-radius:6px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
-        <span style="font-size:10px;color:#444;">Clique Générer pour lancer</span>
-      </div>
-      <button onclick="generateHorde()" style="width:100%;padding:8px 0;background:#1a3050;border:1px solid #6a9fd8;border-radius:6px;color:#6a9fd8;font-size:11px;font-weight:700;cursor:pointer;">⚡ Générer via Stable Horde</button>
-    </div>
-    <div style="font-size:9px;color:#444;margin-top:8px;">Perchance.org · Stable Horde · Gratuit · Sans compte</div>
+  </div>
+
+  <!-- Perchance -->
+  <div style="margin:0 14px 10px;padding:10px;background:#0e0a14;border:1px solid #2a1a40;border-radius:8px;text-align:left;">
+    <div style="font-size:10px;color:#a07fd8;font-weight:700;margin-bottom:6px;">🎲 Perchance.org — Gratuit · Sans compte · Haute qualité</div>
+    <button onclick="openPerchanceTab()"
+      style="width:100%;padding:9px 0;background:#3a1a60;border:1px solid #7b5ea7;border-radius:7px;color:#d0b0ff;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.3px;">
+      🎲 Copier le prompt &amp; ouvrir Perchance
+    </button>
+    <div style="font-size:9px;color:#555;margin-top:5px;">Le prompt est copié → colle-le dans le champ de Perchance.org</div>
+  </div>
+
+  <!-- Upload -->
+  <div style="margin:0 14px 14px;display:flex;gap:8px;align-items:center;">
+    <label style="flex:1;padding:8px;border:1px dashed #444;border-radius:6px;color:#888;font-size:10px;cursor:pointer;display:block;text-align:center;">
+      📁 Uploader une image locale
+      <input type="file" accept="image/*" onchange="uploadPortraitFromFile(this)" style="display:none;">
+    </label>
   </div>
 
 </div>
@@ -8836,14 +8843,45 @@ function buildPortraitPromptRaw() {
   };
   const classeEn = classMap[classe] || classe.toLowerCase().replace(/\(.*\)/,"").trim();
   const extra = document.getElementById("portraitPromptExtra")?.value || "";
-  return `fantasy portrait, ${raceEn} ${classeEn}, D&D 4th edition art style, dramatic lighting, detailed armor and weapons, dark fantasy, character art${extra ? ", "+extra : ""}${nom ? ", character named "+nom : ""}, cinematic, high quality, front-facing portrait`;
+  // AE5 custom race prompts
+  const ae5RacePrompts = {
+    'Deva (Bassin de Vie)':'deva angelic being silver skin glowing divine runes sacred pool',
+    'Résonnant':'warforged resonant construct glowing arcane circuits mechanical humanoid',
+    'Re-Rhun':'shapeshifter mysterious humanoid fluid appearance shifting features',
+    'Vulkaris':'draconic humanoid with small wings reptilian scales proud bearing',
+    'Kalashtar':'ethereal human with inner glow psionic energy dream light',
+    'Githzéraï':'githzerai angular features monastic psionic warrior',
+    'Changeling':'changeling pale androgynous fluid face shapeshifter',
+    'Shifter (Bestial)':'shifter bestial humanoid predatory eyes fur patches feral',
+    'Revenant':'revenant undead pale ghostly determined expression spectral',
+  };
+  const finalRaceEn = ae5RacePrompts[race] || raceEn;
+  return `fantasy portrait, ${finalRaceEn} ${classeEn}, D&D 4th edition art style, dramatic lighting, detailed armor and weapons, dark fantasy, character art${extra ? ", "+extra : ""}${nom ? ", character named "+nom : ""}, cinematic, high quality, front-facing portrait`;
 }
 
 
 function openPortrait() {
   const overlay = document.getElementById('portraitOverlay');
   overlay.style.display = 'flex';
-  generatePortrait();
+  openPortraitUpdatePrompt();
+}
+
+function openPortraitUpdatePrompt() {
+  const raw = buildPortraitPromptRaw();
+  const ta = document.getElementById('percPromptDisplay');
+  if (ta) ta.value = raw;
+}
+
+function saveHordePortrait() {
+  const wrap = document.getElementById('hordeImgWrap');
+  const img  = wrap ? wrap.querySelector('img') : null;
+  if (!img || !img.src) { alert('Génère d\'abord une image via Stable Horde.'); return; }
+  // Convert to base64 via fetch → blob
+  fetch(img.src).then(r => r.blob()).then(blob => {
+    const reader = new FileReader();
+    reader.onload = () => { setSheetPortrait(reader.result); closePortrait(); };
+    reader.readAsDataURL(blob);
+  }).catch(() => setSheetPortrait(img.src)); // fallback URL direct
 }
 
 function portraitSlotRightClick(e) {
@@ -8861,21 +8899,25 @@ function portraitSlotRightClick(e) {
 function setSheetPortrait(dataUrl) {
   const img = document.getElementById("sheetPortraitImg");
   const ph  = document.getElementById("portraitPlaceholder");
+  const rmBtn = document.getElementById("portraitRemoveBtn");
   if (!img) return;
   img.src = dataUrl;
   img.style.display = "block";
   if (ph) ph.style.display = "none";
-  // Persist separately (can be large)
+  if (rmBtn) rmBtn.style.display = "block";
   try { localStorage.setItem("ae5_portrait", dataUrl); } catch(e) {}
   autoSave();
 }
 
 function clearSheetPortrait() {
-  const img = document.getElementById("sheetPortraitImg");
-  const ph  = document.getElementById("portraitPlaceholder");
-  if (img) { img.src = ""; img.style.display = "none"; }
-  if (ph)  ph.style.display = "flex";
+  const img   = document.getElementById("sheetPortraitImg");
+  const ph    = document.getElementById("portraitPlaceholder");
+  const rmBtn = document.getElementById("portraitRemoveBtn");
+  if (img)   { img.src = ""; img.style.display = "none"; }
+  if (ph)    ph.style.display = "flex";
+  if (rmBtn) rmBtn.style.display = "none";
   try { localStorage.removeItem("ae5_portrait"); } catch(e) {}
+  autoSave();
 }
 
 function loadSheetPortrait() {
@@ -8883,6 +8925,10 @@ function loadSheetPortrait() {
     const saved = localStorage.getItem("ae5_portrait");
     if (saved) setSheetPortrait(saved);
   } catch(e) {}
+  // Also restore from autoSave if present (cloud sync)
+  const rmBtn = document.getElementById("portraitRemoveBtn");
+  const img   = document.getElementById("sheetPortraitImg");
+  if (rmBtn && img && img.src && img.src !== window.location.href) rmBtn.style.display = "block";
 }
 
 function savePortraitToSheet() {
@@ -9741,9 +9787,7 @@ const FEAT_LIST = [
   { name:'Résistance aux Dégâts', cat:'Défense', prereq:'CON 13', src:'PHB', bonus:[], desc:'RD 1/–.' },
   { name:'Endurance Naturelle', cat:'Défense', prereq:'CON 15', src:'PHB', bonus:[{type:'vig',val:1,cond:''},{type:'save',val:2,cond:'poison/maladie'}], desc:'+1 Vigueur, +2 aux jets de sauvegarde vs poison/maladie.' },
   { name:'Protection Arcanique', cat:'Défense', prereq:'arcane', src:'PHB', bonus:[{type:'ca',val:1,cond:'pas d\'armure'}], desc:'+1 CA sans armure.' },
-  { name:'Robustesse', cat:'Défense', prereq:'', src:'PHB', bonus:[{type:'hp',val:5,cond:''}], desc:'+5 PV maximum.' },
-  { name:'Robustesse II', cat:'Défense', prereq:'Robustesse, niv.11', src:'PHB', bonus:[{type:'hp',val:10,cond:''}], desc:'+10 PV supplémentaires.' },
-  { name:'Robustesse III', cat:'Défense', prereq:'Robustesse II, niv.21', src:'PHB', bonus:[{type:'hp',val:15,cond:''}], desc:'+15 PV supplémentaires.' },
+  { name:'Robustesse', cat:'Défense', prereq:'', src:'PHB', bonus:[{type:'hp',val:5,cond:''}], desc:'+5 PV max (Héroïque) · +10 PV (Paragonien Niv.11+) · +15 PV (Épique Niv.21+) — un seul don, auto-progressif.' },
   { name:'Durable', cat:'Défense', prereq:'CON 13', src:'PHB', bonus:[{type:'hp',val:5,cond:''},{type:'surge',val:1,cond:''}], desc:'+5 PV max et +1 récupération par jour.' },
   // ── INITIATIVE ───────────────────────────────────
   { name:'Initiative Améliorée', cat:'Général', prereq:'', src:'PHB', bonus:[{type:'init',val:4,cond:''}], desc:'+4 à l\'initiative.' },
@@ -9759,9 +9803,9 @@ const FEAT_LIST = [
   { name:'Persuasion Naturelle', cat:'Compétence', prereq:'', src:'PHB', bonus:[{type:'skill:Persuasion',val:2,cond:''}], desc:'+2 en Persuasion.' },
   { name:'Mémoire Arcanique', cat:'Compétence', prereq:'', src:'PHB', bonus:[{type:'skill:Arcanes',val:2,cond:''}], desc:'+2 en Arcanes.' },
   { name:'Connaissance Religieuse', cat:'Compétence', prereq:'', src:'PHB', bonus:[{type:'skill:Religion',val:2,cond:''}], desc:'+2 en Religion.' },
-  { name:'Connaissance des Donjons', cat:'Compétence', prereq:'', src:'PHB', bonus:[{type:'skill:Exploration',val:2,cond:''}], desc:'+2 en Exploration.' },
+  { name:'Connaissance des Donjons', cat:'Compétence', prereq:'', src:'PHB', bonus:[{type:'skill:Arcanes',val:2,cond:''}], desc:'+2 en Arcanes (Dungeoneering → connaissance INT, mappé sur Arcanes dans AE5).' },
   { name:'Connaissance de la Nature', cat:'Compétence', prereq:'', src:'PHB', bonus:[{type:'skill:Nature',val:2,cond:''}], desc:'+2 en Nature.' },
-  { name:'Focus de Compétence', cat:'Compétence', prereq:'', src:'PHB', bonus:[{type:'skill:*',val:3,cond:'1 compétence entraînée au choix'}], desc:'PHB Skill Focus : +3 à UNE compétence entraînée au choix. ⚠ Bonus appliqué à toutes par limitation technique ; limiter à 1 par accord de table.' },
+  { name:'Focus de Compétence', cat:'Compétence', prereq:'', src:'PHB', choix:'skill', bonus:[{type:'skill:choice',val:3,cond:''}], desc:'+3 à une compétence entraînée au choix (sélectionne-la dans le slot de don).' },
   // ── MOBILITÉ ─────────────────────────────────────
   { name:'Pas Vif', cat:'Mobilité', prereq:'', src:'PHB', bonus:[{type:'speed',val:1,cond:''}], desc:'+1 à la vitesse.' },
   { name:'Mobilité de Combat', cat:'Mobilité', prereq:'DEX 13', src:'PHB', bonus:[], desc:'+2 CA vs attaques d\'opportunité lors d\'un déplacement.' },
@@ -9882,6 +9926,13 @@ function renderFeatSlots() {
 
   container.innerHTML = __featSlots.slice(0, count).map((slot, i) => {
     const fd = FEAT_LIST.find(f => f.name === slot.name);
+    const needsSkillChoice = fd && fd.choix === 'skill';
+    const choiceEl = needsSkillChoice
+      ? `<select onchange="onFeatSkillChoice(${i},this.value)"
+           title="Choisir la compétence ciblée par ce don"
+           style="margin-left:4px;background:#0e0e1a;border:1px solid #c9a260;color:#c9a260;border-radius:4px;font-size:10px;padding:2px 4px;cursor:pointer;">
+           <option value="">— compétence —</option>${SKILLS.map(s=>`<option value="${s.key}"${slot.skillChoice===s.key?' selected':''}>${s.label}</option>`).join('')}
+         </select>` : '';
     return `<div class="feat-slot-row" id="feat-slot-${i}">
       <input type="text" list="featDataList" value="${slot.name||''}"
         placeholder="Sélectionner un don..."
@@ -9889,6 +9940,7 @@ function renderFeatSlots() {
         onchange="onFeatSlotCommit(${i}, this.value)"
         class="feat-slot-input" autocomplete="off">
       <span class="feat-slot-info" id="feat-info-${i}">${fd ? `${fd.prereq ? '<span style=\'color:#f0a040;\'>⚠</span>' : '✓'} ${fd.cat}` : ''}</span>
+      ${choiceEl}
     </div>`;
   }).join('');
 
@@ -9914,6 +9966,12 @@ function onFeatSlotInput(i, value) {
   const badge = document.getElementById('featCountBadge');
   if (badge) badge.textContent = `${__featSlots.filter(s=>s.name).length} / ${getFeatSlotCount()}`;
   // Mettre à jour l'info inline sans recréer l'input
+  // Re-render the slot to show/hide the skill choice dropdown
+  const fd2 = FEAT_LIST.find(f => f.name === value);
+  if (fd2 && fd2.choix === 'skill') {
+    renderFeatSlots(); // full re-render needed to show the skill select
+    return;
+  }
   const infoEl = document.getElementById(`feat-info-${i}`);
   if (infoEl) {
     const fd = FEAT_LIST.find(f => f.name === value);
@@ -9925,10 +9983,20 @@ function onFeatSlotInput(i, value) {
   }
 }
 
+function onFeatSkillChoice(i, key) {
+  if (!__featSlots[i]) return;
+  __featSlots[i].skillChoice = key;
+  applyAllBonuses();
+  autoSave();
+}
+
 // Blur ou Enter : commit complet (re-render + bonus + save)
 function onFeatSlotCommit(i, value) {
   if (!__featSlots[i]) return;
   __featSlots[i].name = value;
+  // Clear skill choice if new feat doesn't need one
+  const fd = FEAT_LIST.find(f => f.name === value);
+  if (!fd || fd.choix !== 'skill') __featSlots[i].skillChoice = null;
   applyAllBonuses();
   autoSave();
   // Re-render uniquement si la valeur a changé (pour afficher/masquer le ⚠)
@@ -10011,9 +10079,16 @@ function applyAllBonuses() {
   // Collect feat bonuses
   const featBonuses = { ca:0, vig:0, ref:0, vol:0, init:0, atk:0, dmg:0, hp:0, surge:0, speed:0, save:0 };
 
+  const _niv = parseInt(document.getElementById('niveau')?.value) || 1;
   (__featSlots||[]).forEach(slot => {
     const fd = FEAT_LIST.find(f => f.name === slot.name);
     if (!fd) return;
+    // Robustesse (Toughness) : auto-scale par palier
+    if (slot.name === 'Robustesse') {
+      const tier = _niv >= 21 ? 3 : _niv >= 11 ? 2 : 1;
+      featBonuses.hp += 5 * tier; // +5 Héroïque, +10 Paragonien, +15 Épique
+      return;
+    }
     (fd.bonus||[]).forEach(b => {
       if (b.type in featBonuses) featBonuses[b.type] += b.val;
     });
