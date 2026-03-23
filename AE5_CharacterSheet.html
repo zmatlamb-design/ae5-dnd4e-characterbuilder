@@ -2754,7 +2754,7 @@ const CLASS_DATA = {
   'Clerc (Prêtre)': { hp1:12, hpLvl:5, surges:7, defBonus:{vig:0,ref:0,vol:2}, mainStats:['SAG','CHA'], source:'Divin',
         powers: {
       atwill:[
-        { name:'Cause Fear', nameEn:'Cause Fear (PHB1 p.~66)', type:'À volonté · Divin · Implement · Radiant', level:1, tags:["standard", "distance 5"], atk:'+½NIV+SAG vs Vol', dmg:'1d8 + mod SAG radiant', effect:'Touché : 1d8 + mod SAG radiant damage, and one allié que tu peux voir gains a +2 bonus de pouvoir to his or her next attack roll against la cible. Touché : The cible moves its speed + your mod CHA away from you. The fleeing cible avoids unsafe cases and difficult terrain if it can. This movement provokes attaque d’opportunités. Priest’s Shield Divine Glow' },
+        { name:'Marque Juste', nameEn:'Righteous Brand (PHB1 p.~65)', type:'À volonté · Divin · Arme', level:1, tags:["standard", "distance 5"], atk:'+½NIV+FOR vs CA', dmg:'1[W] + mod FOR', effect:'Touché : 1d8 + mod SAG radiant damage, and one allié que tu peux voir gains a +2 bonus de pouvoir to his or her next attack roll against la cible. Touché : The cible moves its speed + your mod CHA away from you. The fleeing cible avoids unsafe cases and difficult terrain if it can. This movement provokes attaque d’opportunités. Priest’s Shield Divine Glow' },
         { name:'Frappe Guérisseuse', nameEn:'Healing Strike (PHB1 p.~67)', type:'À volonté · Divin · Arme', level:1, tags:["standard", "mêlée"], atk:'+½NIV+FOR vs CA', dmg:'1[W] + mod FOR damage', effect:'Touché : 1[W] + mod FOR damage, and one allié within 5 cases of you gains a bonus de pouvoir to melee attack rolls against la cible equal to your mod FOR jusqu’à la fin de ton prochain tour.' },
         { name:'Flamme Sacrée', nameEn:'Sacred Flame (PHB1 p.~67)', type:'À volonté · Divin · Implement · Radiant', level:1, tags:["standard", "distance 5"], atk:'+½NIV+SAG vs Réf', dmg:'1d6 + mod SAG radiant', effect:'Touché : 1d6 + mod SAG radiant damage, and one allié que tu peux voir chooses either to gain PV temporaires equal to your mod CHA + ½ niveau or to make a jet de sauvegarde.' }
       ,
@@ -9184,7 +9184,7 @@ const FEAT_LIST = [
   { name:'Attaque Puissante', cat:'Combat', prereq:'FOR 15', src:'PHB', bonus:[{type:'dmg',val:2,cond:'attaque de mêlée'}], desc:'+2 aux dégâts de mêlée à deux mains.' },
   { name:'Combat à Deux Armes', cat:'Combat', prereq:'DEX 15', src:'PHB', bonus:[{type:'dmg',val:1,cond:'arme secondaire'}], desc:'+1 aux dégâts avec l\'arme secondaire.' },
   { name:'Défense à Deux Armes', cat:'Combat', prereq:'DEX 13', src:'PHB', bonus:[{type:'ca',val:1,cond:'deux armes équipées'},{type:'ref',val:1,cond:'deux armes équipées'}], desc:'+1 CA et RÉF avec deux armes équipées.' },
-  { name:'Expertise de Combat', cat:'Combat', prereq:'', src:'PHB', bonus:[{type:'atk',val:1,cond:''}], desc:'+1 à tous les jets d\'attaque.' },
+  { name:'Expertise de Combat', cat:'Combat', prereq:'', src:'PHB', bonus:[{type:'ca',val:1,cond:'attaque de mêlée'}], desc:'+1 à tous les jets d\'attaque.' },
   { name:'Expertise Armée', cat:'Combat', prereq:'', src:'PHB', bonus:[{type:'atk',val:1,cond:'arme spécifique'}], desc:'+1 aux jets d\'attaque avec un groupe d\'arme.' },
   { name:'Expertise d\'Implement', cat:'Combat', prereq:'', src:'PHB', bonus:[{type:'atk',val:1,cond:'implement'}], desc:'+1 aux jets d\'attaque avec un implement.' },
   { name:'Concentration sur l\'Arme', cat:'Combat', prereq:'', src:'PHB', bonus:[{type:'dmg',val:1,cond:'arme spécifique'}], desc:'+1 aux dégâts avec un groupe d\'arme.' },
@@ -9207,7 +9207,7 @@ const FEAT_LIST = [
   { name:'Initiative Améliorée', cat:'Général', prereq:'', src:'PHB', bonus:[{type:'init',val:4,cond:''}], desc:'+4 à l\'initiative.' },
   { name:'Sens du Danger', cat:'Général', prereq:'', src:'PHB', bonus:[{type:'init',val:2,cond:''}], desc:'+2 à l\'initiative.' },
   // ── SAUVEGARDE / DIVERS ──────────────────────────
-  { name:'Résistance Inflexible', cat:'Général', prereq:'', src:'PHB', bonus:[{type:'save',val:1,cond:''}], desc:'+1 à tous les jets de sauvegarde.' },
+  { name:'Résistance Inflexible', cat:'Général', prereq:'', src:'PHB', bonus:[{type:'save',val:2,cond:''}], desc:'+1 à tous les jets de sauvegarde.' },
   { name:'Chance Combative', cat:'Général', prereq:'', src:'PHB', bonus:[{type:'save',val:2,cond:'vs conditions'}], desc:'+2 aux jets de sauvegarde vs conditions.' },
   // ── COMPÉTENCES ──────────────────────────────────
   { name:'Formation en Compétence', cat:'Compétence', prereq:'', src:'PHB', bonus:[], desc:'Devient entraîné dans une compétence.' },
@@ -9219,7 +9219,7 @@ const FEAT_LIST = [
   { name:'Connaissance Religieuse', cat:'Compétence', prereq:'', src:'PHB', bonus:[{type:'skill:Religion',val:2,cond:''}], desc:'+2 en Religion.' },
   { name:'Connaissance des Donjons', cat:'Compétence', prereq:'', src:'PHB', bonus:[{type:'skill:Exploration',val:2,cond:''}], desc:'+2 en Exploration.' },
   { name:'Connaissance de la Nature', cat:'Compétence', prereq:'', src:'PHB', bonus:[{type:'skill:Nature',val:2,cond:''}], desc:'+2 en Nature.' },
-  { name:'Focus de Compétence', cat:'Compétence', prereq:'', src:'PHB', bonus:[{type:'skill:*',val:3,cond:''}], desc:'+3 à une compétence choisie.' },
+  { name:'Focus de Compétence', cat:'Compétence', prereq:'', src:'PHB', bonus:[{type:'skill:*',val:3,cond:'1 compétence entraînée au choix'}], desc:'PHB Skill Focus : +3 à UNE compétence entraînée au choix. ⚠ Bonus appliqué à toutes par limitation technique ; limiter à 1 par accord de table.' },
   // ── MOBILITÉ ─────────────────────────────────────
   { name:'Pas Vif', cat:'Mobilité', prereq:'', src:'PHB', bonus:[{type:'speed',val:1,cond:''}], desc:'+1 à la vitesse.' },
   { name:'Mobilité de Combat', cat:'Mobilité', prereq:'DEX 13', src:'PHB', bonus:[], desc:'+2 CA vs attaques d\'opportunité lors d\'un déplacement.' },
@@ -9228,7 +9228,7 @@ const FEAT_LIST = [
   { name:'Précision Elfique', cat:'Racial', prereq:'Elfe', src:'PHB', bonus:[], desc:'Peut relancer un jet d\'attaque 1×/rencontre.' },
   { name:'Persévérance Humaine', cat:'Racial', prereq:'Humain', src:'PHB', bonus:[{type:'save',val:1,cond:''}], desc:'+1 à tous les jets de sauvegarde.' },
   { name:'Endurance Naine', cat:'Racial', prereq:'Nain', src:'PHB', bonus:[{type:'surge',val:1,cond:''}], desc:'+1 récupération par jour.' },
-  { name:'Pied Léger Halfelin', cat:'Racial', prereq:'Halfelin', src:'PHB', bonus:[{type:'ca',val:1,cond:'vs attaques d\'opportunité'}], desc:'+1 CA contre les attaques d\'opportunité.' },
+  { name:'Pied Léger Halfelin', cat:'Racial', prereq:'Halfelin', src:'PHB', bonus:[{type:'ca',val:2,cond:'vs attaques d\'opportunité'}], desc:'+1 CA contre les attaques d\'opportunité.' },
   { name:'Férocité Orque', cat:'Racial', prereq:'Demi-Orc', src:'PHB', bonus:[], desc:'Peut effectuer une attaque basique à 0 PV 1×/rencontre.' },
   { name:'Résistance Tiefelin', cat:'Racial', prereq:'Tieflin', src:'PHB', bonus:[], desc:'+5 résistance au feu.' },
   { name:'Souffle du Dragon', cat:'Racial', prereq:'Dragonné', src:'PHB', bonus:[], desc:'Souffle de dragon 1×/rencontre.' },
@@ -9237,8 +9237,8 @@ const FEAT_LIST = [
   { name:'Bouclier Défensif', cat:'Bouclier', prereq:'Bouclier Léger', src:'PHB', bonus:[{type:'ref',val:1,cond:'avec bouclier'}], desc:'+1 REF avec bouclier.' },
   { name:'Blocage au Bouclier', cat:'Bouclier', prereq:'Bouclier Lourd', src:'PHB', bonus:[{type:'vig',val:1,cond:'avec bouclier lourd'}], desc:'+1 VIG avec bouclier lourd.' },
   // ── PARAGON / PUISSANTS ──────────────────────────
-  { name:'Expertise au Combat', cat:'Héroïque', prereq:'niv.5', src:'PHB', bonus:[{type:'atk',val:1,cond:''}], desc:'+1 aux jets d\'attaque (toutes armes).' },
-  { name:'Action Héroïque', cat:'Héroïque', prereq:'niv.11', src:'PHB', bonus:[], desc:'Gagne une action supplémentaire 1×/rencontre.' },
+  { name:'Expertise au Combat', cat:'Héroïque', prereq:'niv.5', src:'PHB', bonus:[{type:'ca',val:1,cond:''}], desc:'+1 aux jets d\'attaque (toutes armes).' },
+  { name:'Action Héroïque', cat:'Héroïque', prereq:'Humain', src:'PHB', bonus:[], desc:'Gagne une action supplémentaire 1×/rencontre.' },
   { name:'Résistance Héroïque', cat:'Héroïque', prereq:'niv.11', src:'PHB', bonus:[{type:'vig',val:1,cond:''},{type:'ref',val:1,cond:''},{type:'vol',val:1,cond:''}], desc:'+1 à toutes les défenses.' },
   { name:'Frénésie Épique', cat:'Épique', prereq:'niv.21', src:'PHB', bonus:[{type:'dmg',val:4,cond:''}], desc:'+4 aux dégâts au niveau épique.' },
   { name:'Résistance Épique', cat:'Épique', prereq:'niv.21', src:'PHB', bonus:[{type:'vig',val:2,cond:''},{type:'ref',val:2,cond:''},{type:'vol',val:2,cond:''}], desc:'+2 à toutes les défenses (niveau épique).' },
