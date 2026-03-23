@@ -25,12 +25,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
   text-shadow:0 0 30px rgba(201,162,96,.4);
 }
 .tisserane-name{
-  font-size:clamp(11px,1.5vw,13px);letter-spacing:4px;
-  color:#5a4020;margin-bottom:32px;font-style:normal;font-family:monospace;
+  font-size:clamp(13px,1.8vw,16px);letter-spacing:4px;
+  color:#a08855;margin-bottom:32px;font-style:normal;font-family:monospace;
 }
 .tisserane-quote{
   max-width:560px;text-align:left;font-style:italic;
-  font-size:clamp(12px,1.8vw,15px);line-height:1.9;color:#b09060;
+  font-size:clamp(12px,1.8vw,15px);line-height:1.9;color:#c8a870;
   border-left:1px solid #5a4020;padding-left:20px;margin-top:28px;
 }
 #tisseraneTypeTarget{min-height:3em;}
@@ -42,7 +42,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
 .btn-continue{
   margin-top:36px;padding:10px 32px;
   background:transparent;border:1px solid #5a4020;
-  color:#7a6040;font-family:monospace;font-size:11px;letter-spacing:3px;
+  color:#b8a060;font-family:monospace;font-size:11px;letter-spacing:3px;
   cursor:pointer;text-transform:uppercase;
   transition:all .4s;opacity:0;
 }
@@ -59,7 +59,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
 }
 .forge-header{
   padding:12px 18px;background:#0d0900;border-bottom:1px solid #2a1a08;
-  font-family:monospace;font-size:10px;letter-spacing:2px;color:#5a4020;
+  font-family:monospace;font-size:12px;letter-spacing:2px;color:#a08855;
   display:flex;justify-content:space-between;align-items:center;
 }
 .forge-header span{color:#c9a260;}
@@ -67,15 +67,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
 .forge-title{
   font-size:18px;letter-spacing:1px;color:#c9a260;margin-bottom:4px;
 }
-.forge-subtitle{font-size:11px;color:#5a4020;font-family:monospace;letter-spacing:2px;margin-bottom:24px;}
+.forge-subtitle{font-size:11px;color:#a08855;font-family:monospace;letter-spacing:2px;margin-bottom:24px;}
 .forge-quote{
-  font-style:italic;color:#6a5030;font-size:13px;line-height:1.8;
+  font-style:italic;color:#b09555;font-size:13px;line-height:1.8;
   border-left:1px solid #2a1a08;padding-left:14px;margin-bottom:24px;
 }
 .severine-line{
   font-family:monospace;font-size:13px;color:#8a9a6a;margin-bottom:8px;
 }
-.severine-line::before{content:'> ';color:#4a6040;}
+.severine-line::before{content:'> ';color:#7aaa70;}
 
 /* ── Phase 3 : Six Chemins ──────────────────────── */
 #phasePaths{background:rgba(3,3,10,.97);overflow-y:auto;align-items:flex-start;padding:28px 20px;}
@@ -84,7 +84,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
   align-self:center;
 }
 .paths-title{font-size:20px;letter-spacing:1px;color:#c9a260;margin-bottom:6px;}
-.paths-sub{font-family:monospace;font-size:10px;color:#5a4020;letter-spacing:2px;}
+.paths-sub{font-family:monospace;font-size:12px;color:#a08855;letter-spacing:2px;}
 .paths-grid{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
   gap:14px;max-width:820px;width:100%;align-self:center;
@@ -98,14 +98,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
   box-shadow:0 0 20px rgba(201,162,96,.1);
 }
 .path-card.selected .path-icon{color:#c9a260;}
-.path-icon{font-size:22px;margin-bottom:8px;color:#5a4020;transition:color .3s;}
+.path-icon{font-size:22px;margin-bottom:8px;color:#a08855;transition:color .3s;}
 .path-name{font-size:14px;color:#c9a260;margin-bottom:4px;}
-.path-tagline{font-size:11px;font-style:italic;color:#6a5030;line-height:1.5;margin-bottom:10px;}
-.path-classes{font-family:monospace;font-size:9px;color:#4a6040;letter-spacing:1px;}
+.path-tagline{font-size:11px;font-style:italic;color:#b09555;line-height:1.5;margin-bottom:10px;}
+.path-classes{font-family:monospace;font-size:11px;color:#7aaa70;letter-spacing:1px;}
 .paths-next{
   align-self:center;margin-top:20px;
   padding:10px 36px;background:transparent;border:1px solid #5a4020;
-  color:#7a6040;font-family:monospace;font-size:11px;letter-spacing:3px;
+  color:#b8a060;font-family:monospace;font-size:11px;letter-spacing:3px;
   cursor:pointer;text-transform:uppercase;transition:all .4s;opacity:0;
 }
 .paths-next.visible{opacity:1;}
@@ -118,9 +118,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
   font-family:monospace;font-size:12px;color:#8a9a6a;margin-bottom:20px;
   line-height:1.8;
 }
-.wiz-sev::before{content:'Séverine — ';color:#4a6040;}
+.wiz-sev::before{content:'Séverine — ';color:#7aaa70;}
 .wiz-tisserane{
-  font-style:italic;font-size:12px;color:#5a4020;margin-bottom:16px;
+  font-style:italic;font-size:12px;color:#a08855;margin-bottom:16px;
   line-height:1.8;
 }
 .wiz-input{
@@ -128,7 +128,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
   color:#c9a260;font-family:monospace;font-size:14px;padding:10px 14px;
   outline:none;transition:border-color .3s;margin-bottom:20px;
 }
-.wiz-input:focus{border-color:#5a4020;}
+.wiz-input:focus{border-color:#a08855;}
 .wiz-select{
   width:100%;background:#07070f;border:1px solid #2a1a08;border-radius:4px;
   color:#c9a260;font-family:monospace;font-size:13px;padding:10px 14px;
@@ -139,20 +139,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
 .wiz-btns{display:flex;gap:10px;justify-content:flex-end;}
 .wiz-btn{
   padding:8px 24px;background:transparent;border:1px solid #5a4020;
-  color:#7a6040;font-family:monospace;font-size:11px;letter-spacing:2px;
+  color:#b8a060;font-family:monospace;font-size:11px;letter-spacing:2px;
   cursor:pointer;text-transform:uppercase;transition:all .3s;
 }
 .wiz-btn:hover{border-color:#c9a260;color:#c9a260;}
 .wiz-btn.primary{border-color:#c9a260;color:#c9a260;}
 .wiz-step-indicator{
-  font-family:monospace;font-size:9px;color:#2a1a08;letter-spacing:2px;
+  font-family:monospace;font-size:11px;color:#2a1a08;letter-spacing:2px;
   margin-bottom:24px;
 }
 /* genre chips */
 .genre-chips{display:flex;gap:8px;margin-bottom:20px;}
 .genre-chip{
   flex:1;padding:9px;text-align:center;border:1px solid #2a1a08;border-radius:4px;
-  color:#5a4020;font-family:monospace;font-size:12px;cursor:pointer;transition:all .3s;
+  color:#a08855;font-family:monospace;font-size:12px;cursor:pointer;transition:all .3s;
 }
 .genre-chip:hover,.genre-chip.selected{border-color:#c9a260;color:#c9a260;background:#0d0900;}
 
@@ -160,7 +160,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
 #phaseSummary{background:rgba(3,3,10,.97);}
 .summary-box{max-width:560px;width:100%;text-align:center;}
 .summary-tisserane{
-  font-style:italic;color:#7a6040;font-size:13px;line-height:2;
+  font-style:italic;color:#b8a060;font-size:13px;line-height:2;
   margin-bottom:28px;
 }
 .summary-card{
@@ -170,7 +170,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
 .sum-row{display:flex;justify-content:space-between;padding:6px 0;
   border-bottom:1px solid #12120a;font-family:monospace;font-size:12px;}
 .sum-row:last-child{border:none;}
-.sum-label{color:#5a4020;letter-spacing:1px;}
+.sum-label{color:#a08855;letter-spacing:1px;}
 .sum-value{color:#c9a260;}
 .sum-path{color:#8a9a6a;}
 .btn-launch{
@@ -182,11 +182,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
 .btn-launch:hover{background:#c9a260;color:#03030a;box-shadow:0 0 30px rgba(201,162,96,.3);}
 .btn-skip{
   position:fixed;bottom:16px;right:20px;z-index:100;
-  font-family:monospace;font-size:9px;color:#2a1a08;letter-spacing:2px;
+  font-family:monospace;font-size:11px;color:#2a1a08;letter-spacing:2px;
   background:none;border:none;cursor:pointer;text-transform:uppercase;
   transition:color .3s;
 }
-.btn-skip:hover{color:#5a4020;}
+.btn-skip:hover{color:#a08855;}
 </style>
 </head>
 <body>
@@ -546,7 +546,7 @@ const WIZ_STEPS = [
       <input type="range" id="wiz-niveau" min="1" max="30" value="${forge.niveau}" oninput="forge.niveau=parseInt(this.value);document.getElementById('niv-display').textContent=this.value"
         style="flex:1;accent-color:#c9a260;height:4px;">
       <span id="niv-display" style="font-family:monospace;color:#c9a260;font-size:18px;min-width:28px;">${forge.niveau}</span>
-      <span style="font-family:monospace;font-size:10px;color:#5a4020;">NIV.</span>
+      <span style="font-family:monospace;font-size:12px;color:#a08855;">NIV.</span>
     </div>` },
 ];
 
