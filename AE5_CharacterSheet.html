@@ -2098,7 +2098,8 @@
     </div>
     <div class="panel col3">
       <div class="panel-title">⚙️ Capacités de Classe
-        <button class="power-add-btn" style="font-size:10px;margin-left:8px;" onclick="loadClassFeatures()">⟳ Charger pour la classe</button>
+        <span id="cf-count-badge" style="font-size:10px;color:var(--text3);margin-left:6px;"></span>
+        <button class="power-add-btn" style="font-size:10px;margin-left:8px;" onclick="autoRenderClassFeatures(false)" title="Rafraîchir l'affichage selon la classe et le niveau actuel">⟳ Actualiser</button>
       </div>
       <div id="classFeaturesList" style="display:flex;flex-direction:column;gap:4px;"></div>
       <textarea id="classFeatures" placeholder="Notes additionnelles sur les capacités de classe..." rows="3" oninput="autoSave()" style="margin-top:6px;width:100%;background:var(--bg2);color:var(--text1);border:1px solid var(--border);border-radius:4px;padding:6px;font-size:11px;resize:vertical;"></textarea>
@@ -3956,7 +3957,10 @@ const CLASS_DATA = {
   },
 
   // ─── BARBARE (BARBARIAN) ─────────────────────────────────────
-  'Barbare (Barbarian)': { hp1:15, hpLvl:6, surges:8, defBonus:{vig:2,ref:0,vol:0}, mainStats:["FOR", "CON"], source:'Primal',
+  'Barbare (Barbarian)': { hp1:15, hpLvl:6, surges:8, defBonus:{vig:2,ref:0,vol:0}, mainStats:["FOR", "CON",
+    { name:'Frénésie de Sang', nameEn:'Blood Frenzy (PHB2)', level:11, desc:'Niv.11 ★ Paragonien : En Rage, +2 ATK contre toute cible en dessous du Seuil Ensanglanté.' },
+    { name:'Indestructible', nameEn:'Unstoppable (PHB2)', level:21, desc:'Niv.21 ★★ Épique : En Rage : Résistance 10 à tous les dégâts sauf Radiants/Psychiques.' }
+  ], source:'Primal',
     powers: {
       atwill:[
         { name:'Devastating Strike', nameEn:'Devastating Strike (PHB2 p.~53)', type:'À volonté · Primal · Arme', level:1, tags:["standard", "mêlée"], atk:'+½NIV+FOR vs CA', dmg:'—', effect:'Touché : 1[W] + 1d8 + mod FOR damage. Level 11: 1[W] + 2d8 + mod FOR damage. Level 21: 2[W] + 3d8 + mod FOR damage. Effet : Until the start of your next turn, any attacker gains a +2 bonus to attack rolls against you. If you are raging, attackers do not gain this bonus. Howling Strike Barbarian Feature You channel your primal rage into a devastating attack. 50 The Feral Might class feature grants each barbarian one of the following powers.' },
@@ -4072,7 +4076,10 @@ const CLASS_DATA = {
   },
 
   // ─── BARDE ─────────────────────────────────────
-  'Barde': { hp1:12, hpLvl:5, surges:7, defBonus:{vig:0,ref:0,vol:2}, mainStats:["CHA", "INT"], source:'Arcanique',
+  'Barde': { hp1:12, hpLvl:5, surges:7, defBonus:{vig:0,ref:0,vol:2}, mainStats:["CHA", "INT",
+    { name:'Maîtrise des Chants', nameEn:'Song of Rest (PHB2)', level:11, desc:'Niv.11 ★ Paragonien : Repos court : Chant de Repos — alliés qui t\'entendent : +1d6 PV supplémentaires lors des Surges.' },
+    { name:'Mélodie Inspirante', nameEn:'Bardic Mastery (PHB2)', level:21, desc:'Niv.21 ★★ Épique : Chant de Bataille maintenu toute la rencontre sans action de soutien. Buffs bardiques +1.' }
+  ], source:'Arcanique',
     powers: {
       atwill:[
         { name:'Guiding Strike', nameEn:'Guiding Strike (PHB2 p.~71)', type:'À volonté · Arcanique · Arme', level:1, tags:["standard", "mêlée"], atk:'+½NIV+CHA vs CA', dmg:'1[W] + mod CHA damage', effect:'Touché : 1[W] + mod CHA damage, and la cible takes a –2 penalty to the defense of your choice jusqu’à la fin de ton prochain tour. Level 21: 2[W] + mod CHA damage. Misdirected Mark' },
@@ -5484,92 +5491,109 @@ const CLASS_DATA = {
 // ═══════════════════════════════════════════════════
 const CLASS_FEATURES = {
   'Paladin': [
-    { name:'Défi Divin', nameEn:'Divine Challenge (PHB1)', desc:'Action mineure : Marque une créature dans 5 cases. Si elle attaque un autre que toi et est dans les 5 cases, elle subit ton mod CHA en dégâts radiants. Marque 1 cible à la fois.' },
-    { name:'Imposition des Mains', nameEn:'Lay on Hands (PHB1)', desc:'Nombre d\u2019utilisations/repos long = mod CHA (min 1). Action mineure (mêlée) : une cible alliée récupère des PV égaux à sa Valeur de Surge, sans dépenser de Surge.' },
-    { name:'Canalisation Divine', nameEn:'Channel Divinity (PHB1)', desc:'1 fois par rencontre, tu peux utiliser un pouvoir Channel Divinity. Ton choix de pouvoir dépend de ta divinité : Bouclier de Foi (+2 CA pour 1 allié) ou Retribution Sacrée (dégâts radiants sur prochain raté).' },
-    { name:'Maîtrise des Armures Lourdes', nameEn:'Heavy Armor Proficiency', desc:'Tu portes les armures lourdes sans pénalité. +1 à CA pour chaque type d\u2019armure port\u00e9e au-dessus des armures légères (Mailles, Plates).' },
-    { name:'Aura Divine', nameEn:'Divine Aura (PHB1)', desc:'Aura passive (distance 1). Chaque allié dans l\u2019aura bénéficie d\u2019un bonus de +1 aux jets de sauvegarde. À niv. 11 : +2, à niv. 21 : +3.' },
-    { name:'Serment du Paladin', nameEn:'Paladin\u2019s Oath', desc:'Chaque Paladin prête un Serment de classe (serment de Protection, Vengeance, ou Dévotion). Le Serment définit le choix de divinité et les bonus de Canalisation.' }
-      ],
+    { name:'Défi Divin', nameEn:'Divine Challenge (PHB1)', desc:'Action mineure : Marque une créature dans 5 cases. Si elle attaque un autre que toi et est dans les 5 cases, elle subit ton mod CHA en dégâts radiants. Marque 1 cible à la fois.' , level:1},
+    { name:'Imposition des Mains', nameEn:'Lay on Hands (PHB1)', desc:'Nombre d\u2019utilisations/repos long = mod CHA (min 1). Action mineure (mêlée) : une cible alliée récupère des PV égaux à sa Valeur de Surge, sans dépenser de Surge.' , level:1},
+    { name:'Canalisation Divine', nameEn:'Channel Divinity (PHB1)', desc:'1 fois par rencontre, tu peux utiliser un pouvoir Channel Divinity. Ton choix de pouvoir dépend de ta divinité : Bouclier de Foi (+2 CA pour 1 allié) ou Retribution Sacrée (dégâts radiants sur prochain raté).' , level:1},
+    { name:'Maîtrise des Armures Lourdes', nameEn:'Heavy Armor Proficiency', desc:'Tu portes les armures lourdes sans pénalité. +1 à CA pour chaque type d\u2019armure port\u00e9e au-dessus des armures légères (Mailles, Plates).' , level:1},
+    { name:'Aura Divine', nameEn:'Divine Aura (PHB1)', desc:'Aura passive (distance 1). Chaque allié dans l\u2019aura bénéficie d\u2019un bonus de +1 aux jets de sauvegarde. À niv. 11 : +2, à niv. 21 : +3.' , level:1},
+    { name:'Serment du Paladin', nameEn:'Paladin\u2019s Oath', desc:'Chaque Paladin prête un Serment de classe (serment de Protection, Vengeance, ou Dévotion). Le Serment définit le choix de divinité et les bonus de Canalisation.' , level:1},
+    { name:'Aura de Courage', nameEn:'Aura of Courage (PHB1)', level:11, desc:'Niv.11 ★ Paragonien : Aura distance 2. Alliés dans l\'aura : +2 aux JS contre Peur et Domination.' },
+    { name:'Présence Angélique', nameEn:'Angelic Presence (PHB1)', level:21, desc:'Niv.21 ★★ Épique : Immunité permanente à Peur/Charme. Alliés dans l\'aura : Résistance 5 Radiant.' }
+  ],
   'Clerc (Prêtre)': [
-    { name:'Canalisation Divine', nameEn:'Channel Divinity (PHB1)', desc:'1 fois par rencontre. Choix entre Retribut. de Lancer : +2 aux jets de dégâts sur les prochaines attaques divines, ou Lumière Curative : un allié regagne 1d6+mod SAG PV.' },
-    { name:'Maîtrise des Rituels', nameEn:'Ritual Casting (PHB1)', desc:'Tu peux lancer des Rituels divins depuis le Livre de Prières sans Rituel Scroll. Tu connais un nombre de Rituels égal à ton mod SAG + niveau (arrondi).' },
-    { name:'Guérison Sacrée', nameEn:'Healing Word (PHB1)', desc:'2 fois par rencontre (action mineure, distance 5) : un allié dépense un Surge et regagne +1d6 PV supplémentaires. À niv. 6 : +2d6, à niv. 11 : +3d6.' },
-    { name:'Maîtrise d\u2019Armure de Mailles', nameEn:'Chain Mail Proficiency', desc:'Port de la cotte de mailles sans pénalité. Pas d\u2019armure lourde par défaut sauf don.' },
-    { name:'Symbole Sacré', nameEn:'Holy Symbol Implement', desc:'Tu utilises un Symbole Sacré comme Implement pour tes pouvoirs Divins. Bonus de l\u2019Implement s\u2019ajoute aux jets d\u2019attaque et dégâts des pouvoirs Implement.' },
-    { name:'Prière du Matin', nameEn:'Morning Prayer', desc:'Une fois par repos long, tu mémorises tes pouvoirs Quotidiens et Utilitaires depuis ta liste de prières (au lieu de les récupérer automatiquement comme d\u2019autres classes).' }
-      ],
+    { name:'Canalisation Divine', nameEn:'Channel Divinity (PHB1)', desc:'1 fois par rencontre. Choix entre Retribut. de Lancer : +2 aux jets de dégâts sur les prochaines attaques divines, ou Lumière Curative : un allié regagne 1d6+mod SAG PV.' , level:1},
+    { name:'Maîtrise des Rituels', nameEn:'Ritual Casting (PHB1)', desc:'Tu peux lancer des Rituels divins depuis le Livre de Prières sans Rituel Scroll. Tu connais un nombre de Rituels égal à ton mod SAG + niveau (arrondi).' , level:1},
+    { name:'Guérison Sacrée', nameEn:'Healing Word (PHB1)', desc:'2 fois par rencontre (action mineure, distance 5) : un allié dépense un Surge et regagne +1d6 PV supplémentaires. À niv. 6 : +2d6, à niv. 11 : +3d6.' , level:1},
+    { name:'Maîtrise d\u2019Armure de Mailles', nameEn:'Chain Mail Proficiency', desc:'Port de la cotte de mailles sans pénalité. Pas d\u2019armure lourde par défaut sauf don.' , level:1},
+    { name:'Symbole Sacré', nameEn:'Holy Symbol Implement', desc:'Tu utilises un Symbole Sacré comme Implement pour tes pouvoirs Divins. Bonus de l\u2019Implement s\u2019ajoute aux jets d\u2019attaque et dégâts des pouvoirs Implement.' , level:1},
+    { name:'Prière du Matin', nameEn:'Morning Prayer', desc:'Une fois par repos long, tu mémorises tes pouvoirs Quotidiens et Utilitaires depuis ta liste de prières (au lieu de les récupérer automatiquement comme d\u2019autres classes).' , level:1},
+    { name:'Résonance Sacrée', nameEn:'Anointed Army (PHB1)', level:11, desc:'Niv.11 ★ Paragonien : Quand tu lances un pouvoir de Soin, tous les alliés à portée 5 regagnent +5 PV temporaires.' },
+    { name:'Grâce Divine Complète', nameEn:'Divine Mastery (PHB1)', level:21, desc:'Niv.21 ★★ Épique : Channel Divinity utilisable 2×/rencontre. Soins : +mod SAG PV supplémentaires.' }
+  ],
   'Guerrier (Fighter)': [
-    { name:'Maîtrise de Combat', nameEn:'Combat Superiority (PHB1)', desc:'Lors d\u2019une Attaque d\u2019Opportunité, si tu touches, la cible s\u2019arrête et est Ralentie jusqu\u2019à la fin de son prochain tour (en plus des dégâts normaux).' },
-    { name:'Second Souffle', nameEn:'Second Wind (PHB1)', desc:'1 fois par rencontre (action standard) : tu dépenses un Surge et récupères des PV. +2 à toutes les défenses jusqu\u2019à la fin de ton prochain tour.' },
-    { name:'Style de Combat', nameEn:'Combat Style (PHB1)', desc:'Tu choisis un Style : Lame à Deux Mains (+2 dégâts armes polyvalentes / deux-mains), Lame et Bouclier (+1 CA, repousser de 1 case sur AO), ou Deux Armes (+1 atk avec arme secondaire).' },
-    { name:'Marque du Guerrier', nameEn:'Fighter Mark (PHB1)', desc:'Chaque touche de tes pouvoirs peut Marquer la cible (sauf indication contraire). Une cible Marquée qui attaque un autre que toi: −2 aux jets d\u2019attaque.' },
-    { name:'Maîtrise d\u2019Armure Lourde', nameEn:'Heavy Armor Proficiency', desc:'Port de toutes les armures (légères, intermédiaires, lourdes, bouclier) sans pénalité.' }
-      ],
+    { name:'Maîtrise de Combat', nameEn:'Combat Superiority (PHB1)', desc:'Lors d\u2019une Attaque d\u2019Opportunité, si tu touches, la cible s\u2019arrête et est Ralentie jusqu\u2019à la fin de son prochain tour (en plus des dégâts normaux).' , level:1},
+    { name:'Second Souffle', nameEn:'Second Wind (PHB1)', desc:'1 fois par rencontre (action standard) : tu dépenses un Surge et récupères des PV. +2 à toutes les défenses jusqu\u2019à la fin de ton prochain tour.' , level:1},
+    { name:'Style de Combat', nameEn:'Combat Style (PHB1)', desc:'Tu choisis un Style : Lame à Deux Mains (+2 dégâts armes polyvalentes / deux-mains), Lame et Bouclier (+1 CA, repousser de 1 case sur AO), ou Deux Armes (+1 atk avec arme secondaire).' , level:1},
+    { name:'Marque du Guerrier', nameEn:'Fighter Mark (PHB1)', desc:'Chaque touche de tes pouvoirs peut Marquer la cible (sauf indication contraire). Une cible Marquée qui attaque un autre que toi: −2 aux jets d\u2019attaque.' , level:1},
+    { name:'Maîtrise d\u2019Armure Lourde', nameEn:'Heavy Armor Proficiency', desc:'Port de toutes les armures (légères, intermédiaires, lourdes, bouclier) sans pénalité.' , level:1},
+    { name:'Combat Agility', nameEn:'Combat Agility (PHB1)', level:2, desc:'Niv.2 : Tu ne provoques pas d\'AO lors de tes déplacements dans les 1 case d\'un ennemi durant ton tour.' },
+    { name:'Robustesse au Combat', nameEn:'Battle Hardened (PHB1)', level:11, desc:'Niv.11 ★ Paragonien : +2 à toutes les défenses quand tu n\'as plus de Surges disponibles. Résistance physique 5.' },
+    { name:'Frappe Implacable', nameEn:'Indomitable (PHB1)', level:21, desc:'Niv.21 ★★ Épique : 1×/rencontre, quand un effet devrait te Tuer ou te Rendre Inconscient, tu restes à 1 PV.' }
+  ],
   'Rôdeur (Ranger)': [
-    { name:'Serment du Chasseur', nameEn:'Hunter\u2019s Quarry (PHB1)', desc:'Action mineure : désigne un ennemi comme ta Proie. Contre ta Proie, tu infliges +1d6 dégâts (mod DEX 13-15 : +1d8, mod 16+ : +1d10) une fois par tour sur la première attaque.' },
-    { name:'Tir à Courte Portée', nameEn:'Prime Shot (PHB1)', desc:'+1 aux jets d\u2019attaque à distance si tu es l\u2019allié le plus proche de la cible (Prime Shot). S\u2019applique aux attaques de ton tour seulement.' },
-    { name:'Style de Combat', nameEn:'Combat Style (PHB1)', desc:'Deux Armes : +1 aux jets d\u2019attaque avec l\u2019arme secondaire. Ou Arc/Arbalète : ignore les pénalités de couverture normales (mais pas couverture totale).' },
-    { name:'Maîtrise des Armures Intermédiaires', nameEn:'Armor Proficiency', desc:'Port des armures légères et intermédiaires (cuir renforcé, cotte de mailles d\u2019anneaux) sans pénalité. Pas d\u2019armures lourdes sauf don.' },
-    { name:'Réflexes du Traqueur', nameEn:'Running Attack (PHB1)', desc:'Tu peux Charger et utiliser un pouvoir Arme à la place d\u2019une Attaque de Base (une seule fois par tour). Aucune pénalité de déplacement lors d\u2019une Charge.' }
-      ],
+    { name:'Serment du Chasseur', nameEn:'Hunter\u2019s Quarry (PHB1)', desc:'Action mineure : désigne un ennemi comme ta Proie. Contre ta Proie, tu infliges +1d6 dégâts (mod DEX 13-15 : +1d8, mod 16+ : +1d10) une fois par tour sur la première attaque.' , level:1},
+    { name:'Tir à Courte Portée', nameEn:'Prime Shot (PHB1)', desc:'+1 aux jets d\u2019attaque à distance si tu es l\u2019allié le plus proche de la cible (Prime Shot). S\u2019applique aux attaques de ton tour seulement.' , level:1},
+    { name:'Style de Combat', nameEn:'Combat Style (PHB1)', desc:'Deux Armes : +1 aux jets d\u2019attaque avec l\u2019arme secondaire. Ou Arc/Arbalète : ignore les pénalités de couverture normales (mais pas couverture totale).' , level:1},
+    { name:'Maîtrise des Armures Intermédiaires', nameEn:'Armor Proficiency', desc:'Port des armures légères et intermédiaires (cuir renforcé, cotte de mailles d\u2019anneaux) sans pénalité. Pas d\u2019armures lourdes sauf don.' , level:1},
+    { name:'Réflexes du Traqueur', nameEn:'Running Attack (PHB1)', desc:'Tu peux Charger et utiliser un pouvoir Arme à la place d\u2019une Attaque de Base (une seule fois par tour). Aucune pénalité de déplacement lors d\u2019une Charge.' , level:1},
+    { name:'Frappe Élastique', nameEn:'Ruthless Hunter (PHB1)', level:11, desc:'Niv.11 ★ Paragonien : Bonus Hunter\'s Quarry → +1d10. À l\'élimination de ta Proie, désigne immédiatement une nouvelle (action libre).' },
+    { name:'Maître Chasseur', nameEn:'Predator\'s Hide (PHB1)', level:21, desc:'Niv.21 ★★ Épique : Désigne 2 Proies simultanément. Critiques contre ta Proie réinitialisent un pouvoir Par Rencontre.' }
+  ],
   'Voleur (Rogue)': [
-    { name:'Attaque Sournoise', nameEn:'Sneak Attack (PHB1)', desc:'Si tu as avantage de combat (flanc, cible Aveuglée/Étourdie, etc.) et que tu touches avec un pouvoir qui l\u2019indique : +2d6 dégâts (héroïque), +3d6 (parangon), +5d6 (épique).' },
-    { name:'Premier Coup', nameEn:'First Strike (PHB1)', desc:'Tu as combat advantage contre tout ennemi qui n\u2019a pas encore agi lors du premier round de la rencontre.' },
-    { name:'Brutalité ou Élégance', nameEn:'Rogue Tactics (PHB1)', desc:'Tu choisis: Scélérat Brutal (les attaques Sournoise utilisent FOR au lieu de DEX) ou Filou Acrobate (+3 à CA contre les AO et bonus de compétence à Acrobaties).' },
-    { name:'Frappe Subtile', nameEn:'Ruthless Ruffian', desc:'+1 à CA et Réflexes quand tu portes une armure légère ou moins. Permet de Dessiner une arme comme action libre 1×/tour.' },
-    { name:'Maîtrise des Serrures et Pièges', nameEn:'Trap Handling', desc:'+4 aux jets de Voleur de Poches, Crochetage, et Discrétion. Tu peux Désamorcer des pièges comme action standard (au lieu de standard + bonus).' }
-      ],
+    { name:'Attaque Sournoise', nameEn:'Sneak Attack (PHB1)', desc:'Si tu as avantage de combat (flanc, cible Aveuglée/Étourdie, etc.) et que tu touches avec un pouvoir qui l\u2019indique : +2d6 dégâts (héroïque), +3d6 (parangon), +5d6 (épique).' , level:1},
+    { name:'Premier Coup', nameEn:'First Strike (PHB1)', desc:'Tu as combat advantage contre tout ennemi qui n\u2019a pas encore agi lors du premier round de la rencontre.' , level:1},
+    { name:'Brutalité ou Élégance', nameEn:'Rogue Tactics (PHB1)', desc:'Tu choisis: Scélérat Brutal (les attaques Sournoise utilisent FOR au lieu de DEX) ou Filou Acrobate (+3 à CA contre les AO et bonus de compétence à Acrobaties).' , level:1},
+    { name:'Frappe Subtile', nameEn:'Ruthless Ruffian', desc:'+1 à CA et Réflexes quand tu portes une armure légère ou moins. Permet de Dessiner une arme comme action libre 1×/tour.' , level:1},
+    { name:'Maîtrise des Serrures et Pièges', nameEn:'Trap Handling', desc:'+4 aux jets de Voleur de Poches, Crochetage, et Discrétion. Tu peux Désamorcer des pièges comme action standard (au lieu de standard + bonus).' , level:1},
+    { name:'Coup du Scélérat Accompli', nameEn:'Artful Dodger Paragon (PHB1)', level:11, desc:'Niv.11 ★ Paragonien : Attaque Sournoise → +3d6. 1×/tour, déplace un allié adjacent de 1 case (action libre).' },
+    { name:'Assassin Parfait', nameEn:'Perfect Assassin (PHB1)', level:21, desc:'Niv.21 ★★ Épique : Attaque Sournoise → +5d6. Critique avec Sournoise : –4 à toutes les défenses de la cible.' }
+  ],
   'Magicien (Wizard)': [
-    { name:'Livre de Sorts', nameEn:'Spellbook (PHB1)', desc:'Tu possèdes un Livre de Sorts contenant tous tes pouvoirs (y compris ceux non préparés). Lors d\u2019un repos long, tu peux changer tes pouvoirs Quotidiens et Utilitaires depuis ton Livre.' },
-    { name:'Maîtrise d\u2019Implement', nameEn:'Implement Mastery (PHB1)', desc:'Tu choisis un Implement : Orbe (force les cibles à relancer les JS avec −2), Bâton (+2 dégâts sur un quotidien/repos long), Baguette (+1 aux jets d\u2019attaque avec baguette), ou Tome (+2 pouvoirs utilitaires/repos long).' },
-    { name:'Ritualisme', nameEn:'Ritual Casting (PHB1)', desc:'Tu peux lancer des Rituels arcanes depuis un Grimoire ou Parchemin. Tu connais un nombre de Rituels = ton niveau. Les Rituels ne comptent pas comme pouvoirs AEDU.' },
-    { name:'Maîtrise du Projectile Magique', nameEn:'Magic Missile Mastery', desc:'Magic Missile (Projectile Magique) ne rate jamais automatiquement. Chaque fois que tu l\u2019utilises, tu peux choisir une 2e cible à portée et lui infliger 1d4 force (sans jet d\u2019attaque).' },
-    { name:'Mémoire Arcanique', nameEn:'Arcane Memory', desc:'1 fois par rencontre, en action mineure, tu peux récupérer l\u2019usage d\u2019un pouvoir Par Rencontre arcanique déjà utilisé. Utilisable 1×/rencontre.' }
-      ],
+    { name:'Livre de Sorts', nameEn:'Spellbook (PHB1)', desc:'Tu possèdes un Livre de Sorts contenant tous tes pouvoirs (y compris ceux non préparés). Lors d\u2019un repos long, tu peux changer tes pouvoirs Quotidiens et Utilitaires depuis ton Livre.' , level:1},
+    { name:'Maîtrise d\u2019Implement', nameEn:'Implement Mastery (PHB1)', desc:'Tu choisis un Implement : Orbe (force les cibles à relancer les JS avec −2), Bâton (+2 dégâts sur un quotidien/repos long), Baguette (+1 aux jets d\u2019attaque avec baguette), ou Tome (+2 pouvoirs utilitaires/repos long).' , level:1},
+    { name:'Ritualisme', nameEn:'Ritual Casting (PHB1)', desc:'Tu peux lancer des Rituels arcanes depuis un Grimoire ou Parchemin. Tu connais un nombre de Rituels = ton niveau. Les Rituels ne comptent pas comme pouvoirs AEDU.' , level:1},
+    { name:'Maîtrise du Projectile Magique', nameEn:'Magic Missile Mastery', desc:'Magic Missile (Projectile Magique) ne rate jamais automatiquement. Chaque fois que tu l\u2019utilises, tu peux choisir une 2e cible à portée et lui infliger 1d4 force (sans jet d\u2019attaque).' , level:1},
+    { name:'Mémoire Arcanique', nameEn:'Arcane Memory', desc:'1 fois par rencontre, en action mineure, tu peux récupérer l\u2019usage d\u2019un pouvoir Par Rencontre arcanique déjà utilisé. Utilisable 1×/rencontre.' , level:1},
+    { name:'Maîtrise Arcanique', nameEn:'Arcane Mastery (PHB1)', level:11, desc:'Niv.11 ★ Paragonien : Prépare 1 pouvoir Quotidien supplémentaire. +1 aux jets d\'attaque avec tous les pouvoirs arcanes.' },
+    { name:'Singularité Arcanique', nameEn:'Arcane Singularity (PHB1)', level:21, desc:'Niv.21 ★★ Épique : Pouvoirs Quotidiens arcanes ignorent la Résistance aux Dégâts. Immunisés prennent 50% au lieu de 0.' }
+  ],
   'Warlord': [
-    { name:'Présence Inspirante', nameEn:'Inspiring Presence (PHB1)', desc:'Chaque allié adjacent à toi gagne +1 aux jets de sauvegarde. Cet effet double (+2) si l\u2019allié a dépensé un Surge lors de cette rencontre.' },
-    { name:'Commandement Tactique', nameEn:'Combat Leader (PHB1)', desc:'Lors du Round de Surprise ou du Premier Round, tu et tous tes alliés gagnez +2 à l\u2019initiative. Les alliés qui peuvent t\u2019entendre ne sont jamais Surpris.' },
-    { name:'Style de Commandement', nameEn:'Warlord Style (PHB1)', desc:'Tu choisis : Warlord Tactique (alliés adjacents +2 aux jets d\u2019attaque après qu\u2019un allié dépense un Surge) ou Warlord Inspirant (alliés dans 5 cases +1 dmg quand Mot Inspirant utilisé).' },
-    { name:'Mot Inspirant', nameEn:'Inspiring Word (PHB1)', desc:'2 fois par rencontre (action mineure, distance 5) : un allié dépense un Surge et regagne des PV supplémentaires = ton mod CHA. Cumulable avec Harangue Inspirante.' },
-    { name:'Présence du Chef', nameEn:'Battle Cry', desc:'1 fois par rencontre, quand tu touches, tu peux crier une Ordre de Bataille : un allié adjacent peut immédiatement se déplacer de 2 cases (action libre, sans PdO).' }
-      ],
+    { name:'Présence Inspirante', nameEn:'Inspiring Presence (PHB1)', desc:'Chaque allié adjacent à toi gagne +1 aux jets de sauvegarde. Cet effet double (+2) si l\u2019allié a dépensé un Surge lors de cette rencontre.' , level:1},
+    { name:'Commandement Tactique', nameEn:'Combat Leader (PHB1)', desc:'Lors du Round de Surprise ou du Premier Round, tu et tous tes alliés gagnez +2 à l\u2019initiative. Les alliés qui peuvent t\u2019entendre ne sont jamais Surpris.' , level:1},
+    { name:'Style de Commandement', nameEn:'Warlord Style (PHB1)', desc:'Tu choisis : Warlord Tactique (alliés adjacents +2 aux jets d\u2019attaque après qu\u2019un allié dépense un Surge) ou Warlord Inspirant (alliés dans 5 cases +1 dmg quand Mot Inspirant utilisé).' , level:1},
+    { name:'Mot Inspirant', nameEn:'Inspiring Word (PHB1)', desc:'2 fois par rencontre (action mineure, distance 5) : un allié dépense un Surge et regagne des PV supplémentaires = ton mod CHA. Cumulable avec Harangue Inspirante.' , level:1},
+    { name:'Présence du Chef', nameEn:'Battle Cry', desc:'1 fois par rencontre, quand tu touches, tu peux crier une Ordre de Bataille : un allié adjacent peut immédiatement se déplacer de 2 cases (action libre, sans PdO).' , level:1},
+    { name:'Assaut Tactique', nameEn:'Tactical Assault (PHB1)', level:11, desc:'Niv.11 ★ Paragonien : 1×/rencontre (action mineure) : un allié peut faire 1 action standard supplémentaire.' },
+    { name:'Commandant Légendaire', nameEn:'Legendary Warlord (PHB1)', level:21, desc:'Niv.21 ★★ Épique : Mot Inspirant cible 2 alliés/utilisation. +2 ATK pour alliés dans 5 cases lors du round de surprise.' }
+  ],
   'Druide': [
-    { name:'Transformation Sauvage', nameEn:'Wild Shape (PHB2)', desc:'1 fois par rencontre (action mineure) : tu adoptes la Forme de Bête. Dans cette forme, tu peux utiliser tes pouvoirs Bête, tes armes deviennent des attaques naturelles (mêmes dégâts). Retour Humanoïde : action mineure.' },
-    { name:'Régénération Primale', nameEn:'Primal Aspect (PHB2)', desc:'En Forme de Bête : Régénération 2+mod SAG. En Forme Humanoïde : +1 à toutes les défenses. Le bonus change chaque fois que tu changes de forme.' },
-    { name:'Ritualisme Primal', nameEn:'Primal Ritual Casting', desc:'Tu peux lancer des Rituels Primaux sans composantes (remplacées par ton Lien Primal). Tu connais un Rituel par niveau de personnage (arrondi au bas).' },
-    { name:'Langue des Bêtes', nameEn:'Speak with Animals', desc:'Tu peux communiquer avec tout animal non-magique. Les animaux Petits ou Moyens t\u2019obéissent lors de tests de Diplomatie contre DD 10+1/2 NIV.' },
-    { name:'Cercle Naturel', nameEn:'Nature\u2019s Mark', desc:'Lors de chaque repos court, tu peux puiser dans ton Cercle Naturel : récupérer un pouvoir Par Rencontre Primal déjà utilisé, ou obtenir +5 temporaires à un jet de compétence lié à la nature.' }
-      ],
+    { name:'Transformation Sauvage', nameEn:'Wild Shape (PHB2)', desc:'1 fois par rencontre (action mineure) : tu adoptes la Forme de Bête. Dans cette forme, tu peux utiliser tes pouvoirs Bête, tes armes deviennent des attaques naturelles (mêmes dégâts). Retour Humanoïde : action mineure.' , level:1},
+    { name:'Régénération Primale', nameEn:'Primal Aspect (PHB2)', desc:'En Forme de Bête : Régénération 2+mod SAG. En Forme Humanoïde : +1 à toutes les défenses. Le bonus change chaque fois que tu changes de forme.' , level:1},
+    { name:'Ritualisme Primal', nameEn:'Primal Ritual Casting', desc:'Tu peux lancer des Rituels Primaux sans composantes (remplacées par ton Lien Primal). Tu connais un Rituel par niveau de personnage (arrondi au bas).' , level:1},
+    { name:'Langue des Bêtes', nameEn:'Speak with Animals', desc:'Tu peux communiquer avec tout animal non-magique. Les animaux Petits ou Moyens t\u2019obéissent lors de tests de Diplomatie contre DD 10+1/2 NIV.' , level:1},
+    { name:'Cercle Naturel', nameEn:'Nature\u2019s Mark', desc:'Lors de chaque repos court, tu peux puiser dans ton Cercle Naturel : récupérer un pouvoir Par Rencontre Primal déjà utilisé, ou obtenir +5 temporaires à un jet de compétence lié à la nature.' , level:1},
+    { name:'Harmonie Primale', nameEn:'Primal Harmony (PHB2)', level:11, desc:'Niv.11 ★ Paragonien : Quand tu changes de Forme (Bête ↔ Humanoïde), tous les alliés à portée 3 regagnent 5+mod SAG PV.' },
+    { name:'Gardien Éternel', nameEn:'Eternal Guardian (PHB2)', level:21, desc:'Niv.21 ★★ Épique : En Forme de Bête, Résistance 10 Feu/Froid/Foudre. En Forme Humanoïde, +4 à toutes les défenses.' }
+  ],
   'Warden (Gardien)': [
-    { name:'Forme de Gardien', nameEn:'Warden\u2019s Form (PHB2)', desc:'1 fois par rencontre (action mineure) : tu adoptes une Forme de Gardien (Rocher, Tempête, Chêne). Chaque Forme confère des bonus spécifiques (voir pouvoirs Quotidiens). La Forme dure jusqu\u2019à la fin de la rencontre ou jusqu\u2019à ce que tu en adoptes une nouvelle.' },
-    { name:'Source de Vie', nameEn:'Font of Life (PHB2)', desc:'Au début de chaque tour (si tu es en vie), tu récupères automatiquement 2 PV + mod CON. Si tu es en dessous du Seuil Ensanglanté, cette régénération double.' },
-    { name:'Emprise Terrestre', nameEn:'Earth\u2019s Grasp (PHB2)', desc:'Chaque fois que tu touches un ennemi adjacent avec un pouvoir Primal, il est également Raleneti jusqu\u2019à la fin de ton prochain tour (en plus des effets normaux).' },
-    { name:'Serment du Gardien', nameEn:'Guardian\u2019s Oath (PHB2)', desc:'Tu peux Marquer jusqu\u2019à 3 ennemis simultanément (action mineure). Un ennemi Marqué qui attaque un allié dans tes 5 cases subit ton mod CON en dégâts primaux (sans jet).' },
-    { name:'Résistance Primale', nameEn:'Primal Resistance', desc:'Résistance 5 à deux types de dégâts de ton choix (Froid, Feu, Foudre, Acide, Tonnerre, ou Poison). Ce choix est permanent au niveau 1 et augmente à Résistance 10 au niveau 11.' }
+    { name:'Forme de Gardien', nameEn:'Warden\u2019s Form (PHB2)', desc:'1 fois par rencontre (action mineure) : tu adoptes une Forme de Gardien (Rocher, Tempête, Chêne). Chaque Forme confère des bonus spécifiques (voir pouvoirs Quotidiens). La Forme dure jusqu\u2019à la fin de la rencontre ou jusqu\u2019à ce que tu en adoptes une nouvelle.' , level:1},
+    { name:'Source de Vie', nameEn:'Font of Life (PHB2)', desc:'Au début de chaque tour (si tu es en vie), tu récupères automatiquement 2 PV + mod CON. Si tu es en dessous du Seuil Ensanglanté, cette régénération double.' , level:1},
+    { name:'Emprise Terrestre', nameEn:'Earth\u2019s Grasp (PHB2)', desc:'Chaque fois que tu touches un ennemi adjacent avec un pouvoir Primal, il est également Raleneti jusqu\u2019à la fin de ton prochain tour (en plus des effets normaux).' , level:1},
+    { name:'Serment du Gardien', nameEn:'Guardian\u2019s Oath (PHB2)', desc:'Tu peux Marquer jusqu\u2019à 3 ennemis simultanément (action mineure). Un ennemi Marqué qui attaque un allié dans tes 5 cases subit ton mod CON en dégâts primaux (sans jet).' , level:1},
+    { name:'Résistance Primale', nameEn:'Primal Resistance', desc:'Résistance 5 à deux types de dégâts de ton choix (Froid, Feu, Foudre, Acide, Tonnerre, ou Poison). Ce choix est permanent au niveau 1 et augmente à Résistance 10 au niveau 11.' , level:1}
       ],
   'Avenger (Vengeur)': [
-    { name:'Serment d\u2019Ennemi', nameEn:'Oath of Enmity (PHB2)', desc:'Au début de la rencontre (action mineure, distance 10) : désigne ta Cible du Serment. Contre elle, tu lances 2d20 et gardes le meilleur résultat pour tous tes jets d\u2019attaque (avantage permanent).' },
-    { name:'Armure de Foi', nameEn:'Armor of Faith (PHB2)', desc:'Quand tu ne portes pas d\u2019armure lourde ou intermédiaire, tu bénéficies de +3 à CA (Tenue d\u2019Avenger). Ce bonus remplace le bonus d\u2019armure de la tenue.' },
-    { name:'Censure du Vengeur', nameEn:'Avenger\u2019s Censure (PHB2)', desc:'Tu choisis ta Censure : Censure de la Poursuite (ta Cible du Serment qui s\u2019éloigne subit des dégâts) ou Censure d\u2019Unité (bonus quand des alliés sont proches de ta Cible).' },
-    { name:'Vigilance Sacrée', nameEn:'Avenger\u2019s Awareness', desc:'+4 aux jets de Perception et d\u2019Intuition. Les ennemis Camouflés ou Furtifs n\u2019obtiennent pas d\u2019avantage de combat contre toi.' },
-    { name:'Corps comme Arme', nameEn:'Unarmed Combat', desc:'Même sans arme, tes attaques de mêlée infligent 1d8+SAG dégâts radiants. Tu peux utiliser SAG pour tous les jets d\u2019attaque au corps-à-corps.' }
+    { name:'Serment d\u2019Ennemi', nameEn:'Oath of Enmity (PHB2)', desc:'Au début de la rencontre (action mineure, distance 10) : désigne ta Cible du Serment. Contre elle, tu lances 2d20 et gardes le meilleur résultat pour tous tes jets d\u2019attaque (avantage permanent).' , level:1},
+    { name:'Armure de Foi', nameEn:'Armor of Faith (PHB2)', desc:'Quand tu ne portes pas d\u2019armure lourde ou intermédiaire, tu bénéficies de +3 à CA (Tenue d\u2019Avenger). Ce bonus remplace le bonus d\u2019armure de la tenue.' , level:1},
+    { name:'Censure du Vengeur', nameEn:'Avenger\u2019s Censure (PHB2)', desc:'Tu choisis ta Censure : Censure de la Poursuite (ta Cible du Serment qui s\u2019éloigne subit des dégâts) ou Censure d\u2019Unité (bonus quand des alliés sont proches de ta Cible).' , level:1},
+    { name:'Vigilance Sacrée', nameEn:'Avenger\u2019s Awareness', desc:'+4 aux jets de Perception et d\u2019Intuition. Les ennemis Camouflés ou Furtifs n\u2019obtiennent pas d\u2019avantage de combat contre toi.' , level:1},
+    { name:'Corps comme Arme', nameEn:'Unarmed Combat', desc:'Même sans arme, tes attaques de mêlée infligent 1d8+SAG dégâts radiants. Tu peux utiliser SAG pour tous les jets d\u2019attaque au corps-à-corps.' , level:1}
       ],
   'Armaturge': [
-    { name:'Arma Spiritus', nameEn:'Arma Spiritus (AE5)', desc:'L\u2019Arma est ton arme liée vivante. Elle ajoute un Bonus d\u2019Arme qui augmente avec ton niveau : +1 (niv.1-5), +2 (6-10), +3 (11-15)... aux jets d\u2019attaque ET dégâts. Elle ne peut être détruite que par une Ritual Disjunction.' },
-    { name:'Maîtrise Mécanique', nameEn:'Mechanical Mastery (AE5)', desc:'Tu ajoutes ton mod INT à tous les jets de dégâts avec l\u2019Arma Spiritus. De plus, tu ignores les pénalités magiques sur les jets de compétences mécaniques.' },
-    { name:'Synchronisation Primordiale', nameEn:'Primal Sync (AE5)', desc:'Quand l\u2019Arma est active (non Silencée), tu perçois via ses capteurs : +4 aux jets de Perception, +2 à l\u2019initiative. L\u2019Arma peut détecter les créatures invisibles dans 3 cases.' },
-    { name:'Protocole de Combat', nameEn:'Combat Protocol (AE5)', desc:'1 fois par rencontre (action libre, déclencheur : tu touches), tu peux activer un Protocole selon le Rang de l\u2019Arma : Protocole Offensif (+1d8 dégâts force), Protocole Défensif (+3 CA jusqu\u2019à la fin de ton tour), ou Protocole Tactique (un allié dans 3 cases peut se déplacer de 2 cases, sans PdO).' },
-    { name:'Lien Spirituel', nameEn:'Spirit Link (AE5)', desc:'Si l\u2019Arma Spiritus subit des dégâts, tu choisis si tu prends ces dégâts à sa place ou si elle les subit. L\u2019Arma a ses propres PV = 10+5×niveau. Si ses PV tombent à 0, elle entre en Veille (ne fonctionne plus jusqu\u2019à un Rituel de Restauration).' }
+    { name:'Arma Spiritus', nameEn:'Arma Spiritus (AE5)', desc:'L\u2019Arma est ton arme liée vivante. Elle ajoute un Bonus d\u2019Arme qui augmente avec ton niveau : +1 (niv.1-5), +2 (6-10), +3 (11-15)... aux jets d\u2019attaque ET dégâts. Elle ne peut être détruite que par une Ritual Disjunction.' , level:1},
+    { name:'Maîtrise Mécanique', nameEn:'Mechanical Mastery (AE5)', desc:'Tu ajoutes ton mod INT à tous les jets de dégâts avec l\u2019Arma Spiritus. De plus, tu ignores les pénalités magiques sur les jets de compétences mécaniques.' , level:1},
+    { name:'Synchronisation Primordiale', nameEn:'Primal Sync (AE5)', desc:'Quand l\u2019Arma est active (non Silencée), tu perçois via ses capteurs : +4 aux jets de Perception, +2 à l\u2019initiative. L\u2019Arma peut détecter les créatures invisibles dans 3 cases.' , level:1},
+    { name:'Protocole de Combat', nameEn:'Combat Protocol (AE5)', desc:'1 fois par rencontre (action libre, déclencheur : tu touches), tu peux activer un Protocole selon le Rang de l\u2019Arma : Protocole Offensif (+1d8 dégâts force), Protocole Défensif (+3 CA jusqu\u2019à la fin de ton tour), ou Protocole Tactique (un allié dans 3 cases peut se déplacer de 2 cases, sans PdO).' , level:1},
+    { name:'Lien Spirituel', nameEn:'Spirit Link (AE5)', desc:'Si l\u2019Arma Spiritus subit des dégâts, tu choisis si tu prends ces dégâts à sa place ou si elle les subit. L\u2019Arma a ses propres PV = 10+5×niveau. Si ses PV tombent à 0, elle entre en Veille (ne fonctionne plus jusqu\u2019à un Rituel de Restauration).' , level:1}
       ],
     'Chantelame (Bladesinger)': [
-    { name:'Magie de Lame', nameEn:'Blade Magic (NCS p.67)', desc:'Choisis une arme de mêlée à une main (lame légère ou lourde) avec laquelle tu es compétent. Tu peux utiliser cette arme comme Implement pour tes pouvoirs arcaniques. Elle compte aussi comme baguette. Ne peut être enchantée que comme arme.' },
-    { name:'Chantelame', nameEn:'Bladesong (NCS p.68)', desc:'Rencontre — Action mineure. Condition : arme à une main, autre main libre (pas d\u2019arme ni bouclier). Jusqu\u2019à la fin de ton prochain tour : +2 bonus de pouvoir aux jets d\u2019attaque et à toutes les défenses, +5 bonus de pouvoir aux dégâts. Niv.17 : +10 dmg. Niv.27 : +15 dmg.' },
-    { name:'Sortilames', nameEn:'Bladespells (NCS p.68)', desc:'Tu obtiens 3 Sortilames de ton choix parmi : Givre Mordant (froid/Ralenties), Feu Dansant (feu/avantage de combat), Rayon d\u2019Éblouissement (radiants/−2 atk), Anneau de Foudre (foudre/dégâts si se déplace), Sever d\u2019Ombre (nécrotique/renverse), Main Invisible (force/glisse de 3 cases). Déclencheur : hit avec ABM une main, autre main vide.' },
-    { name:'Floraison Gardée', nameEn:'Guarded Flourish (NCS p.68)', desc:'Tes attaques à distance et de zone ne provoquent pas d\u2019attaque d\u2019opportunité si tu tiens une arme de mêlée à une main. De plus, +2 (bouclier) à CA quand tu portes armure légère ou nulle + arme une main + autre main vide.' },
-    { name:'Attaque Instinctive', nameEn:'Instinctive Attack (NCS p.68)', desc:'Lors d\u2019une Attaque de base au corps à corps avec ton arme à une main, tu peux utiliser ton mod INT à la place du mod FOR pour le jet d\u2019attaque ET les dégâts.' },
-    { name:'Grimoire du Chantelame', nameEn:'Bladesinger\u2019s Spellbook (NCS p.67)', desc:'Ton grimoire contient tous tes pouvoirs de wizard. Après chaque repos long, tu prépares tes pouvoirs quotidiens et utilitaires (voir tableau de préparation). Les pouvoirs d\u2019attaque par rencontre ajoutés au grimoire fonctionnent comme des pouvoirs quotidiens.' },
-    { name:'Cantilènes (3)', nameEn:'Bladesinger Cantrips (NCS p.67)', desc:'Tu obtiens 3 cantilènes parmi : Son Fantôme, Lumière, Main de Mage, Prestidigitation, Suggestion. Ces pouvoirs utilitaires de wizard sont disponibles à volonté.' }
+    { name:'Magie de Lame', nameEn:'Blade Magic (NCS p.67)', desc:'Choisis une arme de mêlée à une main (lame légère ou lourde) avec laquelle tu es compétent. Tu peux utiliser cette arme comme Implement pour tes pouvoirs arcaniques. Elle compte aussi comme baguette. Ne peut être enchantée que comme arme.' , level:1},
+    { name:'Chantelame', nameEn:'Bladesong (NCS p.68)', desc:'Rencontre — Action mineure. Condition : arme à une main, autre main libre (pas d\u2019arme ni bouclier). Jusqu\u2019à la fin de ton prochain tour : +2 bonus de pouvoir aux jets d\u2019attaque et à toutes les défenses, +5 bonus de pouvoir aux dégâts. Niv.17 : +10 dmg. Niv.27 : +15 dmg.' , level:1},
+    { name:'Sortilames', nameEn:'Bladespells (NCS p.68)', desc:'Tu obtiens 3 Sortilames de ton choix parmi : Givre Mordant (froid/Ralenties), Feu Dansant (feu/avantage de combat), Rayon d\u2019Éblouissement (radiants/−2 atk), Anneau de Foudre (foudre/dégâts si se déplace), Sever d\u2019Ombre (nécrotique/renverse), Main Invisible (force/glisse de 3 cases). Déclencheur : hit avec ABM une main, autre main vide.' , level:1},
+    { name:'Floraison Gardée', nameEn:'Guarded Flourish (NCS p.68)', desc:'Tes attaques à distance et de zone ne provoquent pas d\u2019attaque d\u2019opportunité si tu tiens une arme de mêlée à une main. De plus, +2 (bouclier) à CA quand tu portes armure légère ou nulle + arme une main + autre main vide.' , level:1},
+    { name:'Attaque Instinctive', nameEn:'Instinctive Attack (NCS p.68)', desc:'Lors d\u2019une Attaque de base au corps à corps avec ton arme à une main, tu peux utiliser ton mod INT à la place du mod FOR pour le jet d\u2019attaque ET les dégâts.' , level:1},
+    { name:'Grimoire du Chantelame', nameEn:'Bladesinger\u2019s Spellbook (NCS p.67)', desc:'Ton grimoire contient tous tes pouvoirs de wizard. Après chaque repos long, tu prépares tes pouvoirs quotidiens et utilitaires (voir tableau de préparation). Les pouvoirs d\u2019attaque par rencontre ajoutés au grimoire fonctionnent comme des pouvoirs quotidiens.' , level:1},
+    { name:'Cantilènes (3)', nameEn:'Bladesinger Cantrips (NCS p.67)', desc:'Tu obtiens 3 cantilènes parmi : Son Fantôme, Lumière, Main de Mage, Prestidigitation, Suggestion. Ces pouvoirs utilitaires de wizard sont disponibles à volonté.' , level:1}
       ],
 };
 
@@ -6060,6 +6084,7 @@ function updateNiveau() {
   updateArmaBonus(niv);
   updateAutoStats();
   buildSurges();
+  if (typeof autoRenderClassFeatures === 'function') autoRenderClassFeatures(true);
   autoSave();
 }
 
@@ -6197,6 +6222,9 @@ function onClassChange(val) {
       armaNote.style.color = 'var(--text3)';
     }
   }
+
+  // Auto-render class features for new class
+  if (typeof autoRenderClassFeatures === 'function') autoRenderClassFeatures(true);
 
   // Load class powers (replace defaults)
   if (cd.powers) {
@@ -7403,21 +7431,72 @@ function removeFeatCard(id) {
 //  CLASS FEATURES SYSTEM
 // ═══════════════════════════════════════════════════
 function loadClassFeatures() {
+  autoRenderClassFeatures(false);
+}
+
+function autoRenderClassFeatures(silent) {
   const className = document.getElementById('classe')?.value?.trim();
-  if (!className) { alert('Sélectionne d\u2019abord une classe dans l\u2019onglet Profil.'); return; }
-  const features = CLASS_FEATURES[className];
-  if (!features || features.length === 0) { alert('Aucune capacité de classe définie pour : ' + className); return; }
-  const list = document.getElementById('classFeaturesList');
+  const niveau    = parseInt(document.getElementById('niveau')?.value) || 1;
+  const list      = document.getElementById('classFeaturesList');
   if (!list) return;
-  // Ask before clearing
-  if (list.children.length > 0) {
-    if (!confirm('Remplacer les capacités actuelles par celles de ' + className + ' ?')) return;
+
+  const features = CLASS_FEATURES[className];
+  if (!features || features.length === 0) {
+    if (!silent) {
+      list.innerHTML = '<div style="color:var(--text3);font-size:11px;padding:6px;">Aucune capacit\u00e9 d\u00e9finie pour cette classe.</div>';
+    }
+    return;
   }
+
+  // Sort by level
+  const sorted = [...features].sort((a, b) => (a.level || 1) - (b.level || 1));
+
+  const unlocked  = sorted.filter(f => (f.level || 1) <= niveau);
+  const upcoming  = sorted.filter(f => (f.level || 1) > niveau).slice(0, 3);
+
   list.innerHTML = '';
-  features.forEach((feat, i) => {
-    addClassFeatureCard(feat, 'cf_' + Date.now() + '_' + i);
+
+  // Unlocked features
+  unlocked.forEach(feat => {
+    const div = document.createElement('div');
+    div.className = 'cf-card';
+    const tierBadge = feat.level >= 21 ? ' <span style="font-size:9px;color:#f96;font-weight:700;">\u2605\u2605 \u00c9pique</span>'
+                    : feat.level >= 11 ? ' <span style="font-size:9px;color:#b7f;font-weight:700;">\u2605 Paragonien</span>'
+                    : feat.level >= 2  ? ` <span style="font-size:9px;color:var(--text3);">Niv.${feat.level}</span>`
+                    : '';
+    div.innerHTML = `
+      <div style="flex:1;">
+        <div class="cf-name">${feat.name}${tierBadge} <span class="cf-name-en">${feat.nameEn || ''}</span></div>
+        <div class="cf-desc">${feat.desc}</div>
+      </div>`;
+    list.appendChild(div);
   });
-  autoSave();
+
+  // Upcoming features
+  if (upcoming.length > 0) {
+    const sep = document.createElement('div');
+    sep.style.cssText = 'font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:4px 0 2px;border-top:1px solid var(--border);margin-top:4px;';
+    sep.textContent = '\u2b07 Capacit\u00e9s \u00e0 venir';
+    list.appendChild(sep);
+
+    upcoming.forEach(feat => {
+      const div = document.createElement('div');
+      div.className = 'cf-card';
+      div.style.cssText = 'opacity:0.4;filter:grayscale(0.5);';
+      div.innerHTML = `
+        <div style="flex:1;">
+          <div class="cf-name" style="color:var(--text3);">
+            <span style="font-size:9px;background:var(--border);color:var(--text2);border-radius:3px;padding:1px 5px;margin-right:4px;">Niv.${feat.level || 1}</span>${feat.name}
+          </div>
+          <div class="cf-desc" style="color:var(--text3);">${feat.desc}</div>
+        </div>`;
+      list.appendChild(div);
+    });
+  }
+
+  // Update badge
+  const badge = document.getElementById('cf-count-badge');
+  if (badge) badge.textContent = `${unlocked.length}/${sorted.length}`;
 }
 
 function addClassFeatureCard(feat, id) {
