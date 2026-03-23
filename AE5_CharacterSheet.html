@@ -8190,10 +8190,15 @@ if ('serviceWorker' in navigator && location.protocol !== 'blob:' && !location.h
   <div style="padding:12px 14px 0;">
     <div style="font-size:10px;color:#888;margin-bottom:4px;text-align:left;">📋 Prompt IA généré depuis ta fiche — copie-le dans le générateur :</div>
     <div style="display:flex;gap:6px;align-items:flex-start;margin-bottom:6px;">
-      <textarea id="percPromptDisplay" readonly rows="2"
-        style="flex:1;background:#050510;border:1px solid #333;border-radius:5px;color:#aaa;font-size:10px;padding:5px;font-family:monospace;resize:none;"></textarea>
-      <button onclick="copyPercPrompt()" id="percCopyBtn"
-        style="padding:5px 10px;border:1px solid #c9a260;border-radius:5px;background:none;color:#c9a260;font-size:10px;cursor:pointer;white-space:nowrap;">📋 Copier</button>
+      <textarea id="percPromptDisplay" rows="2"
+        placeholder="Prompt IA — modifie-le librement avant de générer"
+        style="flex:1;background:#050510;border:1px solid #444;border-radius:5px;color:#ddd;font-size:10px;padding:5px;font-family:monospace;resize:vertical;" spellcheck="false"></textarea>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <button onclick="copyPercPrompt()" id="percCopyBtn"
+          style="padding:5px 10px;border:1px solid #c9a260;border-radius:5px;background:none;color:#c9a260;font-size:10px;cursor:pointer;white-space:nowrap;">📋 Copier</button>
+        <button onclick="openPortraitUpdatePrompt()" title="Régénérer le prompt depuis la fiche"
+          style="padding:5px 10px;border:1px solid #555;border-radius:5px;background:none;color:#666;font-size:10px;cursor:pointer;white-space:nowrap;">↺ Reset</button>
+      </div>
     </div>
     <textarea id="portraitPromptExtra" rows="2"
       placeholder="Détails supplémentaires (ex : cheveux rouges, cicatrice, capuche noire...)"
@@ -8717,8 +8722,7 @@ function copyPercPrompt() {
 }
 
 function openPerchanceTab() {
-  // Copy prompt then open Perchance
-  copyPercPrompt();
+  copyPercPrompt(); // copies textarea value (editable)
   window.open("https://perchance.org/ai-text-to-image-generator", "_blank");
 }
 
@@ -8727,7 +8731,9 @@ function openPerchanceTab() {
 
 function generateHorde() {
   const wrap = document.getElementById("hordeImgWrap");
-  const prompt = buildPortraitPromptRaw();
+  // Use the editable textarea value — falls back to auto-built prompt if empty
+  const ta = document.getElementById("percPromptDisplay");
+  const prompt = (ta && ta.value.trim()) ? ta.value.trim() : buildPortraitPromptRaw();
   let elapsed = 0;
   let pollTimer;
 
