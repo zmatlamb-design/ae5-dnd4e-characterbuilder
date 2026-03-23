@@ -2105,6 +2105,24 @@
       <textarea id="classFeatures" placeholder="Notes additionnelles sur les capacités de classe..." rows="3" oninput="autoSave()" style="margin-top:6px;width:100%;background:var(--bg2);color:var(--text1);border:1px solid var(--border);border-radius:4px;padding:6px;font-size:11px;resize:vertical;"></textarea>
     </div>
 
+    <!-- PARAGON PATH & EPIC DESTINY -->
+    <div class="panel col3" id="paragonPanel">
+      <div class="panel-title">⭐ Voie Paragonique &amp; Destinée Épique
+        <span id="paragon-level-note" style="font-size:9px;color:var(--text3);margin-left:6px;"></span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
+        <select id="paragonPathSel" onchange="onParagonChange(this.value)"
+          style="flex:1;min-width:140px;background:var(--bg-card,#0e0e1a);border:1px solid var(--border);color:var(--text1);border-radius:4px;font-size:11px;padding:4px 6px;cursor:pointer;">
+          <option value="">— Aucune voie paragonique —</option>
+        </select>
+        <select id="epicDestSel" onchange="onEpicDestChange(this.value)"
+          style="flex:1;min-width:140px;background:var(--bg-card,#0e0e1a);border:1px solid var(--border);color:var(--text1);border-radius:4px;font-size:11px;padding:4px 6px;cursor:pointer;">
+          <option value="">— Aucune destinée épique —</option>
+        </select>
+      </div>
+      <div id="paragonDisplayArea" style="display:flex;flex-direction:column;gap:3px;"></div>
+    </div>
+
     <!-- FACTIONS & SOCIAL -->
     <div class="panel col2">
       <div class="panel-title">🏴 Factions & Contacts</div>
@@ -6085,6 +6103,451 @@ function updateNiveau() {
   updateAutoStats();
   buildSurges();
   if (typeof autoRenderClassFeatures === 'function') autoRenderClassFeatures(true);
+  if (typeof renderParagonPanel === 'function') renderParagonPanel();
+  autoSave();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  SPRINT 2B — PARAGON PATHS & EPIC DESTINIES
+// ═══════════════════════════════════════════════════════════════════
+
+const PARAGON_PATHS_DATA = [
+
+  // ─── GUERRIER ───────────────────────────────────────────────────
+  {
+    name:'Avant-Garde de Fer', nameEn:'Iron Vanguard (PHB1 p.155)',
+    classes:['Guerrier (Fighter)'], prereq:'Guerrier Niv.11',
+    desc:'Tu deviens un bastion indestructible, repoussant les ennemis et récupérant des forces à chaque victoire.',
+    features:[
+      { level:11, name:'Guerrier Endurant', nameEn:'Enduring Warrior', desc:'Chaque fois que tu réduis un ennemi à 0 PV ou moins, tu récupères PV = ton mod CON.' },
+      { level:11, name:'Réaction Féroce', nameEn:'Ferocious Reaction', desc:'Quand tu tombes à 0 PV, avant de t\'évanouir (action immédiate), tu peux dépenser un Point d\'Action pour agir. Tu gagnes aussi +4 à toutes les défenses jusqu\'au début de ton prochain tour quand tu dépenses un PA.' },
+      { level:16, name:'Piétiner le Vaincu', nameEn:'Trample the Fallen', desc:'Quand tu repousses une créature ou la renverses à terre, elle subit des dégâts = mod CON.' }
+    ],
+    powers:[
+      { level:11, type:'encounter', name:'Assaut de la Ligne de Front', nameEn:'Frontline Surge (PHB1)', atk:'+½NIV+FOR vs CA', dmg:'2[W]+FOR', effect:'Touché : 2[W]+mod FOR. Tu pousses la cible 1 case et glisses dans sa case précédente. Chaque allié dans 2 cases peut aussi glisser d\'1 case.' },
+      { level:12, type:'utility', name:'Défense de Fer', nameEn:'Iron Defense (PHB1)', atk:'—', dmg:'—', effect:'Réaction immédiate. Déclencheur : tu es touché par une attaque. Effet : tu dépenses un Surge de guérison.' },
+      { level:20, type:'daily', name:'Fierté de l\'Avant-Garde', nameEn:'Iron Vanguard\'s Pride (PHB1)', atk:'+½NIV+FOR vs CA', dmg:'4[W]+FOR', effect:'Touché : 4[W]+mod FOR. Jusqu\'à la fin de la rencontre, tous tes alliés dans 5 cases gagnent +2 aux jets d\'attaque.' }
+    ]
+  },
+
+  {
+    name:'Gladiateur des Fosses', nameEn:'Pit Fighter (PHB1 p.158)',
+    classes:['Guerrier (Fighter)', 'Barbare (Barbarian)'], prereq:'Guerrier Niv.11',
+    desc:'Durci par des combats sans merci dans les arènes, tu frappes plus fort et encaisses plus de coups.',
+    features:[
+      { level:11, name:'Techniques de l\'Arène', nameEn:'Arena Training', desc:'Tu maîtrises toutes les armes improvisées. Tu peux utiliser Intimidation comme action mineure (1×/rencontre) pour imposer –2 aux attaques d\'un ennemi adjacent jusqu\'à la fin de ton prochain tour.' },
+      { level:11, name:'Coup Brutal', nameEn:'Brutal Blow', desc:'Quand tu utilises une attaque à deux mains ou une arme polyvalente à deux mains, tu infliges +1d6 dégâts supplémentaires sur un touché critique.' },
+      { level:16, name:'Endurcissement par les Cicatrices', nameEn:'Scar Toughening', desc:'Tu gagnes Résistance physique 2. Cette résistance augmente à 5 si tu es en dessous du Seuil Ensanglanté.' }
+    ],
+    powers:[
+      { level:11, type:'encounter', name:'Coup du Gladiateur', nameEn:'Pit Fighter\'s Challenge (PHB1)', atk:'+½NIV+FOR vs CA', dmg:'2[W]+FOR', effect:'Touché : 2[W]+mod FOR. La cible est marquée et ralentie jusqu\'à la fin de ton prochain tour. Elle subit –2 à la CA. ' },
+      { level:12, type:'utility', name:'Truc de l\'Arène', nameEn:'Arena Trick (PHB1)', atk:'—', dmg:'—', effect:'Action mineure. Tu te déplaces de 2 cases sans provoquer d\'AO et gagnes +2 à la CA jusqu\'à la fin de ton tour.' },
+      { level:20, type:'daily', name:'Maître de l\'Arène', nameEn:'Arena Mastery (PHB1)', atk:'+½NIV+FOR vs CA', dmg:'3[W]+FOR', effect:'Touché : 3[W]+mod FOR, et la cible est Étourdie (JS fin de tour). Raté : la moitié des dégâts.' }
+    ]
+  },
+
+  // ─── PALADIN ────────────────────────────────────────────────────
+  {
+    name:'Hospitalier Sacré', nameEn:'Hospitaler (PHB1 p.170)',
+    classes:['Paladin', 'Clerc (Prêtre)'], prereq:'Paladin ou Clerc Niv.11, Imposition des Mains/Guérison Sacrée',
+    desc:'Tu te spécialises dans la guérison et la protection de tes alliés, amplifiant ta magie curative.',
+    features:[
+      { level:11, name:'Soin Amplifié', nameEn:'Amplified Healing', desc:'Quand tu utilises Imposition des Mains ou Guérison Sacrée, la cible récupère +mod CHA PV supplémentaires.' },
+      { level:11, name:'Toucher Stabilisant', nameEn:'Stabilizing Touch', desc:'1×/rencontre, quand tu soignes un allié qui est en dessous de 0 PV, il se stabilise et gagne +2 défenses jusqu\'à la fin de son prochain tour.' },
+      { level:16, name:'Aura Guérisseuse', nameEn:'Healing Aura', desc:'Aura 1 : quand un allié dans ton aura dépense un Surge de guérison, il récupère +2 PV supplémentaires.' }
+    ],
+    powers:[
+      { level:11, type:'encounter', name:'Parole Guérisseuse Amplifiée', nameEn:'Amplified Healing Word (PHB1)', atk:'—', dmg:'—', effect:'Action mineure, portée 5. Un allié dépense un Surge et récupère PV supplémentaires = 2d6 + mod CHA. Tous les alliés à portée 3 de la cible récupèrent 5 PV temporaires.' },
+      { level:12, type:'utility', name:'Refuge Sacré', nameEn:'Sacred Refuge (PHB1)', atk:'—', dmg:'—', effect:'Action mineure. Jusqu\'à la fin de ton prochain tour, chaque allié adjacent peut dépenser un Surge de guérison comme action libre.' },
+      { level:20, type:'daily', name:'Miracle Curatif', nameEn:'Healing Miracle (PHB1)', atk:'—', dmg:'—', effect:'Action standard, portée 10. Jusqu\'à 3 alliés dépensent chacun un Surge. Chaque cible récupère des PV max de Surge + mod CHA + mod SAG. Enlève un état (Étourdi, Affaibli, ou Aveuglé) de chaque cible.' }
+    ]
+  },
+
+  {
+    name:'Chevalier Astral', nameEn:'Astral Weapon (PHB1 p.172)',
+    classes:['Paladin'], prereq:'Paladin Niv.11, Canalisation Divine',
+    desc:'Tu canaliseras le pouvoir des dieux pour forger une arme d\'énergie pure qui punit les impies.',
+    features:[
+      { level:11, name:'Frappe Astrale', nameEn:'Astral Strike', desc:'Quand tu utilises un pouvoir Divin avec arme, tes dégâts ont le type Radiant en plus (dual-type). Les créatures vulnérables au Radiant prennent +5 dégâts.' },
+      { level:11, name:'Réaction de Jugement', nameEn:'Judgment\'s Reaction', desc:'1×/rencontre, quand un ennemi critique un allié adjacent à toi, tu peux effectuer une Attaque de Base au Corps-à-Corps contre cet ennemi comme réaction immédiate.' },
+      { level:16, name:'Armure Lumineuse', nameEn:'Gleaming Armor', desc:'Tant que tu portes une armure lourde, tous les alliés dans 2 cases gagnent +1 à la CA.' }
+    ],
+    powers:[
+      { level:11, type:'encounter', name:'Frappe du Jugement Céleste', nameEn:'Celestial Judgment (PHB1)', atk:'+½NIV+CHA vs CA', dmg:'2[W]+CHA Radiant', effect:'Touché : 2[W]+mod CHA Radiant. La cible est marquée et aveuglée jusqu\'à la fin de ton prochain tour.' },
+      { level:12, type:'utility', name:'Bouclier Astral', nameEn:'Astral Shield (PHB1)', atk:'—', dmg:'—', effect:'Action mineure. Jusqu\'à la fin de la rencontre, tu et chaque allié adjacent gagnez Résistance 5 Radiant et Nécrotique.' },
+      { level:20, type:'daily', name:'Wrath of the Astral Weapon', nameEn:'Astral Weapon\'s Wrath (PHB1)', atk:'+½NIV+CHA vs Vol', dmg:'4d10+CHA Radiant', effect:'Touché : 4d10+mod CHA Radiant. Raté : moitié. Effet : tous les ennemis dans 5 cases de la cible subissent 10 Radiant (sans attaque). La zone est illuminée (lumière vive) jusqu\'à la fin de la rencontre.' }
+    ]
+  },
+
+  // ─── CLERC ──────────────────────────────────────────────────────
+  {
+    name:'Seigneur du Matin', nameEn:'Morninglord (PHB1 p.175)',
+    classes:['Clerc (Prêtre)', 'Paladin', 'Invocateur (Invoker)'], prereq:'Clerc Niv.11',
+    desc:'Prêtre du soleil levant, tu insuffles la lumière radieuse dans tes alliés et brûles les ténèbres.',
+    features:[
+      { level:11, name:'Lumière Curative', nameEn:'Radiant Healing', desc:'Quand tu utilises un pouvoir de Soin, toutes les cibles récupèrent +mod SAG PV supplémentaires si elles ont un score de Lumière positive (pas en état Maudit ou sous Obscurité).' },
+      { level:11, name:'Éclat Divin', nameEn:'Radiant Detonation', desc:'Quand un ennemi dans 5 cases de toi a la Vulnérabilité Radiant, tes pouvoirs Radiant lui infligent +1d6 dégâts supplémentaires.' },
+      { level:16, name:'Aura Solaire', nameEn:'Solar Aura', desc:'Aura 2 : les alliés dans ton aura peuvent relancer 1 dé (1×/tour) sur un jet d\'attaque Radiant et garder le meilleur.' }
+    ],
+    powers:[
+      { level:11, type:'encounter', name:'Salve Radieuse', nameEn:'Radiant Salvo (PHB1)', atk:'+½NIV+SAG vs Réf', dmg:'2d8+SAG Radiant', effect:'Touché (jusqu\'à 3 ennemis dans 3 cases d\'un point) : 2d8+mod SAG Radiant chacun. Les cibles vulnérables au Radiant subissent –2 CA jusqu\'à la fin de ton prochain tour.' },
+      { level:12, type:'utility', name:'Lueur d\'Espoir', nameEn:'Gleam of Hope (PHB1)', atk:'—', dmg:'—', effect:'Action mineure. Jusqu\'à 3 alliés dans 5 cases gagnent 5 PV temporaires. Les alliés en dessous du Seuil Ensanglanté en gagnent 10 à la place.' },
+      { level:20, type:'daily', name:'Colère du Soleil', nameEn:'Solar Wrath (PHB1)', atk:'+½NIV+SAG vs Réf', dmg:'4d10+SAG Radiant', effect:'Touché (zone 3 cases) : 4d10+mod SAG Radiant à chaque ennemi. Raté : moitié. Effet : la zone est illuminée (lumière vive) pour 24h et devient Terrain Consacré (ennemis morts-vivants : –2 ATK).' }
+    ]
+  },
+
+  // ─── RODEUR ─────────────────────────────────────────────────────
+  {
+    name:'Guerrier-Ours', nameEn:'Bear Warrior (PHB2 p.91)',
+    classes:['Rôdeur (Ranger)', 'Barbare (Barbarian)', 'Druide'], prereq:'Rôdeur ou Barbare Niv.11',
+    desc:'Tu canaliseras la force brute de l\'ours, absorbant les coups et déchiquetant tes ennemis.',
+    features:[
+      { level:11, name:'Forme d\'Ours', nameEn:'Bear Shape', desc:'1×/rencontre (action mineure) : tu adoptes la Forme d\'Ours jusqu\'à la fin de la rencontre. En Forme d\'Ours : +4 PV temporaires au début de chaque tour, +2 aux jets de dégâts, vitesse réduite à 5.' },
+      { level:11, name:'Résistance de l\'Ours', nameEn:'Bear\'s Resilience', desc:'En Forme d\'Ours, tu as Résistance physique 5. Quand tu es réduit à 0 PV, si tu es en Forme d\'Ours, tu sors de la forme et récupères 10 PV.' },
+      { level:16, name:'Griffe de l\'Ours', nameEn:'Bear\'s Claw', desc:'En Forme d\'Ours, tes attaques sans arme infligent 1d10 dégâts (au lieu de 1d4). Tu peux effectuer 2 attaques sans arme en une action standard.' }
+    ],
+    powers:[
+      { level:11, type:'encounter', name:'Rugissement de l\'Ours', nameEn:'Bear Roar (PHB2)', atk:'+½NIV+FOR vs Vig', dmg:'2d8+FOR', effect:'Touché (souffle 2 cases) : 2d8+mod FOR à chaque ennemi. Les ennemis touchés sont repoussés de 2 cases et sont Ralentis jusqu\'à la fin de leur prochain tour.' },
+      { level:12, type:'utility', name:'Peau d\'Ours', nameEn:'Bear Skin (PHB2)', atk:'—', dmg:'—', effect:'Action mineure. Jusqu\'à la fin de la rencontre : Résistance 5 Froid, +2 à la Vigueur. Si tu es en Forme d\'Ours, ces bonus doublent.' },
+      { level:20, type:'daily', name:'Fureur de l\'Ours Arctique', nameEn:'Arctic Bear Fury (PHB2)', atk:'+½NIV+FOR vs CA', dmg:'4[W]+FOR', effect:'Touché : 4[W]+mod FOR. Tu entres automatiquement en Forme d\'Ours (si pas déjà en forme). Jusqu\'à la fin de la rencontre, chaque attaque réussie en Forme d\'Ours ralentit la cible (JS fin de tour).' }
+    ]
+  },
+
+  {
+    name:'Traqueur Sang-de-Lune', nameEn:'Blood Moon Stalker (PHB2 p.94)',
+    classes:['Rôdeur (Ranger)', 'Voleur (Rogue)'], prereq:'Rôdeur Niv.11',
+    desc:'La nuit est ton domaine. Tu chasses dans l\'obscurité, invisible et mortel.',
+    features:[
+      { level:11, name:'Chasseur Nocturne', nameEn:'Night Hunter', desc:'Tu bénéficies de Vision dans l\'Obscurité totale (60 cases). Les pénalités de couverture et d\'obscurité ne s\'appliquent pas à tes jets d\'attaque.' },
+      { level:11, name:'Embuscade Sanglante', nameEn:'Blood Ambush', desc:'Quand tu attaques une cible qui n\'as pas encore agi dans la rencontre, ou pendant le Round de Surprise, tu infliges +2d6 dégâts.' },
+      { level:16, name:'Fuite dans l\'Ombre', nameEn:'Shadow Step', desc:'1×/rencontre, quand tu es touché par une attaque, tu peux te téléporter de 3 cases dans une zone d\'obscurité (réaction immédiate).' }
+    ],
+    powers:[
+      { level:11, type:'encounter', name:'Frappe dans l\'Ombre', nameEn:'Shadow Strike (PHB2)', atk:'+½NIV+DEX vs CA', dmg:'2[W]+DEX', effect:'Touché : 2[W]+mod DEX. Tu deviens Invisible jusqu\'au début de ton prochain tour. Si tu étais en Obscurité, tu peux te déplacer de 2 cases avant cette attaque sans provoquer d\'AO.' },
+      { level:12, type:'utility', name:'Manteau d\'Ombre', nameEn:'Shadow Cloak (PHB2)', atk:'—', dmg:'—', effect:'Action mineure. Jusqu\'à la fin de ton prochain tour, tu bénéficies de Camouflage total même en lumière normale. Les ennemis ont –5 à Perception pour te détecter.' },
+      { level:20, type:'daily', name:'Mort dans l\'Obscurité', nameEn:'Death in Darkness (PHB2)', atk:'+½NIV+DEX vs CA', dmg:'4[W]+DEX', effect:'Touché : 4[W]+mod DEX. La cible est Aveuglée (JS fin de tour) et Ralentie jusqu\'à la fin de la rencontre. Tu deviens Invisible jusqu\'à la fin de ton prochain tour. Raté : la moitié des dégâts, pas d\'aveuglement.' }
+    ]
+  },
+
+  // ─── VOLEUR ─────────────────────────────────────────────────────
+  {
+    name:'Assassin des Ombres', nameEn:'Shadow Assassin (PHB1 p.183)',
+    classes:['Voleur (Rogue)'], prereq:'Voleur Niv.11',
+    desc:'Tu maîtrises l\'art du meurtre silencieux, frappant depuis l\'ombre avec une précision létale.',
+    features:[
+      { level:11, name:'Frappe Mortelle', nameEn:'Death Strike', desc:'Quand tu utilises Attaque Sournoise contre une cible qui ne t\'a pas encore vu dans cette rencontre, tu inflignes +2d8 dégâts supplémentaires.' },
+      { level:11, name:'Créer l\'Avantage', nameEn:'Create Advantage', desc:'1×/tour en action libre : si tu n\'as pas encore attaqué ce tour et que tu es Adjacent à un ennemi, tu peux désorienter un ennemi pour lui imposer –2 aux attaques jusqu\'à la fin de son prochain tour.' },
+      { level:16, name:'Sabotage des Défenses', nameEn:'Defense Sabotage', desc:'Quand ton Attaque Sournoise touche, tu peux choisir de réduire les défenses de la cible de 2 (au lieu d\'infliger les dégâts Sournoise normaux) jusqu\'à la fin de ton prochain tour.' }
+    ],
+    powers:[
+      { level:11, type:'encounter', name:'Coup de l\'Assassin', nameEn:'Assassin\'s Strike (PHB1)', atk:'+½NIV+DEX vs CA', dmg:'3d6+DEX', effect:'Touché : 3d6+mod DEX. Si tu avais l\'Avantage de Combat, la cible est Affaiblie jusqu\'à la fin de ton prochain tour. Si la cible était en dessous du Seuil Ensanglanté, elle est Étourdie à la place.' },
+      { level:12, type:'utility', name:'Disparaître dans la Foule', nameEn:'Vanish in Crowd (PHB1)', atk:'—', dmg:'—', effect:'Action mineure. Si tu es adjacent à au moins 2 créatures, tu deviensInvisible jusqu\'au début de ton prochain tour ou jusqu\'à ce que tu attaques.' },
+      { level:20, type:'daily', name:'Frappe du Fantôme', nameEn:'Ghost Strike (PHB1)', atk:'+½NIV+DEX vs CA', dmg:'5d8+DEX', effect:'Touché : 5d8+mod DEX. La cible est Étourdie (JS fin de tour) et perd sa prochaine action. Tu peux te déplacer de 5 cases (téléportation) avant cette attaque. Raté : la moitié des dégâts.' }
+    ]
+  },
+
+  // ─── MAGICIEN ───────────────────────────────────────────────────
+  {
+    name:'Source des Arcanes', nameEn:'Arcane Wellspring (PHB1 p.187)',
+    classes:['Magicien (Wizard)', 'Ensorceleur (Sorcerer)', 'Sorcier (Warlock)'], prereq:'Magicien Niv.11',
+    desc:'Tu puises dans un puits de magie illimitée, amplifiant tes sorts et récupérant de l\'énergie arcanique.',
+    features:[
+      { level:11, name:'Surcharge Arcanique', nameEn:'Arcane Surge', desc:'1×/rencontre (action libre) : quand tu utilises un pouvoir arcane, tu peux ajouter ton mod INT aux dégâts de ce pouvoir.' },
+      { level:11, name:'Fontaine de Mana', nameEn:'Mana Fountain', desc:'Au début de chaque rencontre, tu récupères un pouvoir Par Rencontre arcanique déjà utilisé (du repos court précédent).' },
+      { level:16, name:'Débordement de la Source', nameEn:'Wellspring Overflow', desc:'Quand tu utilises un pouvoir Quotidien arcane, tu gagnes 5 PV temporaires et +1 aux jets d\'attaque jusqu\'à la fin de ton prochain tour.' }
+    ],
+    powers:[
+      { level:11, type:'encounter', name:'Décharge de la Source', nameEn:'Wellspring Discharge (PHB1)', atk:'+½NIV+INT vs Réf', dmg:'3d8+INT Force', effect:'Touché (zone 3 cases) : 3d8+mod INT Force à chaque ennemi. Les ennemis touchés sont repoussés de 2 cases. Tu récupères 5 PV temporaires par ennemi touché (max 15).' },
+      { level:12, type:'utility', name:'Tourbillon Arcanique', nameEn:'Arcane Whirlwind (PHB1)', atk:'—', dmg:'—', effect:'Action mineure. Jusqu\'à la fin de la rencontre : tes pouvoirs arcanes à Distance et Aire ignorent la couverture normale (mais pas couverture totale). +1 à la portée de tous tes pouvoirs arcanes.' },
+      { level:20, type:'daily', name:'Raz-de-Marée de Mana', nameEn:'Mana Tsunami (PHB1)', atk:'+½NIV+INT vs Réf', dmg:'5d10+INT Force', effect:'Touché (zone 5 cases) : 5d10+mod INT Force. Raté : moitié. Effet : toutes les AoE jusqu\'à la fin de la rencontre ont leur taille augmentée de 2 cases. Tu récupères un pouvoir Par Rencontre arcanique.' }
+    ]
+  },
+
+  // ─── WARLORD ────────────────────────────────────────────────────
+  {
+    name:'Étudiant des Sept Arts', nameEn:'Student of the Seven (PHB1 p.196)',
+    classes:['Warlord', 'Guerrier (Fighter)', 'Rôdeur (Ranger)'], prereq:'Martial Niv.11',
+    desc:'Tu maîtrises sept formes de combat distinctes, adaptant ton style à chaque adversaire.',
+    features:[
+      { level:11, name:'Forme Universelle', nameEn:'Universal Form', desc:'1×/tour (action libre) : tu peux changer ton Style de Combat entre Lame à Deux Mains, Lame et Bouclier, ou Deux Armes. Les bonus de style s\'appliquent immédiatement.' },
+      { level:11, name:'Connaissance Tactique', nameEn:'Tactical Knowledge', desc:'Au début de chaque rencontre, tu choisis l\'un de tes alliés. Cet allié gagne +2 à ses jets d\'attaque lors de son premier tour.' },
+      { level:16, name:'Maître des Sept', nameEn:'Seven Masters', desc:'Quand tu touches avec une attaque, tu peux imposer l\'un des effets suivants : Reculer 2 cases, Ralentir (JS fin tour), ou –2 à la CA (jusqu\'à début de ton tour suivant).' }
+    ],
+    powers:[
+      { level:11, type:'encounter', name:'Frappe de la Septième Forme', nameEn:'Seventh Form Strike (PHB1)', atk:'+½NIV+FOR vs CA', dmg:'2[W]+FOR', effect:'Touché : 2[W]+mod FOR. Un allié que tu peux voir peut faire une Attaque de Base (action libre). Raté : un allié peut quand même se déplacer de 2 cases (action libre).' },
+      { level:12, type:'utility', name:'Inspiration de Maître', nameEn:'Master\'s Inspiration (PHB1)', atk:'—', dmg:'—', effect:'Action mineure. Jusqu\'à 2 alliés dans 5 cases gagnent +2 ATK et +2 dégâts jusqu\'à la fin de ton prochain tour.' },
+      { level:20, type:'daily', name:'Sept Formes Déchaînées', nameEn:'Seven Forms Unleashed (PHB1)', atk:'+½NIV+FOR vs CA', dmg:'3[W]+FOR', effect:'Touché : 3[W]+mod FOR. Tu peux faire 3 attaques supplémentaires contre jusqu\'à 3 cibles différentes (toutes : Attaque de Base). Toutes les attaques supplémentaires bénéficient de ton bonus de style actuel.' }
+    ]
+  },
+
+  // ─── BARDE ──────────────────────────────────────────────────────
+  {
+    name:'Chantelame du Souvenir', nameEn:'War Chanter (PHB2 p.85)',
+    classes:['Barde', 'Warlord'], prereq:'Barde Niv.11',
+    desc:'Ta voix et ta lame ne font qu\'un. Tes chants de guerre amplifient les capacités de tes alliés.',
+    features:[
+      { level:11, name:'Chant de Vaillance', nameEn:'Song of Valor', desc:'Quand tu utilises un pouvoir Barde qui affecte des alliés, ceux-ci gagnent +2 aux jets de sauvegarde jusqu\'au début de ton prochain tour.' },
+      { level:11, name:'Lame Harmonique', nameEn:'Harmonic Blade', desc:'Quand tu touches avec une arme, tu peux activer ton Chant de Bataille sans action (si pas déjà actif). Le premier allié qui touche avant ton prochain tour inflige +1d8 dégâts.' },
+      { level:16, name:'Mélodie de Renforcement', nameEn:'Fortifying Melody', desc:'Aura 3 : quand un allié dans l\'aura touche avec une attaque, il gagne 5 PV temporaires.' }
+    ],
+    powers:[
+      { level:11, type:'encounter', name:'Hymne de Bataille', nameEn:'Battle Hymn (PHB2)', atk:'+½NIV+CHA vs Vol', dmg:'2d8+CHA Psychique', effect:'Touché (portée 5) : 2d8+mod CHA Psychique. Tous les alliés qui peuvent t\'entendre gagnent +2 ATK et +2 dégâts jusqu\'à la fin de ton prochain tour.' },
+      { level:12, type:'utility', name:'Chant de Résilience', nameEn:'Song of Resilience (PHB2)', atk:'—', dmg:'—', effect:'Action mineure. Jusqu\'à 3 alliés dans 5 cases gagnent Résistance 5 à un type de dégâts de ton choix jusqu\'à la fin de la rencontre.' },
+      { level:20, type:'daily', name:'Épopée du Héros', nameEn:'Hero\'s Saga (PHB2)', atk:'+½NIV+CHA vs Vol', dmg:'3d10+CHA Psychique', effect:'Touché (zone 5 cases) : 3d10+mod CHA Psychique à chaque ennemi. Effet : tous les alliés dans la zone récupèrent un pouvoir Par Rencontre déjà utilisé. Ils gagnent aussi +2 à toutes les défenses jusqu\'à la fin de la rencontre.' }
+    ]
+  },
+
+  // ─── AE5 CUSTOM ─────────────────────────────────────────────────
+  {
+    name:'Forgeron de l\'Arma', nameEn:'Arma Forgemaster (AE5)',
+    classes:['Armaturge'], prereq:'Armaturge Niv.11',
+    desc:'Tu repousses les limites de la liaison Arma, forgeant une synergie parfaite entre chair et métal.',
+    features:[
+      { level:11, name:'Fusion d\'Âme', nameEn:'Soul Fusion (AE5)', desc:'Ton Arma Spiritus peut maintenant changer de forme (épée→lance→arc) en action mineure. Le bonus d\'Arma s\'applique à toutes les formes.' },
+      { level:11, name:'Résonance Amplifiée', nameEn:'Amplified Resonance (AE5)', desc:'Quand tu utilises un pouvoir Technomagie ou Résonance, tu ajoutes +mod FOR aux dégâts en plus de mod INT.' },
+      { level:16, name:'Armure d\'Arcanite', nameEn:'Arcanite Armor (AE5)', desc:'Résistance 5 à tous les dégâts magiques. Quand tu es touché par une attaque magique, tu récupères 3 PV.' }
+    ],
+    powers:[
+      { level:11, type:'encounter', name:'Explosion d\'Arma', nameEn:'Arma Burst (AE5)', atk:'+½NIV+INT vs CA', dmg:'2[W]+INT+FOR', effect:'Touché : 2[W]+mod INT+mod FOR. Tu pousses la cible de 2 cases. L\'Arma inflige automatiquement ses dégâts de résonance à toutes les créatures dans 1 case de toi.' },
+      { level:12, type:'utility', name:'Lien Défensif', nameEn:'Defensive Bond (AE5)', atk:'—', dmg:'—', effect:'Action mineure. Jusqu\'à la fin de la rencontre : +2 à CA et Réflexes. Quand tu es touché, tu peux réduire les dégâts de mod INT (réaction immédiate, 1×/round).' },
+      { level:20, type:'daily', name:'Singularité d\'Arma', nameEn:'Arma Singularity (AE5)', atk:'+½NIV+INT vs CA', dmg:'4[W]+INT+FOR', effect:'Touché : 4[W]+mod INT+mod FOR. Zone 3 cases : tous les ennemis sont Repoussés de 3 cases et Ralentis. Tu deviens Immun au déplacement forcé jusqu\'à la fin de la rencontre. Raté : moitié des dégâts à la cible principale.' }
+    ]
+  },
+
+];
+
+// ─────────────────────────────────────────────────────────────────
+const EPIC_DESTINIES_DATA = [
+
+  {
+    name:'Demi-Dieu', nameEn:'Demigod (PHB1 p.211)',
+    classes:['*'], prereq:'Niv.21, tout',
+    desc:'Tu transcendes l\'humanité pour devenir l\'enfant d\'un dieu, acquérant une puissance divine.',
+    features:[
+      { level:21, name:'Incarnation Divine', nameEn:'Divine Spark', desc:'Niv.21 : tu gagnes +2 à deux scores de caractéristiques de ton choix. Ces scores ne comptent pas dans la limite de 28.' },
+      { level:24, name:'Faveur des Dieux', nameEn:'Divine Favor', desc:'Niv.24 : 1×/jour, quand tu rates un jet d\'attaque ou un jet de sauvegarde, tu peux relancer (garder le meilleur).' },
+      { level:26, name:'Immunité Partielle', nameEn:'Partial Immunity', desc:'Niv.26 : tu choisis un type de dégât. Tu es Immunisé à ce type de dégâts.' },
+      { level:30, name:'Ascension Divine', nameEn:'Divine Ascension', desc:'Niv.30 : À la fin de la campagne, tu transcendes le monde mortel et prends ta place parmi les dieux.' }
+    ]
+  },
+
+  {
+    name:'Chercheur Éternel', nameEn:'Eternal Seeker (PHB1 p.213)',
+    classes:['*'], prereq:'Niv.21, tout',
+    desc:'Tu voyages à travers les âges et les réalités, puisant dans les pouvoirs de toutes les classes.',
+    features:[
+      { level:21, name:'Puissance Ancienne', nameEn:'Ancient Power', desc:'Niv.21 : tu peux choisir 2 pouvoirs Par Rencontre dans n\'importe quelle liste de classe (ta classe ou une autre). Tu les ajoutes à ton répertoire.' },
+      { level:24, name:'Témoin des Âges', nameEn:'Ageless Witness', desc:'Niv.24 : +5 à tous les jets de compétences basés sur INT. Tu ne peux plus être victime d\'illusions (Immunisé aux effets de Fantaisie/Illusion).' },
+      { level:26, name:'Mémoire du Multivers', nameEn:'Multiverse Memory', desc:'Niv.26 : 1×/jour, tu peux choisir n\'importe quel pouvoir Quotidien d\'une autre classe et l\'utiliser une fois.' },
+      { level:30, name:'Transcendance', nameEn:'Transcendence', desc:'Niv.30 : tu existes simultanément dans plusieurs réalités. Tu es Immunisé à la mort permanente — si tu tombes à 0 PV, tu reviens à la vie au début de ton prochain tour avec 10 PV.' }
+    ]
+  },
+
+  {
+    name:'Archimage', nameEn:'Archmage (PHB1 p.215)',
+    classes:['Magicien (Wizard)', 'Ensorceleur (Sorcerer)', 'Sorcier (Warlock)', 'Invocateur (Invoker)', 'Psion'],
+    prereq:'Niv.21, classe arcanique ou divine',
+    desc:'Tu domines la magie comme peu d\'autres dans l\'histoire. Tes sorts défient les lois de la réalité.',
+    features:[
+      { level:21, name:'Maîtrise Arcanique Suprême', nameEn:'Supreme Arcane Mastery', desc:'Niv.21 : +2 à tous les jets d\'attaque avec des pouvoirs magiques. Tu peux utiliser tes pouvoirs Quotidiens magiques 2×/jour (au lieu d\'1×).' },
+      { level:24, name:'Rituel Instantané', nameEn:'Instant Ritual', desc:'Niv.24 : tu peux lancer n\'importe quel Rituel de niveau ≤ 20 comme action standard (au lieu du temps normal).' },
+      { level:26, name:'Magie Pliée', nameEn:'Reality Fold', desc:'Niv.26 : tes pouvoirs arcanes ignorent toutes les Résistances et Immunités aux dégâts (sauf Immunités divines).' },
+      { level:30, name:'Omniscience', nameEn:'Arcane Omniscience', desc:'Niv.30 : tu peux préparer TOUS tes pouvoirs Quotidiens arcanes entre chaque repos long (au lieu d\'un seul).' }
+    ]
+  },
+
+  {
+    name:'Champion Martial', nameEn:'Martial Champion (PHB1 p.217)',
+    classes:['Guerrier (Fighter)', 'Warlord', 'Rôdeur (Ranger)', 'Barbare (Barbarian)'],
+    prereq:'Niv.21, classe martiale',
+    desc:'Tu es le guerrier le plus accompli de ton époque, maîtrisant toutes les formes de combat.',
+    features:[
+      { level:21, name:'Maîtrise Absolue', nameEn:'Absolute Mastery', desc:'Niv.21 : +2 à tous les jets d\'attaque avec les armes. Quand tu rates un jet d\'attaque au corps-à-corps, tu infliges quand même les dégâts de base (sans effets spéciaux).' },
+      { level:24, name:'Robustesse Légendaire', nameEn:'Legendary Endurance', desc:'Niv.24 : +30 PV maximum. Quand tu dépenses un Surge de guérison, tu récupères PV = Valeur de Surge + mod CON + 10.' },
+      { level:26, name:'Vigilance Perpétuelle', nameEn:'Perpetual Vigilance', desc:'Niv.26 : tu ne peux plus être Surpris. Tu peux faire une AO par tour supplémentaire (max 2 AO/tour).' },
+      { level:30, name:'Légende Vivante', nameEn:'Living Legend', desc:'Niv.30 : 1×/jour, tu peux dépenser une action mineure pour entrer dans un état de Maîtrise Absolue pendant 1 minute : chaque attaque est automatiquement un Critique.' }
+    ]
+  },
+
+  {
+    name:'Filou Mortel', nameEn:'Deadly Trickster (PHB1 p.219)',
+    classes:['Voleur (Rogue)', 'Barde'], prereq:'Niv.21, Attaque Sournoise ou pouvoir de ruse',
+    desc:'Tu deviens la mort incarnée pour tes ennemis, frappant avec une précision et une ruse inégalables.',
+    features:[
+      { level:21, name:'Instinct du Tueur', nameEn:'Killer Instinct', desc:'Niv.21 : ton Attaque Sournoise devient +6d6 (épique). Tes Critiques avec une arme légère ou à distance infligent max dégâts + 3d6 supplémentaires.' },
+      { level:24, name:'Trompe-la-Mort', nameEn:'Death Trick', desc:'Niv.24 : 1×/jour, quand tu serais réduit à 0 PV, tu peux déclarer que c\'était un double — tu restes à 1 PV et te téléportes de 5 cases.' },
+      { level:26, name:'Maîtrise de l\'Ombre', nameEn:'Shadow Mastery', desc:'Niv.26 : tu peux te déplacer à vitesse normale même en terrain difficile ou sur les murs/plafonds. Immunité à la détection magique.' },
+      { level:30, name:'Fantôme Vivant', nameEn:'Living Ghost', desc:'Niv.30 : tu peux passer à travers les objets solides. 1×/jour, tu peux devenir complètement intangible pendant 1 round (immunité totale aux dégâts).' }
+    ]
+  },
+
+  {
+    name:'Avatar de la Mort', nameEn:'Avatar of Death (PHB2 p.160)',
+    classes:['Paladin', 'Clerc (Prêtre)', 'Avenger (Vengeur)'], prereq:'Niv.21, source Divine',
+    desc:'Tu es le bras armé de la mort elle-même, guide des âmes entre les mondes.',
+    features:[
+      { level:21, name:'Toucher de l\'Au-Delà', nameEn:'Touch of the Beyond', desc:'Niv.21 : tes pouvoirs Radiants et Nécrotiques ignorent les Résistances. Tes attaques contre des morts-vivants infligent +2d10 dégâts.' },
+      { level:24, name:'Aura Funèbre', nameEn:'Funeral Aura', desc:'Niv.24 : Aura 3 : les ennemis dans ton aura ne peuvent pas récupérer de PV (immunité aux soins). Les morts-vivants ennemis sont Ralenties.' },
+      { level:26, name:'Voisin de la Mort', nameEn:'Death\'s Neighbor', desc:'Niv.26 : tu ne peux pas mourir de dégâts ordinaires. Tu tombes à 0 PV mais pas à -mort_seuil. Seul un Kill définitif (décapitation, etc.) peut te tuer.' },
+      { level:30, name:'Incarnation Éternelle', nameEn:'Eternal Incarnation', desc:'Niv.30 : à ta "mort", tu te réincarne 24h plus tard dans le lieu saint le plus proche avec 10% des PV max. Tu ne peux pas être détruit définitivement par des moyens ordinaires.' }
+    ]
+  },
+
+  {
+    name:'Prophète des Étoiles', nameEn:'Star Touched (PHB2 p.164)',
+    classes:['Sorcier (Warlock)', 'Psion', 'Invocateur (Invoker)'], prereq:'Niv.21, connexion au Far Realm ou Étoiles',
+    desc:'Tu transcendes la santé mentale ordinaire pour percevoir des vérités cosmiques au-delà de la compréhension.',
+    features:[
+      { level:21, name:'Vision Cosmique', nameEn:'Cosmic Vision', desc:'Niv.21 : tu peux voir dans n\'importe quelle condition (obscurité, Aveuglé, illusion). +5 à tous les jets de Perception et Insight.' },
+      { level:24, name:'Pouvoir Indicible', nameEn:'Unspeakable Power', desc:'Niv.24 : 1×/jour, tu peux utiliser un pouvoir Quotidien sans le dépenser (il reste disponible). Les ennemis ratent automatiquement leurs JS contre tes effets psychiques ce round.' },
+      { level:26, name:'Réalité Altérée', nameEn:'Altered Reality', desc:'Niv.26 : 1×/jour, tu peux réécrire une action passée dans la rencontre (annuler une attaque qui t\'a touché, ou transformer un raté en touché).' },
+      { level:30, name:'Étoile Mourante', nameEn:'Dying Star', desc:'Niv.30 : à ta mort, tu déclenches une Singularité : tous les ennemis dans 10 cases subissent 50 Psychique (sans attaque) et sont Étourdis (JS fin de tour).' }
+    ]
+  },
+
+  {
+    name:'Témoin de l\'Éveil', nameEn:'Témoin de l\'Éveil (AE5)',
+    classes:['*'], prereq:'Niv.21, Résonance entraîné',
+    desc:'Tu as perçu la vérité derrière l\'Éveil de la Résonance. Tu es le pont entre la conscience technomantique et la magie arcane pure.',
+    features:[
+      { level:21, name:'Résonance Éveillée', nameEn:'Awakened Resonance (AE5)', desc:'Niv.21 : ta Résonance devient automatiquement Maîtrisée (si pas déjà). Tes pouvoirs Technomagie ignorent toutes les Résistances magiques. +2 INT.' },
+      { level:24, name:'Communion avec l\'Arche', nameEn:'Arch Communion (AE5)', desc:'Niv.24 : 1×/jour, tu peux communiquer directement avec un Nœud-Arche. Le Nœud te donnera une information que tu n\'as pas (à la discrétion du MJ).' },
+      { level:26, name:'Transcendance Technomantique', nameEn:'Technomantic Transcendence (AE5)', desc:'Niv.26 : ton corps commence à s\'intégrer avec la Résonance. Immunité aux effets de Charme/Domination électronique. Résistance 10 aux dégâts Foudre et Froid.' },
+      { level:30, name:'L\'Éveil Complet', nameEn:'Full Awakening (AE5)', desc:'Niv.30 : tu deviens un Être de Résonance pure. Immunité permanente à la mort (reviens à la vie dans l\'Arche la plus proche). Tu peux désormais fusionner avec n\'importe quel système technomantique.' }
+    ]
+  },
+
+];
+
+// ─────────────────────────────────────────────────────────────────
+//  PARAGON / EPIC PANEL FUNCTIONS
+// ─────────────────────────────────────────────────────────────────
+let __selectedParagonPath = '';
+let __selectedEpicDestiny = '';
+
+function getFilteredParagonPaths() {
+  const className = document.getElementById('classe')?.value?.trim() || '';
+  return PARAGON_PATHS_DATA.filter(p =>
+    p.classes.includes('*') || p.classes.includes(className) ||
+    p.classes.some(c => className.includes(c.split(' ')[0]))
+  );
+}
+
+function buildParagonSelector() {
+  const sel = document.getElementById('paragonPathSel');
+  if (!sel) return;
+  const className = document.getElementById('classe')?.value?.trim() || '';
+  const paths = getFilteredParagonPaths();
+
+  sel.innerHTML = '<option value="">— Aucune voie paragonique —</option>';
+  paths.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.name;
+    opt.textContent = p.name + ' (' + (p.classes[0] || '') + ')';
+    if (p.name === __selectedParagonPath) opt.selected = true;
+    sel.appendChild(opt);
+  });
+
+  // Also build epic destiny selector
+  const epicSel = document.getElementById('epicDestSel');
+  if (!epicSel) return;
+  epicSel.innerHTML = '<option value="">— Aucune destinée épique —</option>';
+  EPIC_DESTINIES_DATA.filter(e => e.classes.includes('*') || e.classes.includes(className)).forEach(e => {
+    const opt = document.createElement('option');
+    opt.value = e.name;
+    opt.textContent = e.name + ' (Épique)';
+    if (e.name === __selectedEpicDestiny) opt.selected = true;
+    epicSel.appendChild(opt);
+  });
+
+  renderParagonPanel();
+}
+
+function renderParagonPanel() {
+  const niveau = parseInt(document.getElementById('niveau')?.value) || 1;
+  const container = document.getElementById('paragonDisplayArea');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const pathData = PARAGON_PATHS_DATA.find(p => p.name === __selectedParagonPath);
+  const epicData = EPIC_DESTINIES_DATA.find(e => e.name === __selectedEpicDestiny);
+
+  if (!pathData && !epicData) {
+    if (niveau < 11) {
+      container.innerHTML = '<div style="color:var(--text3);font-size:11px;padding:4px;">Disponible au Niv.11 — Sélectionne une Voie Paragonique quand tu atteindras le palier Paragonien.</div>';
+    }
+    return;
+  }
+
+  const renderEntry = (data, label) => {
+    const sec = document.createElement('div');
+    sec.style.cssText = 'margin-bottom:8px;';
+
+    const header = document.createElement('div');
+    header.style.cssText = 'display:flex;align-items:baseline;gap:6px;margin-bottom:3px;';
+    header.innerHTML = `<span style="font-size:12px;font-weight:700;color:var(--gold2);">${data.name}</span>
+      <span style="font-size:9px;color:var(--text3);">${data.nameEn}</span>
+      <span style="font-size:9px;background:#333;color:var(--text2);border-radius:3px;padding:1px 5px;">${label}</span>`;
+    sec.appendChild(header);
+
+    const desc = document.createElement('div');
+    desc.style.cssText = 'font-size:10px;color:var(--text2);margin-bottom:4px;font-style:italic;';
+    desc.textContent = data.desc;
+    sec.appendChild(desc);
+
+    // Features
+    (data.features || []).forEach(f => {
+      const unlocked = (f.level || 21) <= niveau;
+      const fDiv = document.createElement('div');
+      fDiv.className = 'cf-card';
+      if (!unlocked) fDiv.style.cssText = 'opacity:0.4;filter:grayscale(0.5);';
+      const tierColor = f.level >= 26 ? '#f96' : f.level >= 21 ? '#f96' : '#b7f';
+      fDiv.innerHTML = `<div style="flex:1;">
+        <div class="cf-name" style="${!unlocked ? 'color:var(--text3);' : ''}">
+          <span style="font-size:8px;background:var(--border);padding:1px 4px;border-radius:2px;margin-right:3px;color:${tierColor}">Niv.${f.level}</span>${f.name}
+        </div>
+        <div class="cf-desc" style="${!unlocked ? 'color:var(--text3);' : ''}">${f.desc}</div>
+      </div>`;
+      sec.appendChild(fDiv);
+    });
+
+    // Powers
+    const powers = (data.powers || []).filter(p => p.level <= niveau);
+    if (powers.length > 0) {
+      const pHeader = document.createElement('div');
+      pHeader.style.cssText = 'font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:3px 0 1px;';
+      pHeader.textContent = '⚡ Pouvoirs de la voie';
+      sec.appendChild(pHeader);
+      powers.forEach(p => {
+        const typeColor = p.type === 'encounter' ? 'var(--encounter-text)' : p.type === 'daily' ? 'var(--daily-text)' : 'var(--utility-text,#8cf)';
+        const pDiv = document.createElement('div');
+        pDiv.className = 'cf-card';
+        pDiv.style.cssText = 'background:var(--bg2,#0d0d20);margin-top:2px;';
+        pDiv.innerHTML = `<div style="flex:1;">
+          <div style="font-size:11px;font-weight:600;color:${typeColor};">${p.name} <span style="font-size:9px;color:var(--text3);">${p.nameEn}</span></div>
+          ${p.atk && p.atk !== '—' ? `<div style="font-size:9px;color:var(--text2);">ATK: ${p.atk} | DÉG: ${p.dmg}</div>` : ''}
+          <div style="font-size:10px;color:var(--text1);margin-top:1px;">${p.effect}</div>
+        </div>`;
+        sec.appendChild(pDiv);
+      });
+    }
+
+    container.appendChild(sec);
+  };
+
+  if (pathData) renderEntry(pathData, '★ Paragonien');
+  if (epicData) renderEntry(epicData, '★★ Épique');
+}
+
+function onParagonChange(val) {
+  __selectedParagonPath = val;
+  renderParagonPanel();
+  autoSave();
+}
+
+function onEpicDestChange(val) {
+  __selectedEpicDestiny = val;
+  renderParagonPanel();
   autoSave();
 }
 
@@ -6225,6 +6688,8 @@ function onClassChange(val) {
 
   // Auto-render class features for new class
   if (typeof autoRenderClassFeatures === 'function') autoRenderClassFeatures(true);
+  // Rebuild paragon path selector for new class
+  if (typeof buildParagonSelector === 'function') buildParagonSelector();
 
   // Load class powers (replace defaults)
   if (cd.powers) {
@@ -9674,11 +10139,15 @@ const _origAutoLoad = typeof autoLoad === 'function' ? autoLoad : null;
 
 function saveFeatItemData(obj) {
   obj.__featSlots = __featSlots;
+  obj.__paragonPath = __selectedParagonPath;
+  obj.__epicDestiny = __selectedEpicDestiny;
   obj.__itemSlots = __itemSlots;
 }
 
 function loadFeatItemData(obj) {
   if (obj.__featSlots) __featSlots = obj.__featSlots;
+  if (obj.__paragonPath !== undefined) { __selectedParagonPath = obj.__paragonPath; }
+  if (obj.__epicDestiny !== undefined) { __selectedEpicDestiny = obj.__epicDestiny; }
   if (obj.__itemSlots) __itemSlots = obj.__itemSlots;
   renderFeatSlots();
   renderItemSlots();
@@ -9712,6 +10181,8 @@ function loadFeatItemData(obj) {
         const raw = localStorage.getItem('ae5-save') || '{}';
         const data = JSON.parse(raw);
         if (data.__featSlots) __featSlots = data.__featSlots;
+  if (data.__paragonPath !== undefined) { __selectedParagonPath = data.__paragonPath; }
+  if (data.__epicDestiny !== undefined) { __selectedEpicDestiny = data.__epicDestiny; }
         if (data.__itemSlots) __itemSlots = data.__itemSlots;
       } catch(e) {}
       setTimeout(() => {
