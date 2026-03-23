@@ -50,7 +50,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
 .btn-continue.visible{opacity:1;}
 
 /* ── Phase 2 : Terminal Forge ───────────────────── */
-#phaseForge{background:rgba(3,3,10,.97);}
+#phaseForge{background:rgba(3,3,10,.97);overflow-y:auto;align-items:flex-start;padding:32px 20px;}
 .forge-box{
   max-width:600px;width:100%;
   border:1px solid #2a1a08;border-radius:4px;
@@ -230,6 +230,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
       <button class="btn-continue visible" id="btnContinueForge" onclick="goToPaths()" style="margin-top:20px;opacity:0;transition:opacity .8s;">
         Choisir un chemin
       </button>
+      <div id="loreVivant" style="opacity:0;transition:opacity 1s;"></div>
     </div>
   </div>
 </div>
@@ -315,6 +316,138 @@ const CLASSES_AE5 = [
   'Moine (Monk)','Psion','Ardent (Ardent)','Battlemind','Chantelame (Bladesinger)',
   'Chaman (Shaman)','Chercheur (Seeker)','Armaturge','Warlord','Invocateur (Invoker)',
 ];
+
+// ═══════════════════════════════════════════════════
+//  LORE VIVANT — données monde AE5
+// ═══════════════════════════════════════════════════
+
+const SAISONS_RESONANTES = [
+  { nom:'Saison Écarlite',    icon:'🔴', couleur:'#c04040',
+    effet:'Veines d\'Écarlite en surface — IRH +1 dans toutes les Contrées. Loot élevé, risque proportionnel.' },
+  { nom:'Saison d\'Animas',   icon:'🌀', couleur:'#8060c0',
+    effet:'Brèches fréquentes, migrations actives — primes de chasse doublées par le HUB Rail.' },
+  { nom:'Saison d\'Ascension',icon:'⚡', couleur:'#6080c0',
+    effet:'Ciel Fracturé instable — anomalies atmosphériques fréquentes. Signature aérienne +2.' },
+  { nom:'Saison Silencieuse', icon:'🌑', couleur:'#405060',
+    effet:'IRH −2 en Contrées. Faune en dormance. Idéal pour l\'exploration — quelque chose prépare quelque chose.' },
+  { nom:'Marée du Drain',     icon:'🌊', couleur:'#305878',
+    effet:'La Morsure attire. Courants convergents. Accès à des ressources normalement inaccessibles.' },
+];
+
+const TENSIONS_FACTIONS = [
+  { a:'Confrérie du Rail',        b:'Veilleurs du Voile',
+    detail:'Sabotage d\'une ligne secondaire revendiqué — enquête Rail en cours, accès restreint.' },
+  { a:'Directoire d\'Engrenage',  b:'Division Fer-Noir',
+    detail:'Contrat d\'extraction disputé dans le secteur profond — 340M de Moellat en jeu.' },
+  { a:'Archivistes Brisés',       b:'Maison des Cartographes (Azur)',
+    detail:'Trois lots d\'archives retirés du Nexus cette semaine. Motif officiel : révision. Motif réel : inconnu.' },
+  { a:'RedG (compagnie gobeline)', b:'Syndicats de Nains d\'Engrenage',
+    detail:'Vote de reconnaissance au Tribunal Résonant reporté pour la quatrième fois. Tyna Skiperocket note.' },
+  { a:'Écorcheurs Crimsoniques',   b:'Confrérie des Formes Pures',
+    detail:'Extraction d\'Écarlite dans une zone protégée — deux Animas blessés, un mort. Incident classifié.' },
+  { a:'Inner Circle Rail',         b:'Tribunal Résonant d\'Azur',
+    detail:'Demande d\'audit des registres Rail — refusée deux fois sans justification documentée.' },
+  { a:'Perchoir (navigateurs)',    b:'Ciel Fracturé actif',
+    detail:'Corridor cartographié il y a six semaines introuvable. Dérive confirmée. Aucune carte valide.' },
+  { a:'Cartographes du Néant',     b:'Institut d\'Animaforgia (Azur)',
+    detail:'Rapport classifié sur une anomalie abyssale — copie interceptée. Contenu : non-divulgué.' },
+];
+
+const RAPPORTS_TERRAIN = [
+  { zone:'Wild — Secteur Nord',    icon:'🌀',
+    texte:'Convergence d\'Animas signalée — trois Animas tier 2 en territoire disputé. Équipes de chasse en alerte.' },
+  { zone:'Wild — Secteur Est',     icon:'💎',
+    texte:'Saison de Cristaux locale active. Terrain instable, potentiel de loot élevé, IRH +1 par cristal récolté.' },
+  { zone:'Wild — Périmètre Rempart',icon:'🔇',
+    texte:'Silence du Wild confirmé. Faune disparue. Les créatures ont fui avant nous — quelque chose arrive.' },
+  { zone:'Ciel Fracturé',          icon:'⛈',
+    texte:'Tempête résonante couche intermédiaire. Corridors cartographiés instables. Transit déconseillé sans carte récente.' },
+  { zone:'Ciel Fracturé',          icon:'📡',
+    texte:'Signal de détresse ancien capté au-dessus de la Mer de Brume. Origine non identifiée. Il attire.' },
+  { zone:'La Morsure — Côtier',    icon:'🌊',
+    texte:'Vortex chantant à 40 km du Bastion-Rempart. Attire les Animas marins. Navigation DD 14 conseillée.' },
+  { zone:'La Morsure — Profond',   icon:'⬇',
+    texte:'Remontée abyssale en cours. Débris et reliques de l\'Ère des Empires en surface. Valeur : sans plafond.' },
+  { zone:'Engrenage — Niveau 3',   icon:'⚠',
+    texte:'Anomalie profonde — équipes non-recensées déployées. Accès accréditation Argent requis. Nature : classifiée.' },
+  { zone:'Azur — Nexus',           icon:'📄',
+    texte:'Archives retirées : dossiers gobelins, références aux Mange-Rêve. Motif de suppression : non communiqué.' },
+  { zone:'Ligne Rail Engrenage-Rempart', icon:'🚂',
+    texte:'Ligne interrompue — cause officielle : maintenance. Cause circonstancielle : présence Veilleurs. Non confirmé.' },
+  { zone:'Morsure — L\'Approche',  icon:'🌑',
+    texte:'Écho du Gardien Primordial capté. Tous les Résonnants et Devas en mer ont rapporté des visions. Contenu : divergent.' },
+];
+
+const NIVEAUX_DRAIN = [
+  { label:'LOIN',    couleur:'#5a8a50', desc:'Drain imperceptible — terrain stable, tables d\'événements normales.' },
+  { label:'MODÉRÉ',  couleur:'#9a8040', desc:'Zone d\'influence Bastions — +1 à tous les dés d\'événements dynamiques.' },
+  { label:'PROCHE',  couleur:'#b05030', desc:'Eaux côtières actives — un événement par session garanti.' },
+  { label:'ACTIF',   couleur:'#c03020', desc:'Mer intermédiaire — tables marines activées en parallèle.' },
+];
+
+// Graine quotidienne déterministe (même résultat toute la journée, change chaque jour)
+function getDailySeed() {
+  const d = new Date();
+  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+}
+function seedPick(seed, n, arr) {
+  // hash(seed + n*prime) % len — stable et bien distribué
+  let v = (seed + n * 2654435761) >>> 0;
+  v = Math.imul(v ^ (v >>> 16), 0x45d9f3b) >>> 0;
+  v = Math.imul(v ^ (v >>> 16), 0x45d9f3b) >>> 0;
+  return arr[v % arr.length];
+}
+
+function buildLoreVivant() {
+  const seed   = getDailySeed();
+  const saison = seedPick(seed, 0, SAISONS_RESONANTES);
+  const tension= seedPick(seed, 1, TENSIONS_FACTIONS);
+  const rapport= seedPick(seed, 2, RAPPORTS_TERRAIN);
+  const drain  = seedPick(seed, 3, NIVEAUX_DRAIN);
+
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
+
+  const row = (border, label, titre, desc) => `
+    <div style="background:#050508;border:1px solid #141008;border-left:2px solid ${border};
+                padding:10px 14px;border-radius:2px;">
+      <div style="font-family:monospace;font-size:9px;letter-spacing:2px;color:#a08855;margin-bottom:5px;">${label}</div>
+      <div style="font-size:13px;color:#d4b87a;margin-bottom:3px;">${titre}</div>
+      <div style="font-size:11px;color:#b09555;font-style:italic;line-height:1.6;">${desc}</div>
+    </div>`;
+
+  return `
+    <div style="margin-top:22px;border-top:1px solid #1a1208;padding-top:18px;">
+      <div style="font-family:monospace;font-size:10px;letter-spacing:3px;color:#a08855;margin-bottom:14px;">
+        ▸ TRANSMISSIONS ACTIVES — ${dateStr.toUpperCase()}
+      </div>
+      <div style="display:grid;gap:8px;">
+        ${row(saison.couleur,
+              'SAISON RÉSONANTE',
+              saison.icon + ' ' + saison.nom,
+              saison.effet)}
+        ${row('#6a5838',
+              'TENSION FACTIONS',
+              tension.a + ' <span style="color:#5a4020;">↔</span> ' + tension.b,
+              tension.detail)}
+        ${row('#3a5830',
+              'RAPPORT TERRAIN · ' + rapport.zone.toUpperCase(),
+              rapport.icon + ' Incident signalé',
+              rapport.texte)}
+        <div style="display:flex;align-items:center;gap:14px;background:#050508;
+                    border:1px solid #141008;padding:9px 14px;border-radius:2px;">
+          <div style="flex:1;">
+            <div style="font-family:monospace;font-size:9px;letter-spacing:2px;color:#a08855;margin-bottom:3px;">DRAIN · LA MORSURE</div>
+            <div style="font-size:11px;color:#b09555;font-style:italic;">${drain.desc}</div>
+          </div>
+          <div style="font-family:monospace;font-size:11px;font-weight:700;color:${drain.couleur};
+                      border:1px solid ${drain.couleur};padding:4px 12px;border-radius:3px;white-space:nowrap;">
+            ${drain.label}
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
 
 // State
 const forge = { nom:'', race:'', genre:'M', classe:'', niveau:1, chemin:null };
@@ -470,15 +603,20 @@ async function startTisserane() {
 async function goToForge() {
   transition('phaseTisserane', 'phaseForge');
   await delay(1400);
-  const q = document.getElementById('forgeSevQuote');
-  const l = document.getElementById('sevLine1');
+  const q   = document.getElementById('forgeSevQuote');
+  const l   = document.getElementById('sevLine1');
   const btn = document.getElementById('btnContinueForge');
+  const lv  = document.getElementById('loreVivant');
   q.style.opacity = '1';
   await delay(1200);
   l.style.opacity = '1';
   l.textContent = '"Qu\'est-ce que vous savez faire ?"';
   await delay(800);
   btn.style.opacity = '1';
+  await delay(400);
+  // Injecter et révéler le lore vivant
+  lv.innerHTML = buildLoreVivant();
+  lv.style.opacity = '1';
 }
 
 // ═══════════════════════════════════════════════════
