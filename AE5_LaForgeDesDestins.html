@@ -182,11 +182,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
 .btn-launch:hover{background:#c9a260;color:#03030a;box-shadow:0 0 30px rgba(201,162,96,.3);}
 .btn-skip{
   position:fixed;bottom:16px;right:20px;z-index:100;
-  font-family:monospace;font-size:11px;color:#2a1a08;letter-spacing:2px;
-  background:none;border:none;cursor:pointer;text-transform:uppercase;
-  transition:color .3s;
+  font-family:monospace;font-size:11px;color:#7a6035;letter-spacing:2px;
+  background:#07060f;border:1px solid #2a1f08;
+  padding:5px 12px;border-radius:3px;
+  cursor:pointer;text-transform:uppercase;
+  transition:color .3s,border-color .3s;
 }
-.btn-skip:hover{color:#a08855;}
+.btn-skip:hover{color:#c9a260;border-color:#6a5025;}
 </style>
 </head>
 <body>
@@ -398,8 +400,22 @@ function seedPick(seed, n, arr) {
   return arr[v % arr.length];
 }
 
+let _loreRerollOffset = 0;
+
+function rerollLore() {
+  _loreRerollOffset = Math.floor(Math.random() * 9999) + 1;
+  const lv = document.getElementById('loreVivant');
+  if (lv) {
+    lv.style.opacity = '0';
+    setTimeout(() => {
+      lv.innerHTML = buildLoreVivant();
+      lv.style.opacity = '1';
+    }, 300);
+  }
+}
+
 function buildLoreVivant() {
-  const seed   = getDailySeed();
+  const seed   = getDailySeed() + _loreRerollOffset;
   const saison = seedPick(seed, 0, SAISONS_RESONANTES);
   const tension= seedPick(seed, 1, TENSIONS_FACTIONS);
   const rapport= seedPick(seed, 2, RAPPORTS_TERRAIN);
@@ -418,8 +434,18 @@ function buildLoreVivant() {
 
   return `
     <div style="margin-top:22px;border-top:1px solid #1a1208;padding-top:18px;">
-      <div style="font-family:monospace;font-size:10px;letter-spacing:3px;color:#a08855;margin-bottom:14px;">
-        ▸ TRANSMISSIONS ACTIVES — ${dateStr.toUpperCase()}
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-family:monospace;font-size:10px;letter-spacing:3px;color:#a08855;">
+          ▸ TRANSMISSIONS ACTIVES — ${dateStr.toUpperCase()}
+        </div>
+        <button onclick="rerollLore()" title="Nouvelle transmission"
+          style="font-family:monospace;font-size:10px;color:#6a5028;background:none;
+                 border:1px solid #2a1f08;padding:3px 9px;border-radius:3px;
+                 cursor:pointer;letter-spacing:1px;transition:color .2s,border-color .2s;"
+          onmouseover="this.style.color='#c9a260';this.style.borderColor='#6a5025';"
+          onmouseout="this.style.color='#6a5028';this.style.borderColor='#2a1f08';">
+          🎲 reroll
+        </button>
       </div>
       <div style="display:grid;gap:8px;">
         ${row(saison.couleur,
