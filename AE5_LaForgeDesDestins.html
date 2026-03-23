@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La Forge des Destins — AE5</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:'Georgia',serif;color:#c9a260;}
+
+/* ── Canvas EVO ─────────────────────────────────── */
+#evoCanvas{position:fixed;inset:0;z-index:0;opacity:0;transition:opacity 1.5s;}
+
+/* ── Overlay phases ─────────────────────────────── */
+.phase{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:40px;
+  opacity:0;pointer-events:none;transition:opacity 1.2s;}
+.phase.active{opacity:1;pointer-events:all;}
+
+/* ── Phase 1 : La Tisserane ─────────────────────── */
+#phaseTisserane{background:transparent;}
+.tisserane-text{
+  max-width:620px;text-align:center;font-style:italic;
+  font-size:clamp(13px,2vw,17px);line-height:2;color:#d4b87a;
+  text-shadow:0 0 30px rgba(201,162,96,.4);
+}
+.tisserane-name{
+  font-size:clamp(11px,1.5vw,13px);letter-spacing:4px;
+  color:#5a4020;margin-bottom:32px;font-style:normal;font-family:monospace;
+}
+.tisserane-quote{
+  max-width:560px;text-align:left;font-style:italic;
+  font-size:clamp(12px,1.8vw,15px);line-height:1.9;color:#b09060;
+  border-left:1px solid #5a4020;padding-left:20px;margin-top:28px;
+}
+#tisseraneTypeTarget{min-height:3em;}
+.cursor-blink{display:inline-block;width:1px;height:1em;background:#c9a260;
+  vertical-align:text-bottom;animation:blink .7s steps(1) infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* bouton continuer */
+.btn-continue{
+  margin-top:36px;padding:10px 32px;
+  background:transparent;border:1px solid #5a4020;
+  color:#7a6040;font-family:monospace;font-size:11px;letter-spacing:3px;
+  cursor:pointer;text-transform:uppercase;
+  transition:all .4s;opacity:0;
+}
+.btn-continue:hover{border-color:#c9a260;color:#c9a260;box-shadow:0 0 12px rgba(201,162,96,.2);}
+.btn-continue.visible{opacity:1;}
+
+/* ── Phase 2 : Terminal Forge ───────────────────── */
+#phaseForge{background:rgba(3,3,10,.97);}
+.forge-box{
+  max-width:600px;width:100%;
+  border:1px solid #2a1a08;border-radius:4px;
+  background:#07070f;
+  box-shadow:0 0 60px rgba(201,162,96,.05);
+}
+.forge-header{
+  padding:12px 18px;background:#0d0900;border-bottom:1px solid #2a1a08;
+  font-family:monospace;font-size:10px;letter-spacing:2px;color:#5a4020;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.forge-header span{color:#c9a260;}
+.forge-body{padding:28px 32px;}
+.forge-title{
+  font-size:18px;letter-spacing:1px;color:#c9a260;margin-bottom:4px;
+}
+.forge-subtitle{font-size:11px;color:#5a4020;font-family:monospace;letter-spacing:2px;margin-bottom:24px;}
+.forge-quote{
+  font-style:italic;color:#6a5030;font-size:13px;line-height:1.8;
+  border-left:1px solid #2a1a08;padding-left:14px;margin-bottom:24px;
+}
+.severine-line{
+  font-family:monospace;font-size:13px;color:#8a9a6a;margin-bottom:8px;
+}
+.severine-line::before{content:'> ';color:#4a6040;}
+
+/* ── Phase 3 : Six Chemins ──────────────────────── */
+#phasePaths{background:rgba(3,3,10,.97);overflow-y:auto;align-items:flex-start;padding:28px 20px;}
+.paths-header{
+  text-align:center;margin-bottom:28px;width:100%;max-width:820px;
+  align-self:center;
+}
+.paths-title{font-size:20px;letter-spacing:1px;color:#c9a260;margin-bottom:6px;}
+.paths-sub{font-family:monospace;font-size:10px;color:#5a4020;letter-spacing:2px;}
+.paths-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:14px;max-width:820px;width:100%;align-self:center;
+}
+.path-card{
+  border:1px solid #2a1a08;border-radius:6px;padding:18px 20px;
+  background:#07070f;cursor:pointer;transition:all .3s;
+}
+.path-card:hover,.path-card.selected{
+  border-color:#c9a260;background:#0d0900;
+  box-shadow:0 0 20px rgba(201,162,96,.1);
+}
+.path-card.selected .path-icon{color:#c9a260;}
+.path-icon{font-size:22px;margin-bottom:8px;color:#5a4020;transition:color .3s;}
+.path-name{font-size:14px;color:#c9a260;margin-bottom:4px;}
+.path-tagline{font-size:11px;font-style:italic;color:#6a5030;line-height:1.5;margin-bottom:10px;}
+.path-classes{font-family:monospace;font-size:9px;color:#4a6040;letter-spacing:1px;}
+.paths-next{
+  align-self:center;margin-top:20px;
+  padding:10px 36px;background:transparent;border:1px solid #5a4020;
+  color:#7a6040;font-family:monospace;font-size:11px;letter-spacing:3px;
+  cursor:pointer;text-transform:uppercase;transition:all .4s;opacity:0;
+}
+.paths-next.visible{opacity:1;}
+.paths-next:hover{border-color:#c9a260;color:#c9a260;}
+
+/* ── Phase 4 : Wizard Séverine ──────────────────── */
+#phaseWizard{background:rgba(3,3,10,.97);}
+.wizard-box{max-width:520px;width:100%;}
+.wiz-sev{
+  font-family:monospace;font-size:12px;color:#8a9a6a;margin-bottom:20px;
+  line-height:1.8;
+}
+.wiz-sev::before{content:'Séverine — ';color:#4a6040;}
+.wiz-tisserane{
+  font-style:italic;font-size:12px;color:#5a4020;margin-bottom:16px;
+  line-height:1.8;
+}
+.wiz-input{
+  width:100%;background:#07070f;border:1px solid #2a1a08;border-radius:4px;
+  color:#c9a260;font-family:monospace;font-size:14px;padding:10px 14px;
+  outline:none;transition:border-color .3s;margin-bottom:20px;
+}
+.wiz-input:focus{border-color:#5a4020;}
+.wiz-select{
+  width:100%;background:#07070f;border:1px solid #2a1a08;border-radius:4px;
+  color:#c9a260;font-family:monospace;font-size:13px;padding:10px 14px;
+  outline:none;cursor:pointer;margin-bottom:20px;
+  appearance:none;
+}
+.wiz-select option{background:#07070f;}
+.wiz-btns{display:flex;gap:10px;justify-content:flex-end;}
+.wiz-btn{
+  padding:8px 24px;background:transparent;border:1px solid #5a4020;
+  color:#7a6040;font-family:monospace;font-size:11px;letter-spacing:2px;
+  cursor:pointer;text-transform:uppercase;transition:all .3s;
+}
+.wiz-btn:hover{border-color:#c9a260;color:#c9a260;}
+.wiz-btn.primary{border-color:#c9a260;color:#c9a260;}
+.wiz-step-indicator{
+  font-family:monospace;font-size:9px;color:#2a1a08;letter-spacing:2px;
+  margin-bottom:24px;
+}
+/* genre chips */
+.genre-chips{display:flex;gap:8px;margin-bottom:20px;}
+.genre-chip{
+  flex:1;padding:9px;text-align:center;border:1px solid #2a1a08;border-radius:4px;
+  color:#5a4020;font-family:monospace;font-size:12px;cursor:pointer;transition:all .3s;
+}
+.genre-chip:hover,.genre-chip.selected{border-color:#c9a260;color:#c9a260;background:#0d0900;}
+
+/* ── Phase 5 : Résumé final ─────────────────────── */
+#phaseSummary{background:rgba(3,3,10,.97);}
+.summary-box{max-width:560px;width:100%;text-align:center;}
+.summary-tisserane{
+  font-style:italic;color:#7a6040;font-size:13px;line-height:2;
+  margin-bottom:28px;
+}
+.summary-card{
+  border:1px solid #2a1a08;border-radius:6px;padding:24px;
+  background:#07070f;margin-bottom:28px;text-align:left;
+}
+.sum-row{display:flex;justify-content:space-between;padding:6px 0;
+  border-bottom:1px solid #12120a;font-family:monospace;font-size:12px;}
+.sum-row:last-child{border:none;}
+.sum-label{color:#5a4020;letter-spacing:1px;}
+.sum-value{color:#c9a260;}
+.sum-path{color:#8a9a6a;}
+.btn-launch{
+  padding:14px 48px;background:#0d0900;border:1px solid #c9a260;
+  color:#c9a260;font-family:monospace;font-size:13px;letter-spacing:3px;
+  cursor:pointer;text-transform:uppercase;transition:all .4s;
+  text-decoration:none;display:inline-block;
+}
+.btn-launch:hover{background:#c9a260;color:#03030a;box-shadow:0 0 30px rgba(201,162,96,.3);}
+.btn-skip{
+  position:fixed;bottom:16px;right:20px;z-index:100;
+  font-family:monospace;font-size:9px;color:#2a1a08;letter-spacing:2px;
+  background:none;border:none;cursor:pointer;text-transform:uppercase;
+  transition:color .3s;
+}
+.btn-skip:hover{color:#5a4020;}
+</style>
+</head>
+<body>
+
+<!-- Canvas EVO -->
+<canvas id="evoCanvas"></canvas>
+
+<!-- Skip permanent -->
+<button class="btn-skip" onclick="skipAll()">Passer ↗</button>
+
+<!-- ══════════════════════════════════════════
+     PHASE 1 — LA TISSERANE
+═══════════════════════════════════════════ -->
+<div class="phase active" id="phaseTisserane">
+  <div class="tisserane-text">
+    <div class="tisserane-name" id="tisseraneName" style="opacity:0">✦ LA TISSERANE ✦</div>
+    <div id="tisseraneTypeTarget"></div>
+    <div class="tisserane-quote" id="tisseraneQuote" style="opacity:0;transition:opacity 1.5s;">
+      <span id="quoteTarget"></span><span class="cursor-blink" id="quoteCursor" style="display:none"></span>
+    </div>
+  </div>
+  <button class="btn-continue" id="btnContinueTisserane" onclick="goToForge()">
+    Entrer dans la Forge
+  </button>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PHASE 2 — FORGE DES DESTINS
+═══════════════════════════════════════════ -->
+<div class="phase" id="phaseForge">
+  <div class="forge-box">
+    <div class="forge-header">
+      <span>FORGE DES DESTINS</span>
+      <span>Bureau d'Orientation · Azur</span>
+    </div>
+    <div class="forge-body">
+      <div class="forge-title">La Forge des Destins</div>
+      <div class="forge-subtitle">Bureau d'Orientation des Parcours Non-Civils</div>
+      <div class="forge-quote" id="forgeSevQuote" style="opacity:0;transition:opacity 1s;">"Nous ne vous donnons pas un destin.<br>Nous vous aidons à reconnaître celui que vous avez déjà commencé à construire."</div>
+      <div class="severine-line" id="sevLine1" style="opacity:0;transition:opacity .8s;"></div>
+      <button class="btn-continue visible" id="btnContinueForge" onclick="goToPaths()" style="margin-top:20px;opacity:0;transition:opacity .8s;">
+        Choisir un chemin
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PHASE 3 — LES SIX CHEMINS
+═══════════════════════════════════════════ -->
+<div class="phase" id="phasePaths">
+  <div class="paths-header">
+    <div class="paths-title">Les Six Chemins</div>
+    <div class="paths-sub">Lequel ressemble à vous ?  —  Séverine Dault</div>
+  </div>
+  <div class="paths-grid" id="pathsGrid"></div>
+  <button class="paths-next" id="btnPathNext" onclick="goToWizard()">Continuer →</button>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PHASE 4 — WIZARD SÉVERINE
+═══════════════════════════════════════════ -->
+<div class="phase" id="phaseWizard">
+  <div class="wizard-box">
+    <div class="wiz-step-indicator" id="wizStepInd">ÉTAPE 1 / 5</div>
+    <div id="wizContent"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PHASE 5 — RÉSUMÉ
+═══════════════════════════════════════════ -->
+<div class="phase" id="phaseSummary">
+  <div class="summary-box">
+    <div class="summary-tisserane" id="summaryTisserane"></div>
+    <div class="summary-card" id="summaryCard"></div>
+    <a href="AE5_CharacterSheet.html" class="btn-launch" id="btnLaunch" onclick="saveForgeData()">
+      Ouvrir la fiche ✦
+    </a>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  DONNÉES
+// ═══════════════════════════════════════════════════
+
+const SIX_CHEMINS = [
+  { id:'chasseur', icon:'🦴', name:'Chasseur d\'Animas',
+    tagline:'"Vous tuez des choses trop grandes pour que les Bastions s\'en occupent seuls."',
+    classes:['Rôdeur (Ranger)','Guerrier (Fighter)','Barbare (Barbarian)','Warden (Gardien)'],
+    tisserane:'Un fil qui court. Qui traque. Qui ne se repose que quand la proie est abattue.' },
+  { id:'passeur', icon:'🌫', name:'Le Passeur',
+    tagline:'"Vous faites traverser le Wild à des gens et des choses qui ne sauraient pas y survivre seuls."',
+    classes:['Voleur (Rogue)','Rôdeur (Ranger)','Barde','Druide'],
+    tisserane:'Un fil discret. Qui sait se faufiler entre les nœuds sans les toucher.' },
+  { id:'cartographe', icon:'🗺', name:'Cartographe de Ruines',
+    tagline:'"Vous trouvez ce que le Wild essaie d\'effacer. Vous le vendez avant qu\'il disparaisse."',
+    classes:['Magicien (Wizard)','Artificier','Rôdeur (Ranger)','Avenger (Vengeur)'],
+    tisserane:'Un fil curieux. Qui tire sur les fils des autres pour comprendre comment ils ont été tressés.' },
+  { id:'collectionneur', icon:'💎', name:'Collectionneur de Shards',
+    tagline:'"Vous connaissez la valeur de ce que les autres ne reconnaissent pas."',
+    classes:['Magicien (Wizard)','Artificier','Psion','Armaturge'],
+    tisserane:'Un fil qui résonne. Qui reconnaît la fréquence des choses et sait la lire avant les autres.' },
+  { id:'agent', icon:'🎭', name:'Agent de Faction',
+    tagline:'"Vous faites avancer des agendas plus grands que vous. Ou vous prétendez le faire."',
+    classes:['Voleur (Rogue)','Barde','Paladin','Sorcier (Warlock)'],
+    tisserane:'Un fil tressé dans d\'autres fils. Sa force vient des tensions qu\'il crée autour de lui.' },
+  { id:'saboteur', icon:'⚙', name:'Le Saboteur',
+    tagline:'"Vous cassez des choses. Pour des raisons. Parfois bonnes."',
+    classes:['Voleur (Rogue)','Artificier','Guerrier (Fighter)','Moine (Monk)'],
+    tisserane:'Un fil tranchant. Qui ne coupe pas au hasard — il coupe ce qui doit l\'être.' },
+];
+
+const RACES_AE5 = [
+  'Humain','Elfe','Demi-Elfe','Nain','Halfelin','Gnome','Tieflin',
+  'Dragoné','Demi-Orc','Goliath','Githzéraï','Kalashtar','Revenant',
+  'Changeling','Shifter (Bestial)','Minotaure',
+  'Deva (Bassin de Vie)','Résonnant','Re-Rhun','Vulkaris','Warforged (Mécanique)',
+];
+
+const CLASSES_AE5 = [
+  'Guerrier (Fighter)','Paladin','Clerc (Prêtre)','Avenger (Vengeur)',
+  'Rôdeur (Ranger)','Voleur (Rogue)','Magicien (Wizard)','Sorcier (Warlock)',
+  'Barde','Druide','Warden (Gardien)','Artificier','Barbare (Barbarian)',
+  'Moine (Monk)','Psion','Ardent (Ardent)','Battlemind','Chantelame (Bladesinger)',
+  'Chaman (Shaman)','Chercheur (Seeker)','Armaturge','Warlord','Invocateur (Invoker)',
+];
+
+// State
+const forge = { nom:'', race:'', genre:'M', classe:'', niveau:1, chemin:null };
+
+// ═══════════════════════════════════════════════════
+//  EVO CANVAS — cellules organiques qui remontent
+// ═══════════════════════════════════════════════════
+const canvas = document.getElementById('evoCanvas');
+const ctx = canvas.getContext('2d');
+let cells = [], evoRunning = true;
+
+function resizeCanvas() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function spawnCell(x, y) {
+  return {
+    x: x ?? Math.random() * canvas.width,
+    y: y ?? canvas.height + 10,
+    r: 1 + Math.random() * 3,
+    vx: (Math.random() - .5) * .4,
+    vy: -(0.3 + Math.random() * 0.8),
+    alpha: 0,
+    fadeIn: 0.02 + Math.random() * 0.02,
+    hue: 30 + Math.random() * 20,  // amber range
+    life: 0,
+    maxLife: 200 + Math.random() * 300,
+    divideAt: 80 + Math.random() * 100,
+    divided: false,
+  };
+}
+
+for (let i = 0; i < 12; i++) {
+  const c = spawnCell();
+  c.y = Math.random() * canvas.height;
+  c.life = Math.random() * c.maxLife * .5;
+  cells.push(c);
+}
+
+function evoTick() {
+  if (!evoRunning) return;
+  ctx.fillStyle = 'rgba(3,3,10,0.18)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  cells.forEach((c, i) => {
+    c.life++;
+    c.x += c.vx + Math.sin(c.life * 0.03) * .2;
+    c.y += c.vy;
+    if (c.alpha < 1) c.alpha = Math.min(1, c.alpha + c.fadeIn);
+
+    // Divide
+    if (!c.divided && c.life > c.divideAt && cells.length < 80) {
+      const child = spawnCell(c.x + (Math.random()-0.5)*8, c.y);
+      child.r = c.r * 0.7;
+      child.alpha = .3;
+      cells.push(child);
+      c.divided = true;
+    }
+
+    // Draw cell body
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, c.r, 0, Math.PI*2);
+    ctx.fillStyle = `hsla(${c.hue},60%,40%,${c.alpha * 0.6})`;
+    ctx.fill();
+
+    // Glow
+    const grd = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.r * 3);
+    grd.addColorStop(0, `hsla(${c.hue},70%,50%,${c.alpha * .15})`);
+    grd.addColorStop(1, 'transparent');
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, c.r * 3, 0, Math.PI*2);
+    ctx.fillStyle = grd;
+    ctx.fill();
+
+    // Kill off-screen
+    if (c.y < -20 || c.life > c.maxLife) {
+      cells[i] = spawnCell();
+    }
+  });
+
+  // Spawn new cells occasionally
+  if (Math.random() < 0.04 && cells.length < 80) cells.push(spawnCell());
+
+  requestAnimationFrame(evoTick);
+}
+
+// ═══════════════════════════════════════════════════
+//  TYPEWRITER
+// ═══════════════════════════════════════════════════
+function typewrite(el, text, speed, onDone) {
+  let i = 0;
+  el.textContent = '';
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor-blink';
+  el.appendChild(cursor);
+  const t = setInterval(() => {
+    if (i < text.length) {
+      cursor.before(text[i]);
+      i++;
+    } else {
+      clearInterval(t);
+      setTimeout(() => {
+        cursor.remove();
+        if (onDone) onDone();
+      }, 600);
+    }
+  }, speed);
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ═══════════════════════════════════════════════════
+//  PHASE 1 — LA TISSERANE
+// ═══════════════════════════════════════════════════
+async function startTisserane() {
+  canvas.style.opacity = '1';
+  evoTick();
+  await delay(1200);
+
+  // Apparition du nom
+  const nameEl = document.getElementById('tisseraneName');
+  nameEl.style.opacity = '1';
+  nameEl.style.transition = 'opacity 2s';
+  await delay(2000);
+
+  // Premier bloc typewriter
+  const target = document.getElementById('tisseraneTypeTarget');
+  const intro = "Quelque part dans le ciel d'Archyon, entre les étoiles et la couche supérieure de la Résonance, quelque chose très ancien vous regarde.\n\nElle vous regarde depuis avant votre naissance.\n\nElle s'appelle la Tisserane.\n\nEt elle vous parle.";
+  typewrite(target, intro, 28, async () => {
+    await delay(1000);
+
+    // Quote bloc
+    const quoteEl = document.getElementById('tisseraneQuote');
+    quoteEl.style.opacity = '1';
+    await delay(600);
+    const quoteTarget = document.getElementById('quoteTarget');
+    const cursor2 = document.getElementById('quoteCursor');
+    cursor2.style.display = 'inline-block';
+    const quote = "Je t'ai vu arriver.\n\nPas ce matin. Pas la semaine dernière. Depuis le moment où le fil qui allait devenir toi a commencé à vibrer dans la Résonance — cette tension particulière, cette fréquence que je reconnais entre toutes parce qu'elle est la tienne.\n\nJ'ai vu des millions de fils comme le tien. Ils commençaient tous par la même question : qui suis-je dans ce monde, et qu'est-ce que je suis censé en faire ?\n\nJe ne répondrai pas. Ce n'est pas mon rôle. Mon rôle, c'est de tisser — pas de décider. Le motif t'appartient.\n\nAlors regarde. Regarde ce que je vois quand je tiens ton fil.";
+    typewrite(quoteTarget, quote, 18, () => {
+      cursor2.style.display = 'none';
+      document.getElementById('btnContinueTisserane').classList.add('visible');
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  PHASE 2 — FORGE
+// ═══════════════════════════════════════════════════
+async function goToForge() {
+  transition('phaseTisserane', 'phaseForge');
+  await delay(1400);
+  const q = document.getElementById('forgeSevQuote');
+  const l = document.getElementById('sevLine1');
+  const btn = document.getElementById('btnContinueForge');
+  q.style.opacity = '1';
+  await delay(1200);
+  l.style.opacity = '1';
+  l.textContent = '"Qu\'est-ce que vous savez faire ?"';
+  await delay(800);
+  btn.style.opacity = '1';
+}
+
+// ═══════════════════════════════════════════════════
+//  PHASE 3 — SIX CHEMINS
+// ═══════════════════════════════════════════════════
+function goToPaths() {
+  transition('phaseForge', 'phasePaths');
+  renderPaths();
+}
+
+function renderPaths() {
+  const grid = document.getElementById('pathsGrid');
+  grid.innerHTML = SIX_CHEMINS.map(p => `
+    <div class="path-card" id="path-${p.id}" onclick="selectPath('${p.id}')">
+      <div class="path-icon">${p.icon}</div>
+      <div class="path-name">${p.name}</div>
+      <div class="path-tagline">${p.tagline}</div>
+      <div class="path-classes">→ ${p.classes.slice(0,3).join(' · ')}</div>
+    </div>`).join('');
+}
+
+function selectPath(id) {
+  document.querySelectorAll('.path-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('path-'+id).classList.add('selected');
+  forge.chemin = id;
+  document.getElementById('btnPathNext').classList.add('visible');
+}
+
+// ═══════════════════════════════════════════════════
+//  PHASE 4 — WIZARD
+// ═══════════════════════════════════════════════════
+let wizStep = 0;
+const WIZ_STEPS = [
+  { ind:'ÉTAPE 1 / 5', sev:'Vous avez un nom ?',
+    tisserane:'Le fil commence à prendre forme. Il lui faut un nom pour que le monde puisse le reconnaître.',
+    render: () => `<input class="wiz-input" id="wiz-nom" placeholder="Votre nom..." value="${forge.nom}" autocomplete="off">` },
+  { ind:'ÉTAPE 2 / 5', sev:'Votre origine — d\'où venez-vous ?',
+    tisserane:'L\'origine d\'un fil dit peu sur sa destination. Mais elle dit beaucoup sur sa texture.',
+    render: () => `<select class="wiz-select" id="wiz-race">
+      <option value="">Choisir une race...</option>
+      ${RACES_AE5.map(r=>`<option value="${r}"${forge.race===r?' selected':''}>${r}</option>`).join('')}
+    </select>` },
+  { ind:'ÉTAPE 3 / 5', sev:'Homme, femme, autre chose ?',
+    tisserane:'Les fils ne sont pas genrés. Mais les mortels, eux, habitent leurs corps d\'une façon particulière.',
+    render: () => `<div class="genre-chips">
+      <div class="genre-chip${forge.genre==='M'?' selected':''}" onclick="forge.genre='M';document.querySelectorAll('.genre-chip').forEach((c,i)=>{c.classList.toggle('selected',i===0)})">Homme</div>
+      <div class="genre-chip${forge.genre==='F'?' selected':''}" onclick="forge.genre='F';document.querySelectorAll('.genre-chip').forEach((c,i)=>{c.classList.toggle('selected',i===1)})">Femme</div>
+      <div class="genre-chip${forge.genre==='A'?' selected':''}" onclick="forge.genre='A';document.querySelectorAll('.genre-chip').forEach((c,i)=>{c.classList.toggle('selected',i===2)})">Autre</div>
+    </div>` },
+  { ind:'ÉTAPE 4 / 5', sev:'Qu\'est-ce que vous faites quand les choses deviennent sérieuses ?',
+    tisserane:'Là. C\'est là que la texture d\'un fil se révèle vraiment.',
+    render: () => {
+      const chemin = SIX_CHEMINS.find(p=>p.id===forge.chemin);
+      const suggested = chemin ? chemin.classes : [];
+      const others = CLASSES_AE5.filter(c=>!suggested.includes(c));
+      return `<select class="wiz-select" id="wiz-classe">
+        <option value="">Choisir une classe...</option>
+        ${suggested.length ? `<optgroup label="— Suggéré pour votre chemin —">${suggested.map(c=>`<option value="${c}"${forge.classe===c?' selected':''}>${c}</option>`).join('')}</optgroup>` : ''}
+        <optgroup label="— Autres classes —">${others.map(c=>`<option value="${c}"${forge.classe===c?' selected':''}>${c}</option>`).join('')}</optgroup>
+      </select>`;
+    }},
+  { ind:'ÉTAPE 5 / 5', sev:'À quel point êtes-vous... expérimenté ?',
+    tisserane:'L\'âge d\'un fil ne dit pas grand chose sur sa résistance. Mais il dit quelque chose sur ce qu\'il a déjà traversé.',
+    render: () => `<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <input type="range" id="wiz-niveau" min="1" max="30" value="${forge.niveau}" oninput="forge.niveau=parseInt(this.value);document.getElementById('niv-display').textContent=this.value"
+        style="flex:1;accent-color:#c9a260;height:4px;">
+      <span id="niv-display" style="font-family:monospace;color:#c9a260;font-size:18px;min-width:28px;">${forge.niveau}</span>
+      <span style="font-family:monospace;font-size:10px;color:#5a4020;">NIV.</span>
+    </div>` },
+];
+
+function goToWizard() {
+  transition('phasePaths', 'phaseWizard');
+  wizStep = 0;
+  renderWizStep();
+}
+
+function renderWizStep() {
+  const step = WIZ_STEPS[wizStep];
+  document.getElementById('wizStepInd').textContent = step.ind;
+  const isLast = wizStep === WIZ_STEPS.length - 1;
+  document.getElementById('wizContent').innerHTML = `
+    <div class="wiz-tisserane">${step.tisserane}</div>
+    <div class="wiz-sev">${step.sev}</div>
+    ${step.render()}
+    <div class="wiz-btns">
+      ${wizStep > 0 ? '<button class="wiz-btn" onclick="wizBack()">← Retour</button>' : ''}
+      <button class="wiz-btn primary" onclick="wizNext()">${isLast ? 'Tisser le fil ✦' : 'Continuer →'}</button>
+    </div>`;
+}
+
+function wizCollect() {
+  if (wizStep===0){ const v=document.getElementById('wiz-nom')?.value.trim(); if(v) forge.nom=v; }
+  if (wizStep===1){ const v=document.getElementById('wiz-classe')?.value || document.getElementById('wiz-race')?.value; if(document.getElementById('wiz-race')) forge.race=document.getElementById('wiz-race').value; }
+  if (wizStep===3){ const v=document.getElementById('wiz-classe')?.value; if(v) forge.classe=v; }
+  if (wizStep===4){ const v=document.getElementById('wiz-niveau')?.value; if(v) forge.niveau=parseInt(v); }
+}
+
+function wizNext() {
+  wizCollect();
+  if (wizStep < WIZ_STEPS.length - 1) { wizStep++; renderWizStep(); }
+  else { goToSummary(); }
+}
+function wizBack() {
+  wizCollect();
+  if (wizStep > 0) { wizStep--; renderWizStep(); }
+}
+
+// ═══════════════════════════════════════════════════
+//  PHASE 5 — RÉSUMÉ
+// ═══════════════════════════════════════════════════
+function goToSummary() {
+  transition('phaseWizard','phaseSummary');
+  const chemin = SIX_CHEMINS.find(p=>p.id===forge.chemin);
+  document.getElementById('summaryTisserane').innerHTML =
+    chemin ? chemin.tisserane : 'Je vois ton fil. Il est prêt.';
+
+  const genreLabel = forge.genre==='F'?'Femme':forge.genre==='A'?'Autre':'Homme';
+  document.getElementById('summaryCard').innerHTML = `
+    <div class="sum-row"><span class="sum-label">NOM</span><span class="sum-value">${forge.nom||'—'}</span></div>
+    <div class="sum-row"><span class="sum-label">RACE</span><span class="sum-value">${forge.race||'—'}</span></div>
+    <div class="sum-row"><span class="sum-label">GENRE</span><span class="sum-value">${genreLabel}</span></div>
+    <div class="sum-row"><span class="sum-label">CLASSE</span><span class="sum-value">${forge.classe||'—'}</span></div>
+    <div class="sum-row"><span class="sum-label">NIVEAU</span><span class="sum-value">${forge.niveau}</span></div>
+    <div class="sum-row"><span class="sum-label">CHEMIN</span><span class="sum-path">${chemin?chemin.name:'—'}</span></div>`;
+}
+
+function saveForgeData() {
+  try {
+    localStorage.setItem('ae5_forge', JSON.stringify(forge));
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════
+//  SKIP
+// ═══════════════════════════════════════════════════
+function skipAll() {
+  saveForgeData();
+  window.location.href = 'AE5_CharacterSheet.html';
+}
+
+// ═══════════════════════════════════════════════════
+//  TRANSITIONS
+// ═══════════════════════════════════════════════════
+function transition(fromId, toId) {
+  const from = document.getElementById(fromId);
+  const to   = document.getElementById(toId);
+  from.style.opacity = '0';
+  from.style.pointerEvents = 'none';
+  setTimeout(() => {
+    from.classList.remove('active');
+    to.classList.add('active');
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      to.style.opacity = '';
+    }));
+  }, 1200);
+}
+
+// ═══════════════════════════════════════════════════
+//  LECTURE DES DONNÉES FORGE DANS LA FICHE
+//  (ce script est dans la FORGE, mais la fiche le lit)
+// ═══════════════════════════════════════════════════
+// (voir ci-dessous — la fiche injecte les valeurs au chargement)
+
+// ── START ────────────────────────────────────────
+startTisserane();
+</script>
+</body>
+</html>

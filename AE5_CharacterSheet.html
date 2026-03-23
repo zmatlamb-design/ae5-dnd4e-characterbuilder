@@ -10290,6 +10290,38 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 800);
 });
 
+// ═══════════════════════════════════════════════════
+//  BRIDGE — La Forge des Destins → Fiche personnage
+// ═══════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  const forgeRaw = localStorage.getItem('ae5_forge');
+  if (!forgeRaw) return;
+  try {
+    const forge = JSON.parse(forgeRaw);
+    localStorage.removeItem('ae5_forge');
+    // Delay to let autoLoad + other inits settle first
+    setTimeout(() => {
+      if (forge.nom)    { const el = document.getElementById('nom');    if (el) el.value = forge.nom; }
+      if (forge.genre)  { const el = document.getElementById('genre');  if (el) el.value = forge.genre; }
+      if (forge.race)   { const el = document.getElementById('race');   if (el) { el.value = forge.race;   if (typeof onRaceChange  === 'function') onRaceChange(forge.race); } }
+      if (forge.classe) { const el = document.getElementById('classe'); if (el) { el.value = forge.classe; if (typeof onClassChange === 'function') onClassChange(forge.classe); } }
+      if (forge.niveau) { const el = document.getElementById('niveau'); if (el) { el.value = forge.niveau; if (typeof updateNiveau  === 'function') updateNiveau(forge.niveau); } }
+      if (typeof autoSave === 'function') autoSave();
+      // Toast notification
+      const toast = document.createElement('div');
+      toast.textContent = '✦ Fiche initialisée depuis La Forge des Destins';
+      toast.style.cssText = [
+        'position:fixed','bottom:28px','left:50%','transform:translateX(-50%)',
+        'background:#12121e','border:1px solid var(--gold)','color:var(--gold)',
+        'padding:10px 22px','border-radius:8px','font-size:13px','z-index:99999',
+        'box-shadow:0 0 18px rgba(210,170,50,0.3)','pointer-events:none'
+      ].join(';');
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.style.transition='opacity 0.6s'; toast.style.opacity='0'; setTimeout(()=>toast.remove(),700); }, 3000);
+    }, 1400);
+  } catch(e) { console.warn('[ae5_forge] parse error', e); }
+});
+
 </script>
 
 <!-- ══════════════════ WIZARD DE CRÉATION ══════════════════ -->

@@ -1,5 +1,5 @@
 // ARCHYON-5 Service Worker — offline cache
-const CACHE = 'ae5-v19b';
+const CACHE = 'ae5-v20';
 const ASSETS = [
   './AE5_CharacterSheet.html',
   './manifest.json',
