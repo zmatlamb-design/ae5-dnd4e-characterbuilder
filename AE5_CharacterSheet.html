@@ -6127,9 +6127,11 @@ function updateAutoStats() {
   // ── Initiative (DEX mod + blason) ──
   setAutoField('initiative', dexMod + blason);
 
-  // ── Perception / Perspicacité passives ──
-  const perceptionSkill = sagMod + blason + (document.getElementById('skT-perception')?.classList.contains('active') ? 5 : 0) + (parseInt(document.getElementById('skMisc-perception')?.value)||0);
-  const perspicaciteSkill = sagMod + blason + (document.getElementById('skT-insight')?.classList.contains('active') ? 5 : 0) + (parseInt(document.getElementById('skMisc-insight')?.value)||0);
+  // ── Perception / Perspicacité passives (includes feat bonuses) ──
+  const _featPer = (typeof getFeatSkillBonus === 'function') ? getFeatSkillBonus('perception') : 0;
+  const _featIns = (typeof getFeatSkillBonus === 'function') ? getFeatSkillBonus('insight') : 0;
+  const perceptionSkill = sagMod + blason + (document.getElementById('skT-perception')?.classList.contains('active') ? 5 : 0) + (parseInt(document.getElementById('skMisc-perception')?.value)||0) + _featPer;
+  const perspicaciteSkill = sagMod + blason + (document.getElementById('skT-insight')?.classList.contains('active') ? 5 : 0) + (parseInt(document.getElementById('skMisc-insight')?.value)||0) + _featIns;
   setAutoField('perceptionPassive', 10 + perceptionSkill);
   setAutoField('perspicacitePassive', 10 + perspicaciteSkill);
 }
@@ -6256,7 +6258,8 @@ function updateSkill(key) {
   const blason = getBlason();
   const trained = document.getElementById('skT-'+key)?.classList.contains('active') ? 5 : 0;
   const misc = parseInt(document.getElementById('skMisc-'+key)?.value) || 0;
-  const total = mod + blason + trained + misc;
+  const feat = (typeof getFeatSkillBonus === 'function') ? getFeatSkillBonus(key) : 0;
+  const total = mod + blason + trained + misc + feat;
 
   const totalEl = document.getElementById('sk-'+key);
   const breakEl = document.getElementById('skBreak-'+key);
@@ -6267,12 +6270,40 @@ function updateSkill(key) {
     if (blason !== 0) parts.push('+' + blason + ' Bl.');
     if (trained) parts.push('+5 ✦');
     if (misc !== 0) parts.push((misc >= 0 ? '+' : '') + misc + ' misc');
+    if (feat !== 0) parts.push((feat >= 0 ? '+' : '') + feat + ' don');
     breakEl.textContent = parts.join(' ') || '0';
   }
 }
 
 function updateAllSkills() {
   SKILLS.forEach(sk => updateSkill(sk.key));
+}
+
+// Map FEAT_LIST 'skill:Label' bonus types → SKILLS keys
+const SKILL_LABEL_TO_KEY = {
+  'Acrobaties':'acrobaties', 'Arcanes':'arcanes', 'Athlétisme':'athlete',
+  'Bluff':'bluff', 'Diplomatie':'diplomatie', 'Discrétion':'discret',
+  'Dressage':'dressage', 'Endurance':'endurance', 'Escamotage':'escamot',
+  'Guérison':'guérison', 'Histoire':'histoire', 'Perspicacité':'insight',
+  'Intimidation':'intimider', 'Nature':'nature', 'Perception':'perception',
+  'Persuasion':'diplomatie', 'Religion':'religion', 'Rue':'rue',
+  'Survie':'survie', 'Exploration':'rue', 'Résonance':'resonance',
+  'Technomagie':'technomagie'
+};
+
+function getFeatSkillBonus(key) {
+  let total = 0;
+  (__featSlots || []).forEach(slot => {
+    const fd = FEAT_LIST.find(f => f.name === slot.name);
+    if (!fd) return;
+    (fd.bonus || []).forEach(b => {
+      if (!b.type || !b.type.startsWith('skill:')) return;
+      if (b.type === 'skill:*') { total += (b.val || 0); return; }
+      const label = b.type.slice(6);
+      if (SKILL_LABEL_TO_KEY[label] === key) total += (b.val || 0);
+    });
+  });
+  return total;
 }
 
 function toggleTrained(key) {
@@ -6680,11 +6711,40 @@ function addAttack() {
   addAttackRow(tbody);
 }
 
+// Auto-calcul du bonus d'attaque pour une ligne du tableau
+// Formule 4e : ½Niveau + Mod(Stat) + ProfArme + BonusAtk(dons/objets)
+function refreshAtkCalc(el) {
+  const tr = el.closest('tr');
+  if (!tr) return;
+  const statSel  = tr.querySelector('.atk-stat-sel');
+  const profIn   = tr.querySelector('.atk-prof-in');
+  const atkIn    = tr.querySelector('.atk-bonus');
+  const stat = statSel ? statSel.value : '';
+  if (!stat) return;
+  const prof     = parseInt(profIn ? profIn.value : 2) || 2;
+  const mod      = (typeof getStatMod === 'function') ? getStatMod(stat) : 0;
+  const blason   = (typeof getBlason === 'function') ? getBlason() : 0;
+  const bonusAtk = parseInt(document.getElementById('_bonus_atk')?.value) || 0;
+  const total    = blason + mod + prof + bonusAtk;
+  if (atkIn) { atkIn.value = (total >= 0 ? '+' : '') + total; }
+  autoSave();
+}
+
 function addAttackRow(tbody) {
   const tr = document.createElement('tr');
+  const statOpts = ['FOR','DEX','INT','SAG','CHA'].map(s => `<option value="${s}">${s}</option>`).join('');
+  const selStyle = 'font-size:9px;background:var(--bg-card,#0e0e1a);border:1px solid var(--border,#333);color:var(--text2,#aaa);border-radius:3px;padding:1px 2px;width:34px;cursor:pointer;';
+  const inpStyle = 'width:22px;font-size:9px;background:var(--bg-card,#0e0e1a);border:1px solid var(--border,#333);color:var(--gold2,#d4b483);border-radius:3px;padding:1px;text-align:center;';
   tr.innerHTML = `
     <td><input type="text" placeholder="Épée longue..." list="weaponNameList" oninput="autoSave()"></td>
-    <td><input type="text" class="atk-bonus" placeholder="+5" oninput="autoSave()" style="color:var(--gold2);font-weight:700;font-size:13px;"></td>
+    <td style="white-space:nowrap;min-width:120px;">
+      <input type="text" class="atk-bonus" placeholder="+5" oninput="autoSave()" style="color:var(--gold2);font-weight:700;font-size:13px;width:42px;">
+      <select class="atk-stat-sel" title="Caractéristique d'attaque" style="${selStyle}" onchange="refreshAtkCalc(this)">
+        <option value="">—</option>${statOpts}
+      </select>
+      <input type="number" class="atk-prof-in" min="-1" max="6" value="2" title="Bonus de maîtrise arme" style="${inpStyle}" onchange="refreshAtkCalc(this)">
+      <button onclick="refreshAtkCalc(this)" title="⚙ Calculer: ½Niv + Stat + Prof + Bonus dons/objets" style="background:none;border:none;color:var(--text3,#666);cursor:pointer;font-size:12px;padding:0 2px;vertical-align:middle;">⚙</button>
+    </td>
     <td><input type="text" placeholder="1d8+4" oninput="autoSave()"></td>
     <td><input type="text" placeholder="Mêlée 1" oninput="autoSave()"></td>
     <td><input type="text" placeholder="Polyvalente, etc." oninput="autoSave()"></td>
@@ -9469,6 +9529,9 @@ function applyAllBonuses() {
   setHidden('_bonus_dmg', enhAtk + featBonuses.dmg);
   setHidden('_bonus_hp', featBonuses.hp);
   setHidden('_bonus_surge', featBonuses.surge);
+
+  // Refresh skill grid so feat skill bonuses appear
+  if (typeof updateAllSkills === 'function') updateAllSkills();
 
   // Visually update defense displays with bonus subtotals
   updateBonusBadges();
