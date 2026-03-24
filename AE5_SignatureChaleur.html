@@ -143,6 +143,26 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
   .center-panel{min-height:320px;}
   #tracker-svg{max-width:360px;max-height:360px;}
 }
+
+  :root[data-theme="light"] {
+    --bg:     #f5f2ec;
+    --panel:  #e8e4d8;
+    --card:   #ede9df;
+    --bdr:    #c0b898;
+    --bdr2:   #9a8868;
+    --gold:   #7a5c18;
+    --gold2:  #9a7020;
+    --gold3:  #c8a040;
+    --text:   #1a1820;
+    --text2:  #4a4858;
+    --text3:  #6868a8;
+  }
+  @media print {
+    :root { --bg:#fff !important; --panel:#f8f6f2 !important; --card:#ffffff !important; --bdr:#c0b898 !important; --text:#000 !important; --text2:#333 !important; }
+    body { background:#fff !important; }
+    .app-header, .mode-bar { display:none !important; }
+  }
+
 </style>
 </head>
 <body>
@@ -150,7 +170,7 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 
 <header class="app-header">
   <div class="app-title">◈ AE5 — Toile de Signature & Chaleur</div>
-  <a href="./AE5_CharacterSheet.html" class="back-btn">↩ Fiche</a>
+  <div style="display:flex;gap:6px;align-items:center;"><button id="themeToggleBtn" onclick="toggleTheme()" style="font-family:var(--mono);font-size:13px;border:1px solid var(--bdr2);background:var(--bg);color:var(--text2);cursor:pointer;border-radius:2px;padding:2px 7px;transition:all .2s;">🌙</button><a href="./AE5_CharacterSheet.html" class="back-btn">↩ Fiche</a></div>
 </header>
 
 <div class="mode-bar">
@@ -755,6 +775,19 @@ window.addEventListener('DOMContentLoaded', ()=>{
   initSVG();
   buildLeftPanel();
 });
+</script>
+<script>
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  const btn=document.getElementById('themeToggleBtn');
+  if(btn) btn.textContent = t==='light'?'🌙':'☀️';
+  try{localStorage.setItem('ae5_theme',t);}catch(e){}
+}
+function toggleTheme(){
+  const cur=document.documentElement.getAttribute('data-theme')||'dark';
+  applyTheme(cur==='light'?'dark':'light');
+}
+(function(){try{applyTheme(localStorage.getItem('ae5_theme')||'dark');}catch(e){applyTheme('dark');}})();
 </script>
 </body>
 </html>

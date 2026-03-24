@@ -189,6 +189,26 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
   transition:color .3s,border-color .3s;
 }
 .btn-skip:hover{color:#c9a260;border-color:#6a5025;}
+
+  :root[data-theme="light"] {
+    --dark1:  #f5f2ec;
+    --dark2:  #edeae2;
+    --dark3:  #e4e0d4;
+    --dark4:  #ddd9cc;
+    --accent: #7a5c18;
+    --accent2:#9a7020;
+    --text1:  #1a1820;
+    --text2:  #4a4858;
+    --text3:  #8080a0;
+    --gold:   #7a5c18;
+    --dim:    #9a8868;
+  }
+  @media print {
+    :root { --dark1:#fff !important; --dark2:#f8f6f2 !important; --text1:#000 !important; }
+    body { background:#fff !important; }
+    #skip-intro-btn, #reroll-btn { display:none !important; }
+  }
+
 </style>
 </head>
 <body>
@@ -266,7 +286,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#03030a;font-family:
   <div class="summary-box">
     <div class="summary-tisserane" id="summaryTisserane"></div>
     <div class="summary-card" id="summaryCard"></div>
-    <a href="AE5_CharacterSheet.html" class="btn-launch" id="btnLaunch" onclick="saveForgeData()">
+    <a <button id="themeToggleBtn" onclick="toggleTheme()" style="font-size:13px;background:none;border:1px solid rgba(100,80,30,.4);color:#8a6830;cursor:pointer;border-radius:3px;padding:2px 8px;margin-right:6px;">🌙</button>href="AE5_CharacterSheet.html" class="btn-launch" id="btnLaunch" onclick="saveForgeData()">
       Ouvrir la fiche ✦
     </a>
   </div>
@@ -809,6 +829,19 @@ function transition(fromId, toId) {
 
 // ── START ────────────────────────────────────────
 startTisserane();
+</script>
+<script>
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  const btn=document.getElementById('themeToggleBtn');
+  if(btn) btn.textContent = t==='light'?'🌙':'☀️';
+  try{localStorage.setItem('ae5_theme',t);}catch(e){}
+}
+function toggleTheme(){
+  const cur=document.documentElement.getAttribute('data-theme')||'dark';
+  applyTheme(cur==='light'?'dark':'light');
+}
+(function(){try{applyTheme(localStorage.getItem('ae5_theme')||'dark');}catch(e){applyTheme('dark');}})();
 </script>
 </body>
 </html>

@@ -1393,6 +1393,44 @@
   background: var(--bg2);
 }
 
+
+  /* ─── LIGHT / DAY THEME ─────────────────────────── */
+  :root[data-theme="light"] {
+    --bg:     #f5f2ec;
+    --bg2:    #ffffff;
+    --bg3:    #edeae2;
+    --panel:  #e8e4d8;
+    --panel2: #ddd8c8;
+    --border: #c0b898;
+    --border2:#9a8868;
+    --text:   #1a1820;
+    --text2:  #4a4858;
+    --text3:  #8888a8;
+    --gold:   #7a5c18;
+    --gold2:  #9a7020;
+  }
+  @media print {
+    :root {
+      --bg:     #ffffff !important;
+      --bg2:    #ffffff !important;
+      --bg3:    #f8f6f2 !important;
+      --panel:  #f0ece4 !important;
+      --panel2: #e8e4d8 !important;
+      --border: #c0b898 !important;
+      --border2:#9a8868 !important;
+      --text:   #000000 !important;
+      --text2:  #333333 !important;
+      --text3:  #666666 !important;
+      --gold:   #6a4c10 !important;
+      --gold2:  #8a6018 !important;
+    }
+    body { background: #fff !important; }
+    .toolbar-row, .tab-bar, #pnjModal, #workshopModal,
+    #creationWizard, #dataEditor, .toast { display: none !important; }
+    .tab-content { display: block !important; }
+    .sheet-wrapper { max-width: 100% !important; }
+    * { box-shadow: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -1622,6 +1660,7 @@
       <a class="btn btn-outline" href="https://iws.mx/dnd/?list" target="_blank" title="D&D 4e Compendium en ligne" style="text-decoration:none;font-size:10px;padding:4px 8px;">📖 Compendium</a>
       <button class="btn btn-outline" onclick="openWorkshop()" title="Ajouter ou modifier des données (pouvoirs, dons, capacités) sans toucher au code" style="font-size:10px;padding:4px 8px;border-color:#b07a3c;color:#c9a260;">🛠️ Atelier</button>
       <button class="btn btn-outline" onclick="openDataEditor()" title="Ajouter / modifier / supprimer des races et classes homebrew" style="font-size:10px;padding:4px 8px;border-color:#5a9f7a;color:#5a9f7a;">📋 Races &amp; Classes</button>
+      <button class="btn btn-outline" id="themeToggleBtn" onclick="toggleTheme()" title="Basculer mode jour / nuit" style="font-size:13px;padding:4px 8px;">🌙</button>
   </div>
   <div class="toolbar-row">
     <button class="btn btn-outline" onclick="resetEncounter()">⚔️ Fin Rencontre</button>
@@ -1948,14 +1987,7 @@
     </div>
   </div>
 
-    <div class="panel col3" style="margin-top:0;">
-      <div class="panel-title" style="display:flex;align-items:center;gap:12px;">
-        🏅 Dons
-        <span id="featCountBadge" style="font-size:10px;color:#6a9fd8;font-weight:700;background:rgba(106,159,216,0.12);border:1px solid #6a9fd820;border-radius:4px;padding:2px 6px;">0 / 1</span>
-        <span style="font-size:9px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;">1 par niveau + 1 racial · Humain = +1</span>
-      </div>
-      <div id="featSlotsContainer" style="display:flex;flex-direction:column;gap:4px;"></div>
-    </div>
+
 
 </div>
 
@@ -5266,7 +5298,13 @@ const CLASS_DATA = {
   // ─── CHERCHEUR (SEEKER) ─────────────────────────────────────
   'Chercheur (Seeker)': { hp1:10, hpLvl:4, surges:6, defBonus:{vig:0,ref:2,vol:0}, mainStats:["SAG", "DEX"], source:'Primal',
     powers: {
-      atwill:[],
+      atwill:[
+        { name:'Nuée Mordante', nameEn:'Biting Swarm (PHB3 p.113)', type:'À volonté · Primal · Arme', level:1, tags:["standard","distance arme"], atk:'SAG vs CA', dmg:'1[A]+SAG', effect:'Touché : 1[A] + mod SAG dégâts. La cible et chaque ennemi adjacent subissent −2 aux jets d\'attaque jusqu\'au début de ton prochain tour.' },
+        { name:'Esprits Élémentaires', nameEn:'Elemental Spirits (PHB3 p.113)', type:'À volonté · Primal · Arme', level:1, tags:["standard","distance arme"], atk:'SAG vs CA', dmg:'1[A]+SAG', effect:'Choisis froid, feu, foudre ou tonnerre. Touché : 1[A] + mod SAG dégâts du type choisi. Jusqu\'à la fin de ton prochain tour, toute créature qui commence son tour adjacent à la cible subit des dégâts du type choisi égaux à ton mod DEX. Niv.21 : 2[A] + mod SAG.' },
+        { name:'Esprits Agrippants', nameEn:'Grappling Spirits (PHB3 p.113)', type:'À volonté · Primal · Arme · Attaque de base', level:1, tags:["standard","distance arme"], atk:'SAG vs CA', dmg:'1[A]+SAG', effect:'Touché : 1[A] + mod SAG dégâts. La cible est ralentie et ne peut pas se déplacer de 1 case jusqu\'à la fin de son prochain tour. Niv.21 : 2[A] + mod SAG. Peut être utilisé comme attaque de base à distance.' },
+        { name:'Gardien Harceleur', nameEn:'Guardian Harrier (PHB3 p.113)', type:'À volonté · Primal · Arme · Attaque de base', level:1, tags:["standard","mêlée ou distance arme"], atk:'SAG vs CA', dmg:'1[A]+SAG', effect:'Touché : 1[A] + mod SAG dégâts. Si la cible ne termine pas son prochain tour à au moins 2 cases de sa position de départ, elle subit des dégâts égaux à ton mod FOR. Niv.21 : 2[A] + mod SAG. Peut être utilisé comme attaque de base à distance.' },
+        { name:'Tir Nuage d\'Épines', nameEn:'Thorn Cloud Shot (PHB3 p.113)', type:'À volonté · Primal · Arme', level:1, tags:["standard","distance arme"], atk:'SAG vs CA', dmg:'1[A]+SAG', effect:'Touché : 1[A] + mod SAG dégâts. L\'attaque crée une zone en éclat 1 centré sur la cible. La zone dure jusqu\'au début de ton prochain tour. Toute créature qui termine son tour dans la zone subit des dégâts de poison égaux à ton mod SAG. Niv.21 : 2[A] + mod SAG.' }
+      ],
       encounter:[
         { name:'Serpent Arrow', nameEn:'Serpent Arrow (PHB3 p.~114)', type:'Par rencontre · Primal · WE’apon', level:1, tags:["standard", "mêlée"], atk:'—', dmg:'—', effect:'Touché : 1 [W] <+- 1 d6 + mod SAG damage, At the end of la cible’s next turn, you slide la cible and each ennemi adjacent to it 1 case. Spiritbond: The number of cases you slide the ennemis adjacent to la cible equals your mod FOR. Encounter + poison, Primal, Weapon Standard Action Ranged weapon Touché : 1 IWI <+- 1 dB + mod SAG polson damage. and la cible Is ralenti and takes a ·2 penalty to all defenses until the end of your nelrt turn. LEVEL 1 DAILY EVOCATIONS Fungal Blooms' },
         { name:'Esprit Rider', nameEn:'Spirit Rider (PHB3 p.~116)', type:'', level:1, tags:[], atk:'—', dmg:'—', effect:'' },
@@ -10472,5 +10510,24 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
+<script>
+// ─── THEME TOGGLE ──────────────────────────────────────────
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  const btn = document.getElementById('themeToggleBtn');
+  if (btn) btn.textContent = t === 'light' ? '🌙' : '☀️';
+  try { localStorage.setItem('ae5_theme', t); } catch(e) {}
+}
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(cur === 'light' ? 'dark' : 'light');
+}
+(function initTheme() {
+  try {
+    const saved = localStorage.getItem('ae5_theme') || 'dark';
+    applyTheme(saved);
+  } catch(e) { applyTheme('dark'); }
+})();
+</script>
 </body>
 </html>
