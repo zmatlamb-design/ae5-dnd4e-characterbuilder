@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AE5 — Signature & Chaleur</title>
+<style>
+:root {
+  --bg:     #0d0b07;
+  --panel:  #131008;
+  --card:   #1a1409;
+  --bdr:    #2a1e0c;
+  --bdr2:   #3d2d14;
+  --gold:   #c9a25a;
+  --gold2:  #8a6830;
+  --gold3:  #4a3818;
+  --text:   #c5b898;
+  --text2:  #7a6840;
+  --text3:  #3d3018;
+  --font:   'Georgia', serif;
+  --mono:   'Courier New', monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:13px;overflow:hidden;}
+
+/* ── LAYOUT ── */
+.app{display:flex;flex-direction:column;height:100vh;}
+
+.app-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:7px 16px;background:var(--panel);border-bottom:1px solid var(--bdr);
+  flex-shrink:0;height:38px;
+}
+.app-title{font-size:12px;letter-spacing:.12em;font-variant:small-caps;color:var(--gold);}
+.back-btn{
+  font-family:var(--mono);font-size:10px;color:var(--gold2);
+  text-decoration:none;border:1px solid var(--bdr2);padding:2px 8px;
+  border-radius:2px;transition:all .2s;
+}
+.back-btn:hover{color:var(--gold);border-color:var(--gold2);}
+
+.mode-bar{
+  display:flex;justify-content:center;gap:2px;
+  padding:8px 16px 0;background:var(--panel);
+  border-bottom:1px solid var(--bdr);flex-shrink:0;
+}
+.mode-btn{
+  font-variant:small-caps;font-size:11px;letter-spacing:.08em;
+  padding:6px 22px;border:1px solid var(--bdr);border-bottom:none;
+  background:var(--bg);color:var(--text2);cursor:pointer;
+  border-radius:3px 3px 0 0;transition:all .2s;
+}
+.mode-btn.active{background:var(--card);color:var(--gold);border-color:var(--bdr2);}
+
+.body-layout{display:flex;flex:1;overflow:hidden;}
+
+/* ── LEFT PANEL ── */
+.left-panel{
+  width:228px;flex-shrink:0;background:var(--panel);
+  border-right:1px solid var(--bdr);overflow-y:auto;padding:10px;
+}
+.slabel{
+  font-size:8px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--gold2);border-bottom:1px solid var(--bdr);
+  padding-bottom:4px;margin-bottom:7px;margin-top:11px;
+}
+.slabel:first-child{margin-top:0;}
+
+.srow{display:flex;align-items:center;gap:5px;margin-bottom:4px;min-height:20px;}
+.sname{flex:1;font-size:10px;color:var(--text2);line-height:1.3;}
+.sval{font-family:var(--mono);font-size:11px;color:var(--text);min-width:20px;text-align:center;}
+.bpm{
+  width:17px;height:17px;border:1px solid var(--bdr2);background:var(--bg);
+  color:var(--gold2);cursor:pointer;font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:2px;flex-shrink:0;transition:all .15s;line-height:1;
+}
+.bpm:hover{color:var(--gold);border-color:var(--gold2);}
+
+.zone-row{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:6px;}
+.zchip{
+  font-family:var(--mono);font-size:9px;padding:3px 6px;
+  border:1px solid var(--bdr);background:var(--bg);color:var(--text2);
+  cursor:pointer;border-radius:2px;transition:all .15s;white-space:nowrap;
+}
+.zchip:hover{border-color:var(--bdr2);}
+.zchip.on{background:#1c1609;border-color:var(--gold2);color:var(--gold);}
+
+.total-box{
+  border:1px solid var(--bdr2);border-radius:4px;
+  background:var(--bg);padding:9px;text-align:center;margin-top:10px;
+}
+.total-lbl{font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold2);margin-bottom:3px;}
+.total-num{font-family:var(--mono);font-size:40px;line-height:1;color:var(--gold);transition:color .4s;}
+.total-thr{font-size:11px;font-variant:small-caps;color:var(--text2);margin-top:3px;transition:color .4s;}
+
+.reset-btn{
+  display:block;width:100%;padding:6px;margin-top:10px;
+  font-variant:small-caps;font-size:10px;letter-spacing:.08em;
+  border:1px solid var(--bdr2);background:var(--bg);color:var(--text2);
+  cursor:pointer;border-radius:3px;transition:all .2s;
+}
+.reset-btn:hover{color:var(--gold);border-color:var(--gold2);}
+
+/* ── CENTER (SVG) ── */
+.center-panel{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;position:relative;
+}
+#tracker-svg{width:100%;height:100%;max-width:580px;max-height:580px;}
+
+/* SVG animated pulse */
+@keyframes pulse-node {
+  0%,100%{opacity:1;}
+  50%{opacity:.6;}
+}
+.pulse{animation:pulse-node 1.8s ease-in-out infinite;}
+
+/* ── RIGHT PANEL ── */
+.right-panel{
+  width:216px;flex-shrink:0;background:var(--panel);
+  border-left:1px solid var(--bdr);overflow-y:auto;padding:10px;
+}
+.tcard{
+  border:1px solid var(--bdr);border-radius:3px;padding:9px;
+  background:var(--bg);margin-bottom:9px;transition:border-color .4s;
+}
+.trange{font-family:var(--mono);font-size:9px;color:var(--text2);margin-bottom:2px;}
+.tname{font-size:14px;font-variant:small-caps;margin-bottom:5px;transition:color .4s;}
+.tsigns{font-size:10px;color:var(--text2);font-style:italic;line-height:1.45;margin-bottom:5px;}
+.treact{font-size:10px;line-height:1.5;padding-top:5px;border-top:1px solid var(--bdr);}
+.evlist{list-style:none;}
+.evlist li{font-size:10px;color:var(--text2);padding:3px 0;border-bottom:1px solid var(--bdr);line-height:1.4;}
+.evlist li:last-child{border-bottom:none;}
+.evlist li b{color:var(--text);font-weight:normal;font-variant:small-caps;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:820px){
+  html,body{overflow:auto;}
+  .app{height:auto;}
+  .body-layout{flex-direction:column;}
+  .left-panel,.right-panel{width:100%;border:none;border-bottom:1px solid var(--bdr);}
+  .center-panel{min-height:320px;}
+  #tracker-svg{max-width:360px;max-height:360px;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header class="app-header">
+  <div class="app-title">◈ AE5 — Toile de Signature & Chaleur</div>
+  <a href="./AE5_CharacterSheet.html" class="back-btn">↩ Fiche</a>
+</header>
+
+<div class="mode-bar">
+  <button class="mode-btn active" id="tab-wild"   onclick="setMode('wild')">🌿 Wild — Signature / IRH</button>
+  <button class="mode-btn"        id="tab-urban"  onclick="setMode('urban')">🏙 Urbain — Chaleur</button>
+</div>
+
+<div class="body-layout">
+  <aside class="left-panel" id="left-panel"></aside>
+
+  <main class="center-panel">
+    <svg id="tracker-svg" viewBox="-8 -8 576 576" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="gDim"  x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b"/>
+          <feComposite in="SourceGraphic" in2="b" operator="over"/>
+        </filter>
+        <filter id="gMid"  x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b"/>
+          <feComposite in="SourceGraphic" in2="b" operator="over"/>
+        </filter>
+        <filter id="gHot"  x="-120%" y="-120%" width="340%" height="340%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="b"/>
+          <feComposite in="SourceGraphic" in2="b" operator="over"/>
+        </filter>
+        <filter id="gCrit" x="-180%" y="-180%" width="460%" height="460%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="18" result="b"/>
+          <feComposite in="SourceGraphic" in2="b" operator="over"/>
+        </filter>
+        <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stop-color="#1a1408" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#0d0b07" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <!-- background vignette -->
+      <ellipse cx="280" cy="280" rx="290" ry="290" fill="url(#bgGrad)"/>
+      <g id="g-edges"></g>
+      <g id="g-nodes"></g>
+      <g id="g-center"></g>
+    </svg>
+  </main>
+
+  <aside class="right-panel" id="right-panel"></aside>
+</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  AE5 — TOILE DE SIGNATURE & CHALEUR
+// ═══════════════════════════════════════════════════════════
+
+let MODE = 'wild';
+
+// ── THRESHOLD DATA ──────────────────────────────────────────
+const T_WILD = [
+  { r:[0,3],   name:'Terrain assoupi',   col:'#2a4028', glow:'#3a5a38', txt:'#5a8050', fil:'',
+    signs:'Aucun signe perceptible. Le Wild vous ignore.',
+    react:'Aucune réaction. Déplacement libre.' },
+  { r:[4,5],   name:'Terrain éveillé',   col:'#3a5a20', glow:'#5a8830', txt:'#88bb44', fil:'url(#gDim)',
+    signs:'Températures décalées, sabliers qui tombent de travers, silences soudains.',
+    react:'Faune défensive — pas de combat, mais surveillance active.' },
+  { r:[6,7],   name:'Terrain irrité',    col:'#5a5818', glow:'#8a8220', txt:'#c0b030', fil:'url(#gDim)',
+    signs:'Flammes de couleur bizarre, végétation qui "penche" vers le groupe, bruits nocturnes.',
+    react:'Voraces attirés — rencontre possible (tirage au MJ).' },
+  { r:[8,9],   name:'Terrain hostile',   col:'#6a2e10', glow:'#b04818', txt:'#e06820', fil:'url(#gMid)',
+    signs:'Dalles de réalité instables, micro-Fissures, végétation qui piège.',
+    react:'⚠ Jet de Wild obligatoire (IRH 8+). Anima de terrain probable.' },
+  { r:[10,12], name:'Surflux probable',  col:'#6a1010', glow:'#b01818', txt:'#e02020', fil:'url(#gHot)',
+    signs:'Tout ce qui précède, simultanément et avec intensité.',
+    react:'🔴 Jet de Wild automatique + risque de Surflux (spike +3 en un round).' },
+  { r:[13,99], name:'Surflux de masse',  col:'#480808', glow:'#980808', txt:'#d01010', fil:'url(#gCrit)',
+    signs:'Zone en crise — aucun signe, juste la réponse.',
+    react:'☠ Surflux confirmé. Classe selon excès au-dessus de 13. Formulaire SPC.' }
+];
+
+const T_URBAN = [
+  { r:[0,2],   name:'Transparents',   col:'#182038', glow:'#283058', txt:'#405898', fil:'',
+    signs:'Vous n\'existez pas dans les registres.',
+    react:'Liberté de mouvement totale. Aucune surveillance active.' },
+  { r:[3,4],   name:'Notés',          col:'#102840', glow:'#185878', txt:'#2880b0', fil:'url(#gDim)',
+    signs:'Des gens parlent de vous.',
+    react:'Les agents de faction vous repèrent passivement. Quelqu\'un prend des notes.' },
+  { r:[5,6],   name:'Surveillés',     col:'#281850', glow:'#401888', txt:'#5828c0', fil:'url(#gDim)',
+    signs:'Contrôles réguliers. Accès refusé dans certains districts. Transactions flaggées.',
+    react:'Des agents de faction suivent vos déplacements. Portes closes.' },
+  { r:[7,8],   name:'Recherchés',     col:'#401020', glow:'#701830', txt:'#b02050', fil:'url(#gMid)',
+    signs:'Prime possible. Des gens vous évitent pour se protéger.',
+    react:'⚠ Portes fermées. Prime active possible. Contacts neutres hésitent.' },
+  { r:[9,10],  name:'Pourchassés',    col:'#500810', glow:'#900c18', txt:'#d01828', fil:'url(#gHot)',
+    signs:'Les contacts neutres coupent les ponts.',
+    react:'🔴 Arrestation à vue par forces Rail ou Bastion. Chaque interaction est risquée.' },
+  { r:[11,99], name:'Fugitifs',       col:'#380408', glow:'#700408', txt:'#a80810', fil:'url(#gCrit)',
+    signs:'Chaque heure dans le Bastion est un risque.',
+    react:'☠ Équipes spécialisées déployées. Quitter le Bastion ou survivre en bas-fonds.' }
+];
+
+function getThreshold(val) {
+  const T = MODE==='wild' ? T_WILD : T_URBAN;
+  for(const t of T) if(val>=t.r[0] && val<=t.r[1]) return t;
+  return T[T.length-1];
+}
+
+// ── STATE ────────────────────────────────────────────────────
+const S = {
+  wild: {
+    resonant:0, big:0, reliq3:0, artefact:0, ecarlite:0, armure:0, armaturge:0, pilote:0,
+    encounter:0, daily:0, ritual1:0, ritual2:0, invoc:0, bigmod:0, sync:0,
+    zflags:{}  // zone flag id -> {val, on}
+  },
+  urban: {
+    combat_pub:0, combat_civ:0, transac:0, pouvoir:0, reconnu:0, interro:0,
+    prime:0, contact_en:0, sig_hi:0, materiel:0,
+    reduction:0
+  }
+};
+
+const ZONE_FLAGS = [
+  {id:'clairiere', lbl:'Clairière', val:-3},
+  {id:'primalier', lbl:'Primalier', val:-2},
+  {id:'neutre',    lbl:'Neutre',    val:0},
+  {id:'bastion',   lbl:'Bastion',   val:2},
+  {id:'rail',      lbl:'Rail',      val:2},
+  {id:'extraction',lbl:'Extraction',val:3},
+  {id:'bigan',     lbl:'B.I.G.anc.',val:4},
+  {id:'surflux',   lbl:'Surflux<1m',val:3},
+  {id:'poche',     lbl:'Poche Anima',val:5},
+  {id:'cicatrice', lbl:'Cicatrice', val:2},
+];
+
+function computeTotal() {
+  if(MODE==='wild') {
+    const w = S.wild;
+    const perm = w.resonant*2 + w.big*5 + w.reliq3 + w.artefact + w.ecarlite + w.armure + w.armaturge + w.pilote;
+    const ponct = w.encounter + w.daily*2 + w.ritual1 + w.ritual2*2 + w.invoc*2 + w.bigmod*3 + w.sync*4;
+    const zone  = Object.values(w.zflags).filter(f=>f.on).reduce((a,f)=>a+f.val, 0);
+    return Math.max(0, perm + ponct + zone);
+  } else {
+    const u = S.urban;
+    const pos = u.combat_pub*2 + u.combat_civ*4 + u.transac + u.pouvoir + u.reconnu*2
+              + u.interro + u.prime*2 + u.contact_en + u.sig_hi + u.materiel*2;
+    return Math.max(0, pos - u.reduction);
+  }
+}
+
+// ── NODE GEOMETRY ────────────────────────────────────────────
+// SVG 560×560, center (280,280)
+// Each node: {id, x, y, r, activateAt, group}
+// group 0-5 → threshold index
+
+function polar(angleDeg, radius) {
+  const a = angleDeg * Math.PI / 180;
+  return { x: +(280 + radius * Math.cos(a)).toFixed(1),
+           y: +(280 - radius * Math.sin(a)).toFixed(1) };
+}
+
+function buildNodes(angleOffset) {
+  const ao = angleOffset || 0;
+  const nodes = [
+    {id:'CTR', x:280, y:280, r:27, activateAt:0, group:0, isCenter:true}
+  ];
+
+  // Ring A — r=68, 5 nodes (pentagon), group 0
+  const angA = [90,162,234,306,18].map(a=>a+ao);
+  const atA  = [0,1,2,2,3];
+  angA.forEach((a,i)=>{ const p=polar(a,68); nodes.push({id:`A${i}`,...p,r:9,activateAt:atA[i],group:0}); });
+
+  // Ring B — r=120, 6 nodes (hexagon), group 1
+  const angB = [60,120,180,240,300,0].map(a=>a+ao);
+  const atB  = [4,4,4,5,5,5];
+  angB.forEach((a,i)=>{ const p=polar(a,120); nodes.push({id:`B${i}`,...p,r:11,activateAt:atB[i],group:1}); });
+
+  // Ring C — r=172, 6 nodes, group 2
+  const angC = [30,90,150,210,270,330].map(a=>a+ao);
+  const atC  = [6,6,6,7,7,7];
+  angC.forEach((a,i)=>{ const p=polar(a,172); nodes.push({id:`C${i}`,...p,r:12,activateAt:atC[i],group:2}); });
+
+  // Ring D — r=222, 6 nodes, group 3
+  const angD = [60,120,180,240,300,0].map(a=>a+ao);
+  const atD  = [8,8,8,9,9,9];
+  angD.forEach((a,i)=>{ const p=polar(a,222); nodes.push({id:`D${i}`,...p,r:11,activateAt:atD[i],group:3}); });
+
+  // Ring E — r=258, 5 nodes, group 4  (surflux / pourchassés)
+  const angE = [90,162,234,306,18].map(a=>a+ao);
+  const atE  = [10,10,11,12,11];
+  angE.forEach((a,i)=>{ const p=polar(a,258); nodes.push({id:`E${i}`,...p,r:10,activateAt:atE[i],group:4}); });
+
+  // Tips F — r=267, 5 nodes, group 5  (surflux de masse / fugitifs)
+  const angF = [90,162,234,306,18].map(a=>a+ao+8);
+  angF.forEach((a,i)=>{ const p=polar(a,267); nodes.push({id:`F${i}`,...p,r:7,activateAt:MODE==='wild'?13:11,group:5}); });
+
+  return nodes;
+}
+
+// ── EDGE CONNECTIVITY ────────────────────────────────────────
+function buildEdges() {
+  const pairs = [
+    // CTR → A
+    ['CTR','A0'],['CTR','A1'],['CTR','A2'],['CTR','A3'],['CTR','A4'],
+    // A ring
+    ['A0','A1'],['A1','A2'],['A2','A3'],['A3','A4'],['A4','A0'],
+    // A → B
+    ['A0','B0'],['A0','B5'],['A1','B0'],['A1','B1'],
+    ['A2','B1'],['A2','B2'],['A3','B2'],['A3','B3'],
+    ['A4','B3'],['A4','B4'],['A0','B5'],
+    // B ring
+    ['B0','B1'],['B1','B2'],['B2','B3'],['B3','B4'],['B4','B5'],['B5','B0'],
+    // B → C
+    ['B0','C0'],['B0','C5'],['B1','C0'],['B1','C1'],
+    ['B2','C1'],['B2','C2'],['B3','C2'],['B3','C3'],
+    ['B4','C3'],['B4','C4'],['B5','C4'],['B5','C5'],
+    // C ring
+    ['C0','C1'],['C1','C2'],['C2','C3'],['C3','C4'],['C4','C5'],['C5','C0'],
+    // C → D
+    ['C0','D0'],['C0','D5'],['C1','D0'],['C1','D1'],
+    ['C2','D1'],['C2','D2'],['C3','D2'],['C3','D3'],
+    ['C4','D3'],['C4','D4'],['C5','D4'],['C5','D5'],
+    // D ring
+    ['D0','D1'],['D1','D2'],['D2','D3'],['D3','D4'],['D4','D5'],['D5','D0'],
+    // D → E
+    ['D0','E0'],['D1','E0'],['D1','E1'],['D2','E1'],['D2','E2'],
+    ['D3','E2'],['D3','E3'],['D4','E3'],['D4','E4'],['D5','E4'],['D5','E0'],
+    // E → F
+    ['E0','F0'],['E1','F1'],['E2','F2'],['E3','F3'],['E4','F4'],
+    ['E0','F4'],['E1','F0'],['E2','F1'],['E3','F2'],['E4','F3'],
+  ];
+  return pairs;
+}
+
+// ── SVG BUILD ────────────────────────────────────────────────
+let _nodes = [];
+let _nodeMap = {};
+
+function initSVG() {
+  const angleOffset = MODE==='wild' ? 0 : 15;  // slight rotation for Chaleur variant
+  _nodes = buildNodes(angleOffset);
+  _nodeMap = {};
+  _nodes.forEach(n=>_nodeMap[n.id]=n);
+
+  const ge = document.getElementById('g-edges');
+  const gn = document.getElementById('g-nodes');
+  const gc = document.getElementById('g-center');
+  ge.innerHTML=''; gn.innerHTML=''; gc.innerHTML='';
+
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+
+  // Edges
+  buildEdges().forEach(([fid,tid])=>{
+    const a=_nodeMap[fid], b=_nodeMap[tid];
+    if(!a||!b) return;
+    const dx=b.x-a.x, dy=b.y-a.y, len=Math.sqrt(dx*dx+dy*dy)||1;
+    // small perpendicular offset for organic look, deterministic from positions
+    const px=-dy/len*7*(((a.x+b.x)%11>5)?1:-1);
+    const py= dx/len*7*(((a.y+b.y)%13>6)?1:-1);
+    const cx=(a.x+b.x)/2+px, cy=(a.y+b.y)/2+py;
+    const path=document.createElementNS(SVG_NS,'path');
+    path.setAttribute('d',`M${a.x},${a.y} Q${cx.toFixed(1)},${cy.toFixed(1)} ${b.x},${b.y}`);
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke','#1e1808');
+    path.setAttribute('stroke-width','1');
+    path.setAttribute('stroke-opacity','0.5');
+    path.setAttribute('data-from',fid);
+    path.setAttribute('data-to',tid);
+    ge.appendChild(path);
+  });
+
+  // Non-center nodes
+  _nodes.filter(n=>!n.isCenter).forEach(n=>{
+    const c=document.createElementNS(SVG_NS,'circle');
+    c.setAttribute('cx',n.x);
+    c.setAttribute('cy',n.y);
+    c.setAttribute('r',n.r);
+    c.setAttribute('fill','#181308');
+    c.setAttribute('stroke','#252010');
+    c.setAttribute('stroke-width','1');
+    c.setAttribute('data-id',n.id);
+    c.setAttribute('data-group',n.group);
+    c.setAttribute('data-at',n.activateAt);
+    gn.appendChild(c);
+  });
+
+  // Center ring + node + labels
+  const ring=document.createElementNS(SVG_NS,'circle');
+  ring.setAttribute('cx',280);ring.setAttribute('cy',280);ring.setAttribute('r',36);
+  ring.setAttribute('fill','none');ring.setAttribute('stroke','#2a2015');ring.setAttribute('stroke-width','1');
+  ring.setAttribute('id','ctr-ring');
+  gc.appendChild(ring);
+
+  const cnode=document.createElementNS(SVG_NS,'circle');
+  cnode.setAttribute('cx',280);cnode.setAttribute('cy',280);cnode.setAttribute('r',27);
+  cnode.setAttribute('fill','#1a1408');cnode.setAttribute('stroke','#3a2810');cnode.setAttribute('stroke-width','2');
+  cnode.setAttribute('id','ctr-node');
+  gc.appendChild(cnode);
+
+  const cval=document.createElementNS(SVG_NS,'text');
+  cval.setAttribute('x',280);cval.setAttribute('y',276);
+  cval.setAttribute('text-anchor','middle');cval.setAttribute('dominant-baseline','middle');
+  cval.setAttribute('font-family','Courier New,monospace');cval.setAttribute('font-size','24');
+  cval.setAttribute('fill','#c9a260');cval.setAttribute('id','ctr-val');
+  cval.textContent='0';
+  gc.appendChild(cval);
+
+  const clbl=document.createElementNS(SVG_NS,'text');
+  clbl.setAttribute('x',280);clbl.setAttribute('y',295);
+  clbl.setAttribute('text-anchor','middle');clbl.setAttribute('dominant-baseline','middle');
+  clbl.setAttribute('font-family','Georgia,serif');clbl.setAttribute('font-size','7');
+  clbl.setAttribute('fill','#6a5028');clbl.setAttribute('id','ctr-lbl');
+  clbl.textContent=MODE==='wild'?'IRH':'CHALEUR';
+  gc.appendChild(clbl);
+
+  updateViz();
+}
+
+function updateViz() {
+  const total = computeTotal();
+  const T = MODE==='wild' ? T_WILD : T_URBAN;
+  const thresh = getThreshold(total);
+  const threshIdx = T.indexOf(thresh);
+
+  // Update center
+  const cv=document.getElementById('ctr-val');
+  const cl=document.getElementById('ctr-lbl');
+  const cn=document.getElementById('ctr-node');
+  const cr=document.getElementById('ctr-ring');
+  if(cv) cv.textContent=total;
+  if(cl) cl.textContent=MODE==='wild'?'IRH':'CHALEUR';
+  if(cn) { cn.setAttribute('fill',thresh.col); cn.setAttribute('stroke',thresh.glow); cn.setAttribute('filter',thresh.fil||''); }
+  if(cr) { cr.setAttribute('stroke',thresh.glow); }
+
+  // Update nodes
+  document.querySelectorAll('#g-nodes circle').forEach(c=>{
+    const at=parseInt(c.getAttribute('data-at'));
+    const gr=parseInt(c.getAttribute('data-group'));
+    const t=T[gr]||T[0];
+    if(total>=at) {
+      c.setAttribute('fill',t.col);
+      c.setAttribute('stroke',t.glow);
+      c.setAttribute('stroke-width','1.5');
+      // pulse at current threshold frontier
+      const nodeAtThreshold = (gr===threshIdx);
+      if(nodeAtThreshold && total>=10) {
+        c.setAttribute('filter','url(#gDim)');
+        c.classList.add('pulse');
+      } else {
+        c.setAttribute('filter', gr>=4 ? (thresh.fil||'') : '');
+        c.classList.remove('pulse');
+      }
+    } else {
+      c.setAttribute('fill','#181308');
+      c.setAttribute('stroke','#252010');
+      c.setAttribute('stroke-width','1');
+      c.setAttribute('filter','');
+      c.classList.remove('pulse');
+    }
+  });
+
+  // Update edges
+  document.querySelectorAll('#g-edges path').forEach(path=>{
+    const fid=path.getAttribute('data-from');
+    const tid=path.getAttribute('data-to');
+    const fa=_nodeMap[fid], tb=_nodeMap[tid];
+    if(!fa||!tb) return;
+    const fActive = fa.isCenter ? true : total>=fa.activateAt;
+    const tActive = tb.isCenter ? true : total>=tb.activateAt;
+    if(fActive && tActive) {
+      const gr=Math.max(fa.group||0,tb.group||0);
+      const t=T[gr]||T[0];
+      path.setAttribute('stroke',t.glow);
+      path.setAttribute('stroke-opacity','0.55');
+      path.setAttribute('stroke-width','1');
+    } else {
+      path.setAttribute('stroke','#1e1808');
+      path.setAttribute('stroke-opacity','0.35');
+      path.setAttribute('stroke-width','1');
+    }
+  });
+
+  // Update left panel totals
+  const tn=document.querySelector('.total-num');
+  const tt=document.querySelector('.total-thr');
+  if(tn){ tn.textContent=total; tn.style.color=thresh.txt; }
+  if(tt){ tt.textContent=thresh.name; tt.style.color=thresh.txt; }
+
+  // Update right panel
+  updateInfoPanel(total, thresh, threshIdx);
+}
+
+// ── LEFT PANEL BUILD ─────────────────────────────────────────
+function buildLeftPanel() {
+  const el=document.getElementById('left-panel');
+  if(MODE==='wild') {
+    const w=S.wild;
+    // Initialise zone flags if needed
+    ZONE_FLAGS.forEach(z=>{ if(!w.zflags[z.id]) w.zflags[z.id]={val:z.val,on:false}; });
+
+    el.innerHTML=`
+<div class="slabel">Sources permanentes</div>
+${sr('resonant',  'Résonnant ×2',          w.resonant)}
+${sr('big',       'B.I.G. déployé ×5',     w.big)}
+${sr('reliq3',    'Reliquaire 3 Shards ×1', w.reliq3)}
+${sr('artefact',  'Artefact actif ×1',      w.artefact)}
+${sr('ecarlite',  'Écarlite brute ×1/u',    w.ecarlite)}
+${sr('armure',    'Armure résonante Para+ ×1',w.armure)}
+${sr('armaturge', 'Arma Spiritus actif ×1', w.armaturge)}
+${sr('pilote',    'Reliquaire Pilote ×1',   w.pilote)}
+
+<div class="slabel">Sources ponctuelles</div>
+${sr('encounter', 'Pouvoir Encounter ×1',   w.encounter)}
+${sr('daily',     'Pouvoir Daily ×2',        w.daily)}
+${sr('ritual1',   'Rituel niv.1-5 ×1',      w.ritual1)}
+${sr('ritual2',   'Rituel niv.6-15 ×2',     w.ritual2)}
+${sr('invoc',     'Invocation ×2',           w.invoc)}
+${sr('bigmod',    'Module B.I.G. hors Poche ×3', w.bigmod)}
+${sr('sync',      'SYNC complète ×4',        w.sync)}
+
+<div class="slabel">Modificateurs de zone</div>
+<div class="zone-row">${ZONE_FLAGS.map(z=>`<span class="zchip${w.zflags[z.id]&&w.zflags[z.id].on?' on':''}" data-zid="${z.id}" title="${z.lbl} (${z.val>0?'+':''}${z.val})">${z.lbl}</span>`).join('')}</div>
+
+<div class="total-box">
+  <div class="total-lbl">IRH Effectif</div>
+  <div class="total-num">0</div>
+  <div class="total-thr">Terrain assoupi</div>
+</div>
+<button class="reset-btn" onclick="resetState()">↺ Remettre à zéro</button>`;
+  } else {
+    const u=S.urban;
+    el.innerHTML=`
+<div class="slabel">Sources de Chaleur</div>
+${sr('combat_pub', 'Combat public ×2',              u.combat_pub)}
+${sr('combat_civ', 'Combat + civils/dommages ×4',   u.combat_civ)}
+${sr('transac',    'Transaction non-certifiée ×1',  u.transac)}
+${sr('pouvoir',    'Pouvoirs résonants publics ×1',  u.pouvoir)}
+${sr('reconnu',    'Reconnu par faction hostile ×2', u.reconnu)}
+${sr('interro',    'Interrogatoire raté ×1',         u.interro)}
+${sr('prime',      'Prime active sur membre ×2',     u.prime)}
+${sr('contact_en', 'Contact faction ennemie ×1',    u.contact_en)}
+${sr('sig_hi',     'Entrée avec Sig≥5 (+1/pt) ×1',  u.sig_hi)}
+${sr('materiel',   'Matériel Para+ non-certifié ×2',u.materiel)}
+
+<div class="slabel">Réduction de Chaleur</div>
+${sr('reduction',  'Réductions accumulées (−)',      u.reduction)}
+
+<div class="total-box">
+  <div class="total-lbl">Chaleur</div>
+  <div class="total-num">0</div>
+  <div class="total-thr">Transparents</div>
+</div>
+<button class="reset-btn" onclick="resetState()">↺ Remettre à zéro</button>`;
+  }
+
+  // Bind +/- buttons
+  el.querySelectorAll('.bpm').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const key=btn.dataset.key, delta=parseInt(btn.dataset.delta);
+      const s = MODE==='wild' ? S.wild : S.urban;
+      s[key]=Math.max(0,(s[key]||0)+delta);
+      document.getElementById(`sv-${key}`).textContent=s[key];
+      updateViz();
+      saveState();
+    });
+  });
+
+  // Bind zone chips (wild only)
+  el.querySelectorAll('.zchip').forEach(chip=>{
+    chip.addEventListener('click',()=>{
+      const zid=chip.dataset.zid;
+      const f=S.wild.zflags[zid];
+      f.on=!f.on;
+      chip.classList.toggle('on',f.on);
+      updateViz();
+      saveState();
+    });
+  });
+
+  updateViz();
+}
+
+function sr(key, label, value) {
+  const s = MODE==='wild' ? S.wild : S.urban;
+  return `<div class="srow">
+    <span class="sname">${label}</span>
+    <button class="bpm" data-key="${key}" data-delta="-1">−</button>
+    <span class="sval" id="sv-${key}">${s[key]||0}</span>
+    <button class="bpm" data-key="${key}" data-delta="1">+</button>
+  </div>`;
+}
+
+// ── RIGHT PANEL ──────────────────────────────────────────────
+function updateInfoPanel(total, thresh, threshIdx) {
+  const T = MODE==='wild' ? T_WILD : T_URBAN;
+  const el=document.getElementById('right-panel');
+  const hiLabel = MODE==='wild' ? 'IRH' : 'Chaleur';
+  const rangeStr = thresh.r[1]>50 ? `${thresh.r[0]}+` : `${thresh.r[0]}–${thresh.r[1]}`;
+
+  let html=`<div class="slabel">Seuil actuel</div>
+<div class="tcard" style="border-color:${thresh.glow}">
+  <div class="trange" style="color:${thresh.txt}">${hiLabel} ${rangeStr}</div>
+  <div class="tname" style="color:${thresh.txt}">${thresh.name}</div>
+  <div class="tsigns">${thresh.signs}</div>
+  <div class="treact">${thresh.react}</div>
+</div>`;
+
+  // Next threshold
+  if(threshIdx<T.length-1) {
+    const next=T[threshIdx+1];
+    const gap=next.r[0]-total;
+    const nr=next.r[1]>50?`${next.r[0]}+`:`${next.r[0]}–${next.r[1]}`;
+    html+=`<div class="slabel">Prochain seuil — encore ${gap} pt${gap!==1?'s':''}</div>
+<div class="tcard" style="opacity:.65;">
+  <div class="trange">${hiLabel} ${nr}</div>
+  <div class="tname" style="color:${next.txt};font-size:13px;">${next.name}</div>
+  <div style="font-size:10px;color:var(--text2);margin-top:3px;">${next.react}</div>
+</div>`;
+  }
+
+  // Mode-specific extras
+  if(MODE==='wild' && total>=8) {
+    html+=`<div class="slabel">Jet de Wild (1d20 + mod. zone)</div>
+<ul class="evlist">
+  <li><b>1–5</b> Tension. IRH +1 permanent.</li>
+  <li><b>6–10</b> Voraces Tier 1 dans 1d4 rds.</li>
+  <li><b>11–15</b> Anima niveau +2.</li>
+  <li><b>16–20</b> Incident majeur. Zone +2 IRH perm.</li>
+  <li><b>21–25</b> Surflux Classe 1–2.</li>
+  <li><b>26+</b> Surflux Classe 3+.</li>
+</ul>`;
+  }
+
+  if(MODE==='wild' && total>=10) {
+    html+=`<div class="slabel">Classes de Surflux</div>
+<ul class="evlist">
+  <li><b>Cl.1</b> IRH 10–11 · Faune mineure</li>
+  <li><b>Cl.2</b> IRH 11–12 · Faune moyenne</li>
+  <li><b>Cl.3</b> IRH 12–14 · Grande faune / végétation</li>
+  <li><b>Cl.4</b> IRH 14–16 · Multi-vecteurs · Zone quarantaine</li>
+  <li><b>Cl.5</b> IRH 17+ · Biome entier · Marqueur rouge SPC</li>
+</ul>`;
+  }
+
+  if(MODE==='urban') {
+    html+=`<div class="slabel">Réduire la Chaleur</div>
+<ul class="evlist">
+  <li><b>Repos hors Bastion</b> −1 (zone neutre)</li>
+  <li><b>Changer d\'identité</b> −2 (Bluff DD 18 + 50 po)</li>
+  <li><b>Service à une faction</b> −2 (mission réussie)</li>
+  <li><b>Amende / dette réglée</b> −1 à −3</li>
+  <li><b>1 semaine inactive</b> −1</li>
+  <li><b>Contact rang Or/Noir</b> −3 (faveur dépensée)</li>
+</ul>`;
+  }
+
+  el.innerHTML=html;
+}
+
+// ── MODE SWITCH ──────────────────────────────────────────────
+function setMode(mode) {
+  MODE=mode;
+  document.getElementById('tab-wild').classList.toggle('active', mode==='wild');
+  document.getElementById('tab-urban').classList.toggle('active', mode==='urban');
+  initSVG();
+  buildLeftPanel();
+  saveState();
+}
+
+// ── RESET ────────────────────────────────────────────────────
+function resetState() {
+  if(MODE==='wild') {
+    const w=S.wild;
+    const keys=['resonant','big','reliq3','artefact','ecarlite','armure','armaturge','pilote',
+                 'encounter','daily','ritual1','ritual2','invoc','bigmod','sync'];
+    keys.forEach(k=>w[k]=0);
+    Object.values(w.zflags).forEach(f=>f.on=false);
+  } else {
+    const u=S.urban;
+    ['combat_pub','combat_civ','transac','pouvoir','reconnu','interro',
+     'prime','contact_en','sig_hi','materiel','reduction'].forEach(k=>u[k]=0);
+  }
+  buildLeftPanel();
+  initSVG();
+  saveState();
+}
+
+// ── PERSIST ──────────────────────────────────────────────────
+function saveState() {
+  try { localStorage.setItem('ae5_tracker', JSON.stringify({MODE, S})); } catch(e){}
+}
+function loadState() {
+  try {
+    const d=JSON.parse(localStorage.getItem('ae5_tracker')||'null');
+    if(d) {
+      if(d.MODE) MODE=d.MODE;
+      if(d.S && d.S.wild)  Object.assign(S.wild,  d.S.wild);
+      if(d.S && d.S.urban) Object.assign(S.urban, d.S.urban);
+    }
+  } catch(e){}
+}
+
+// ── BOOT ─────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', ()=>{
+  loadState();
+  document.getElementById('tab-wild').classList.toggle('active', MODE==='wild');
+  document.getElementById('tab-urban').classList.toggle('active', MODE==='urban');
+  initSVG();
+  buildLeftPanel();
+});
+</script>
+</body>
+</html>
