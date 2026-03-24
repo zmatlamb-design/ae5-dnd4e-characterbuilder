@@ -6055,21 +6055,27 @@ function wsExportHTML() {
 
 // ─────────────────── INIT ───────────────────
 function init() {
-  loadCustomData();
-  buildStats();
-  buildSkills();
-  buildSurges();
-  buildAP();
-  buildConditions();
-  buildPowers();
-  buildAttacks();
-  buildWeapons();
-  buildMagicItems();
-  buildRelicaire();
-  loadSheet();
-  loadGenreButtons();
-  updateNiveau();
-  initWeaponEditor();
+  const steps = [
+    ['loadCustomData',  loadCustomData],
+    ['buildStats',      buildStats],
+    ['buildSkills',     buildSkills],
+    ['buildSurges',     buildSurges],
+    ['buildAP',         buildAP],
+    ['buildConditions', buildConditions],
+    ['buildPowers',     buildPowers],
+    ['buildAttacks',    buildAttacks],
+    ['buildWeapons',    buildWeapons],
+    ['buildMagicItems', buildMagicItems],
+    ['buildRelicaire',  buildRelicaire],
+    ['loadSheet',       loadSheet],
+    ['loadGenreButtons',loadGenreButtons],
+    ['updateNiveau',    updateNiveau],
+    ['initWeaponEditor',initWeaponEditor],
+  ];
+  for (const [name, fn] of steps) {
+    try { fn(); }
+    catch(e) { console.error('[AE5 init] ' + name + ' failed:', e); }
+  }
 }
 
 function buildStats() {
